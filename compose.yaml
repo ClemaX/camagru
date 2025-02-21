@@ -1,0 +1,134 @@
+services:
+  web:
+    image: nginx:1.27.4-alpine-slim
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html/src:ro
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      php:
+        condition: service_healthy
+    networks:
+      - front-tier
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 3
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.dev
+    environment:
+      DATABASE_DSN: pgsql:host=db;dbname=${POSTGRES_DB};port=5432
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./docker/php/msmtprc:/etc/msmtprc:ro
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./src:/var/www/html/src:ro
+      - ./public:/var/www/html/public:ro
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+    networks:
+      - data-tier
+      - front-tier
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'echo \"PHP is running.\";'"]
+      interval: 3s
+      timeout: 5s
+      retries: 3
+
+  smtp:
+    image: haravich/fake-smtp-server:20250216
+    ports:
+      - 1080:1080
+    networks:
+      - data-tier
+      - front-tier
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -q -O- http://0.0.0.0:1080"]
+      interval: 5s
+      timeout: 10s
+      retries: 60
+      
+  pgadmin:
+    image: dpage/pgadmin4:9.0.0
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_DISABLE_POSTFIX: true
+      PGADMIN_LISTEN_PORT: 80
+      PGADMIN_CONFIG_ALLOW_SPECIAL_EMAIL_DOMAINS: "['localhost']"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      GUNICORN_ACCESS_LOGFILE: /dev/null
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/entrypoint.sh:/custom-entrypoint.sh:ro
+    entrypoint: /custom-entrypoint.sh
+    networks:
+      - data-tier
+      - front-tier
+    expose:
+      - 80
+    healthcheck:
+      test: wget -O - "http://localhost/misc/ping"
+      # start_period: 10s
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  liquibase:
+    image: liquibase/liquibase:4.31-alpine
+    volumes:
+      - ./docker/liquibase:/liquibase/changelog:ro
+    command: update
+    environment:
+      LIQUIBASE_LIQUIBASE_SCHEMA_NAME: public
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/main.yaml
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      LIQUIBASE_COMMAND_USERNAME: ${POSTGRES_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - data-tier
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:14.16-alpine3.20
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:rw
+    networks:
+      - data-tier
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  data-tier:
+    internal: true
+  back-tier:
+    internal: true
+  front-tier:
