@@ -2,20 +2,30 @@
 
 namespace App;
 
+use App\Services\AuthService;
 use Exception;
+use Role;
+
+define('TEMPLATE_DIR', 'Views');
 
 class Renderer
 {
-    public function __construct(private readonly string $templatePath)
-    {
+    public function __construct(
+        private readonly AuthService $authService,
+        private readonly string $baseUrlPath
+    ) {
     }
 
     private static function processParameters(string $content, array $params): string
     {
         foreach ($params as $key => $value) {
+            $substitute = $value != null
+                ? ($key === 'content' ? $value : htmlspecialchars($value))
+                : "";
+
             $content = str_replace(
                 "{{ \$$key }}",
-                $value != null ? htmlspecialchars($value) : "",
+                $substitute,
                 $content
             );
         }
@@ -23,7 +33,18 @@ class Renderer
         return $content;
     }
 
-    private static function processIfStatements($content, $params)
+    private static function processUrls(string $content, string $baseUrlPath): string
+    {
+        $pattern = '/{{ url\((.*?)\) }}/s';
+
+        return preg_replace_callback($pattern, function ($matches) use ($baseUrlPath) {
+            $path = $matches[1];
+
+            return rtrim($baseUrlPath, '/') . '/' . ltrim($path, '/');
+        }, $content);
+    }
+
+    private static function processIfStatements(string $content, array $params): string
     {
         $pattern = '/@if\s*\((.*?)\)(.*?)(?:@else(.*?))?@endif/s';
         return preg_replace_callback($pattern, function ($matches) use ($params) {
@@ -40,7 +61,7 @@ class Renderer
         }, $content);
     }
 
-    private static function processForLoops($content, $params)
+    private static function processForLoops(string $content, array $params): string
     {
         $pattern = '/@for\s*\((.*?)\)(.*?)@endfor/s';
         return preg_replace_callback($pattern, function ($matches) use ($params) {
@@ -86,10 +107,34 @@ class Renderer
         }, $content);
     }
 
-
-    public static function render(string $template, array $params = [])
+    private function processRoles(string $content): string
     {
-        $templateFile = __DIR__ . '/Views/' . $template . '.php';
+        $pattern = '/@role\s*\((.*?)\)(.*?)(?:@else(.*?))?@endrole/s';
+        $userRoles = null;
+
+        return preg_replace_callback($pattern, function ($matches) use ($userRoles) {
+            if ($userRoles === null) {
+                $user = $this->authService->getCurrentUser();
+                $userRoles = [$user !== null ? Role::USER : Role::GUEST];
+            }
+
+            $roles = str_getcsv($matches[1], escape: '\\');
+
+            $ifBlock = $matches[2];
+            $elseBlock = isset($matches[3]) ? $matches[3] : '';
+
+            $hasRole = array_find($userRoles, function (Role $userRole) use ($roles) {
+                return in_array($userRole->value, $roles);
+            }) !== null;
+
+            return $hasRole ? $ifBlock : $elseBlock;
+        }, $content);
+    }
+
+
+    public function render(string $templateName, array $params = [])
+    {
+        $templateFile = __DIR__ . DIRECTORY_SEPARATOR . TEMPLATE_DIR . DIRECTORY_SEPARATOR . $templateName . '.php';
 
         if (!file_exists($templateFile)) {
             throw new Exception("Template file not found: $templateFile");
@@ -97,10 +142,13 @@ class Renderer
 
         $content = file_get_contents($templateFile);
 
+        $content = $this->processRoles($content);
+
         $content = self::processIfStatements($content, $params);
         $content = self::processForLoops($content, $params);
 
         $content = self::processParameters($content, $params);
+        $content = self::processUrls($content, $this->baseUrlPath);
 
         return $content;
     }

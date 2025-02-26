@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use AbstractController;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Attributes\Route;
@@ -13,18 +14,23 @@ use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\SignupDTO;
 use SensitiveParameter;
 
+require_once __DIR__ . '/AbstractController.php';
+
 require_once __DIR__ . '/../Exceptions/ConflictException.php';
 
-class AuthController
+class AuthController extends AbstractController
 {
-    public function __construct(private AuthService $authService)
-    {
+    public function __construct(
+        Renderer $renderer,
+        private readonly AuthService $authService,
+    ) {
+        parent::__construct($renderer);
     }
 
     #[Route('/auth/signup')]
     public function signup()
     {
-        return Renderer::render("signup", [
+        return $this->render("signup", [
             "conflict" => null,
             "username" => "",
             "email" => "",
@@ -38,7 +44,7 @@ class AuthController
         try {
             $this->authService->signup($dto);
         } catch (ConflictException $e) {
-            return Renderer::render("signup", [
+            return $this->render("signup", [
                 "conflict" => $e->getField(),
                 "username" => $dto->username,
                 "email" => $dto->email,
@@ -51,7 +57,7 @@ class AuthController
     #[Route('/auth/verify-email')]
     public function verifyEmail()
     {
-        return Renderer::render("activate-account");
+        return $this->render("activate-account");
     }
 
     #[Route('/auth/activate')]
@@ -61,7 +67,7 @@ class AuthController
     ) {
         $isActivated = $this->authService->activate($id, $token);
 
-        return Renderer::render("activated-account", [
+        return $this->render("activated-account", [
             'isActivated' => $isActivated,
         ]);
     }
@@ -69,8 +75,8 @@ class AuthController
     #[Route('/auth/login')]
     public function login()
     {
-        return Renderer::render("login", [
-            "invalid" => false,
+        return $this->render("login", [
+            "isInvalid" => false,
             "username" => "",
         ]);
     }
@@ -82,7 +88,7 @@ class AuthController
         try {
             $this->authService->login($dto);
         } catch (UnauthorizedException) {
-            return Renderer::render("login", [
+            return $this->render("login", [
                 "isInvalid" => true,
                 "username" => $dto->username
             ]);

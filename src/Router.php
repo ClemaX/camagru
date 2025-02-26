@@ -21,12 +21,17 @@ require_once __DIR__ . '/Attributes/CurrentUser.php';
 class Router
 {
     private array $routes = [];
+    public readonly string $basePath;
+
 
     public function __construct(
-		private AuthService $authService,
+        private AuthService $authService,
         private Validator $validator,
-        public readonly string $basePath = '/',
+        ?string $basePath = null,
     ) {
+        $this->basePath = $basePath !== null
+            ? $basePath
+            : dirname($_SERVER['SCRIPT_NAME']);
     }
 
     private function getMethodParameters(ReflectionMethod $method): array
@@ -57,7 +62,7 @@ class Router
             }
 
             $attrs = $param->getAttributes(CurrentUser::class);
-			if (!empty($attrs)) {
+            if (!empty($attrs)) {
                 $attribute = $attrs[0]->newInstance();
 
                 $parameters[] = [
@@ -101,17 +106,16 @@ class Router
                     $dto = $requestParams[$param['name']];
                 }
             } elseif (strcmp($param['kind'], CurrentUser::class) === 0) {
-				if (array_key_exists('user_id', $_SESSION)) {
-					$dto = $this->authService->getCurrentUser();
-				}
-			}
+                if (array_key_exists('user_id', $_SESSION)) {
+                    $dto = $this->authService->getCurrentUser();
+                }
+            }
 
             $args[] = $dto;
         }
 
         return $args;
     }
-
 
     // public function addController(string $controllerClass)
     // {

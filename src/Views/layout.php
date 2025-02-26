@@ -11,23 +11,25 @@
 	<script>document.documentElement.classList.remove('no-js');</script>
 	<nav class="navbar navbar-expand-lg">
 		<div class="container">
-			<a class="navbar-brand" href="<?= $router->basePath ?>">Camagru</a>
+			<a class="navbar-brand" href="{{ url(/) }}">Camagru</a>
 			<ul class="navbar-nav">
 				<li class="nav-item">
-					<a class="nav-link" href="<?= $router->basePath ?>">Home</a>
+					<a class="nav-link" href="{{ url(/) }}">Home</a>
+				</li>
+				@role(GUEST)
+				<li class="nav-item">
+					<a class="nav-link" href="{{ url(/auth/signup) }}">Sign Up</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="<?= $router->basePath ?>auth/signup">Sign Up</a>
+					<a class="nav-link" href="{{ url(/auth/login) }}">Log In</a>
 				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="<?= $router->basePath ?>auth/login">Log In</a>
-				</li>
+				@endrole
 			</ul>
 		</div>
 	</nav>
 
 	<div class="container mt-4">
-		<?= $content ?>
+		{{ $content }}
 	</div>
 
 	<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->

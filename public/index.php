@@ -6,6 +6,7 @@ use App\Services\DatabaseSessionService;
 use App\Services\AuthService;
 use App\Controllers\HomeController;
 use App\Controllers\AuthController;
+use App\Renderer;
 
 require __DIR__ . '/../src/config.php';
 require __DIR__ . '/../src/Validator.php';
@@ -49,12 +50,18 @@ $validator = new Validator();
 // Router
 $router = new Router($authService, $validator);
 
-$router->addController(new HomeController());
-$router->addController(new AuthController($authService));
+// Renderer
+$renderer = new Renderer($authService, $router->basePath);
+
+// Controllers
+$router->addController(new HomeController($renderer));
+$router->addController(new AuthController($renderer, $authService));
 
 // Request dispatch
 $content = $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
 
 $pdo = null;
 
-require __DIR__ . '/../src/Views/layout.php';
+echo $renderer->render('layout', [
+    "content" => $content,
+]);

@@ -1,6 +1,6 @@
 <h1>Welcome to Camagru!</h1>
-@if($username !== null)
-Hello {{ $username }}!
+@role(USER)
+Hello user!
 @else
 <p>Sign up or log in to get started!</p>
-@endif
+@endrole
