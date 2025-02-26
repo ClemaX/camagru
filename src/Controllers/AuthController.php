@@ -6,8 +6,10 @@ use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Attributes\Route;
 use App\Exceptions\ConflictException;
+use App\Exceptions\UnauthorizedException;
 use App\Renderer;
 use App\Services\AuthService;
+use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\SignupDTO;
 use SensitiveParameter;
 
@@ -62,5 +64,30 @@ class AuthController
         return Renderer::render("activated-account", [
             'isActivated' => $isActivated,
         ]);
+    }
+
+    #[Route('/auth/login')]
+    public function login()
+    {
+        return Renderer::render("login", [
+            "invalid" => false,
+            "username" => "",
+        ]);
+    }
+
+    #[Route('/auth/login', 'POST')]
+    public function loginSubmit(
+        #[SensitiveParameter] #[RequestBody] LoginDTO $dto
+    ) {
+        try {
+            $this->authService->login($dto);
+        } catch (UnauthorizedException) {
+            return Renderer::render("login", [
+                "isInvalid" => true,
+                "username" => $dto->username
+            ]);
+        }
+
+        header('Location: /');
     }
 }

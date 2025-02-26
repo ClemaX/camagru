@@ -5,15 +5,21 @@ namespace App\Services;
 use App\Entities\User;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
+use App\Exceptions\UnauthorizedException;
 use App\Renderer;
 use App\Repositories\UserRepository;
+use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\SignupDTO;
 use DateInterval;
 use DateTime;
+use Role;
 use SensitiveParameter;
 
+require_once __DIR__ . '/../Enumerations/Role.php';
 require_once __DIR__ . '/../Repositories/UserRepository.php';
+require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
 require_once __DIR__ . '/DTOs/SignupDTO.php';
+require_once __DIR__ . '/DTOs/LoginDTO.php';
 
 class AuthService
 {
@@ -99,6 +105,24 @@ class AuthService
 
         $this->userRepository->update($user);
 
+        return true;
+    }
+
+    public function login(#[SensitiveParameter] LoginDTO $dto) {
+        $user = $this->userRepository->findByUsername($dto->username);
+
+        if ($user == null || $user->isLocked
+        || !password_verify($dto->password, $user->passwordHash)) {
+			throw new UnauthorizedException();
+        }
+
+        session_regenerate_id();
+
+        $_SESSION['user_id'] = $user->id;
+        $_SESSION['username'] = $user->username;
+        $_SESSION['role'] = Role::USER;
+
+        // Set other session variables as needed
         return true;
     }
 }
