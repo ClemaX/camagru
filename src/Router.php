@@ -2,11 +2,13 @@
 
 namespace App;
 
+use App\Attributes\CurrentUser;
 use App\Attributes\Route;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
+use App\Entities\User;
 use App\Exceptions\ValidationException;
-
+use App\Services\AuthService;
 use ReflectionClass;
 use ReflectionMethod;
 use SensitiveParameter;
@@ -14,12 +16,14 @@ use Validator;
 
 require_once __DIR__ . '/Attributes/RequestBody.php';
 require_once __DIR__ . '/Attributes/RequestParam.php';
+require_once __DIR__ . '/Attributes/CurrentUser.php';
 
 class Router
 {
     private array $routes = [];
 
     public function __construct(
+		private AuthService $authService,
         private Validator $validator,
         public readonly string $basePath = '/',
     ) {
@@ -47,6 +51,17 @@ class Router
                 $parameters[] = [
                     'name' => $attribute->getName()
                         ?? $param->getName(),
+                    'type' => $param->getType()->getName(),
+                    'kind' => $attribute::class,
+                ];
+            }
+
+            $attrs = $param->getAttributes(CurrentUser::class);
+			if (!empty($attrs)) {
+                $attribute = $attrs[0]->newInstance();
+
+                $parameters[] = [
+                    'name' => $param->getName(),
                     'type' => $param->getType()->getName(),
                     'kind' => $attribute::class,
                 ];
@@ -79,13 +94,17 @@ class Router
         foreach ($parameters as $param) {
             $dto = null;
 
-            if (strcmp($param['kind'], RequestBody::class) == 0) {
+            if (strcmp($param['kind'], RequestBody::class) === 0) {
                 $dto = $this->validateAndCreateDTO($param['type'], $_POST);
-            } elseif (strcmp($param['kind'], RequestParam::class) == 0) {
+            } elseif (strcmp($param['kind'], RequestParam::class) === 0) {
                 if (array_key_exists($param['name'], $requestParams)) {
                     $dto = $requestParams[$param['name']];
                 }
-            }
+            } elseif (strcmp($param['kind'], CurrentUser::class) === 0) {
+				if (array_key_exists('user_id', $_SESSION)) {
+					$dto = $this->authService->getCurrentUser();
+				}
+			}
 
             $args[] = $dto;
         }

@@ -21,6 +21,9 @@ require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
 require_once __DIR__ . '/DTOs/SignupDTO.php';
 require_once __DIR__ . '/DTOs/LoginDTO.php';
 
+define('SESSION_USER_ID_KEY', 'user_id');
+define('SESSION_USER_ROLE_KEY', 'user_role');
+
 class AuthService
 {
     private readonly string $unlockUrl;
@@ -46,7 +49,7 @@ class AuthService
 
         $passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
 
-        if ($passwordHash == false) {
+        if ($passwordHash === false) {
             throw new InternalException();
         }
 
@@ -88,7 +91,7 @@ class AuthService
 
         $user = $this->userRepository->findById($userId);
 
-        if ($user == null || !$user->isLocked || $user->passwordHash == null) {
+        if ($user === null || !$user->isLocked || $user->passwordHash === null) {
             return false;
         }
 
@@ -111,18 +114,26 @@ class AuthService
     public function login(#[SensitiveParameter] LoginDTO $dto) {
         $user = $this->userRepository->findByUsername($dto->username);
 
-        if ($user == null || $user->isLocked
+        if ($user === null || $user->isLocked
         || !password_verify($dto->password, $user->passwordHash)) {
 			throw new UnauthorizedException();
         }
 
         session_regenerate_id();
 
-        $_SESSION['user_id'] = $user->id;
-        $_SESSION['username'] = $user->username;
-        $_SESSION['role'] = Role::USER;
+        $_SESSION[SESSION_USER_ID_KEY] = $user->id;
+        $_SESSION[SESSION_USER_ROLE_KEY] = Role::USER;
 
-        // Set other session variables as needed
-        return true;
+		return $user;
     }
+
+	public function getCurrentUser(): ?User {
+		if (!array_key_exists(SESSION_USER_ID_KEY, $_SESSION)) {
+			return null;
+		}
+
+		$userId = $_SESSION[SESSION_USER_ID_KEY];
+
+		return $this->userRepository->findById($userId);
+	}
 }

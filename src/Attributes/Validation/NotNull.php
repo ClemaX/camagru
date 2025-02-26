@@ -15,7 +15,7 @@ class NotNull implements ValidationInterface
 
     public function validate($value): ?string
     {
-        if ($value == null) {
+        if ($value === null) {
             return "NOT_NULL_ERROR";
         }
         return null;
