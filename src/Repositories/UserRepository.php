@@ -22,7 +22,7 @@ class UserRepository extends AbstractRepository
         return User::class;
     }
 
-    public function findByUsername($username)
+    public function findByUsername(string $username): ?User
     {
         $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE username = :username");
         $stmt->execute(['username' => $username]);
@@ -36,7 +36,7 @@ class UserRepository extends AbstractRepository
         return $modelClass::load($result);
     }
 
-    public function findByEmailAddress($emailAddress)
+    public function findByEmailAddress(string $emailAddress): ?User
     {
         $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE email_address = :email_address");
         $stmt->execute(['email_address' => $emailAddress]);

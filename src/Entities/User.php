@@ -19,8 +19,8 @@ class User
         public string $username,
         public string $passwordHash,
         public bool $isLocked = true,
-        public int|null $lockedAt = null,
-        public string|null $unlockToken = null,
+        public ?int $lockedAt = null,
+        public ?string $unlockToken = null,
         public int $id = 0,
     ) {
     }

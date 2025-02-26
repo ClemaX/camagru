@@ -33,7 +33,7 @@ abstract class AbstractRepository
         }
     }
 
-    /** @return EntityT|null */
+    /** @return ?EntityT */
     public function findById(int $id)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE id = :id");

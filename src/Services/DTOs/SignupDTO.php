@@ -18,7 +18,6 @@ class SignupDTO
     ) {
     }
 
-
     public static function load(array $data): SignupDTO
     {
         return new SignupDTO(
