@@ -20,10 +20,10 @@ class AuthController
     }
 
     #[Route('/auth/signup')]
-    public function signup(#[RequestParam] string | null $conflict)
+    public function signup()
     {
         return Renderer::render("signup", [
-            "conflict" => $conflict,
+            "conflict" => null,
             "username" => "",
             "email" => "",
         ]);
