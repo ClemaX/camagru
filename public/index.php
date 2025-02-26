@@ -11,7 +11,7 @@ use App\Renderer;
 require __DIR__ . '/../src/config.php';
 require __DIR__ . '/../src/Validator.php';
 require __DIR__ . '/../src/Router.php';
-require_once __DIR__ . '/../src/Renderer.php';
+require __DIR__ . '/../src/Renderer.php';
 require __DIR__ . '/../src/Attributes/Route.php';
 require __DIR__ . '/../src/Repositories/UserRepository.php';
 require __DIR__ . '/../src/Services/DatabaseSessionService.php';
