@@ -1,4 +1,4 @@
-<h1>Sign Up</h1>
+<h1>Log In</h1>
 
 @if($isInvalid)
 <div class="alert alert-danger mt-3" role="alert">
