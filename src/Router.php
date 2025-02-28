@@ -6,17 +6,19 @@ use App\Attributes\CurrentUser;
 use App\Attributes\Route;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
-use App\Entities\User;
 use App\Exceptions\ValidationException;
-use App\Services\AuthService;
+use App\Services\UserSessionServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use SensitiveParameter;
 use Validator;
 
+require_once __DIR__ . '/Attributes/CurrentUser.php';
 require_once __DIR__ . '/Attributes/RequestBody.php';
 require_once __DIR__ . '/Attributes/RequestParam.php';
-require_once __DIR__ . '/Attributes/CurrentUser.php';
+require_once __DIR__ . '/Attributes/Route.php';
+require_once __DIR__ . '/Services/UserSessionServiceInterface.php';
+require_once __DIR__ . '/Validator.php';
 
 class Router
 {
@@ -25,8 +27,8 @@ class Router
 
 
     public function __construct(
-        private AuthService $authService,
-        private Validator $validator,
+        private UserSessionServiceInterface $sessionService,
+        private Validator $validator = new Validator(),
         ?string $basePath = null,
     ) {
         $this->basePath = $basePath !== null
@@ -93,8 +95,10 @@ class Router
         return $dto;
     }
 
-    private function prepareArguments(array $parameters, array $requestParams): array
-    {
+    private function prepareArguments(
+        array $parameters,
+        array $requestParams
+    ): array {
         $args = [];
         foreach ($parameters as $param) {
             $dto = null;
@@ -107,7 +111,7 @@ class Router
                 }
             } elseif (strcmp($param['kind'], CurrentUser::class) === 0) {
                 if (array_key_exists('user_id', $_SESSION)) {
-                    $dto = $this->authService->getCurrentUser();
+                    $dto = $this->sessionService->getUser();
                 }
             }
 
@@ -173,8 +177,10 @@ class Router
     //     }
     // }
 
-    public function dispatch(#[SensitiveParameter] string $requestUri, string $requestMethod): string
-    {
+    public function dispatch(
+        #[SensitiveParameter] string $requestUri,
+        string $requestMethod
+    ): string {
         $urlParts = parse_url($requestUri);
 
         $requestPath = $urlParts['path'];
@@ -186,9 +192,13 @@ class Router
         }
 
         foreach ($this->routes as $route) {
-            if ($route['path'] === $requestPath && $route['method'] === $requestMethod) {
+            if ($route['path'] === $requestPath
+            && $route['method'] === $requestMethod) {
                 $controller = $route['controller'];
-                $args = $this->prepareArguments($route['parameters'], $requestParams);
+                $args = $this->prepareArguments(
+                    $route['parameters'],
+                    $requestParams
+                );
                 return $controller->{$route['action']}(...$args);
             }
         }

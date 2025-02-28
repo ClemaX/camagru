@@ -4,14 +4,21 @@ namespace App\Services;
 
 use PDO;
 use SessionHandlerInterface;
+use App\Entities\User;
+use App\Enumerations\Role;
+use App\Repositories\UserRepository;
 
-class DatabaseSessionService implements SessionHandlerInterface
+require_once __DIR__ . '/UserSessionServiceInterface.php';
+
+define('SESSION_USER_ID_KEY', 'user_id');
+define('SESSION_USER_ROLE_KEY', 'user_role');
+
+class DatabaseSessionService implements SessionHandlerInterface, UserSessionServiceInterface
 {
-    private $pdo;
-
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
+    public function __construct(
+        private readonly PDO $pdo,
+        private readonly UserRepository $userRepository
+    ) {
     }
 
     public function open(string $savePath, string $sessionName): bool
@@ -48,5 +55,24 @@ class DatabaseSessionService implements SessionHandlerInterface
     {
         $stmt = $this->pdo->prepare("DELETE FROM session WHERE last_access < ?");
         return $stmt->execute([time() - $maxlifetime]);
+    }
+
+    public function setUser(?User $user)
+    {
+        session_regenerate_id();
+
+        $_SESSION[SESSION_USER_ID_KEY] = $user->id;
+        $_SESSION[SESSION_USER_ROLE_KEY] = Role::USER;
+    }
+
+    public function getUser(): ?User
+    {
+        if (!array_key_exists(SESSION_USER_ID_KEY, $_SESSION)) {
+            return null;
+        }
+
+        $userId = $_SESSION[SESSION_USER_ID_KEY];
+
+        return $this->userRepository->findById($userId);
     }
 }

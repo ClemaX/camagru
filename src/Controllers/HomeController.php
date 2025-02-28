@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use AbstractController;
 use App\Attributes\CurrentUser;
 use App\Attributes\Route as AttributesRoute;
 use App\Entities\User;

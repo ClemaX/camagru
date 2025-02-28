@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use AbstractController;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Attributes\Route;

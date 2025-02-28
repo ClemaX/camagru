@@ -13,7 +13,10 @@ class Validator
         $properties = $reflection->getProperties();
 
         foreach ($properties as $property) {
-            $attributes = $property->getAttributes(ValidationInterface::class, ReflectionAttribute::IS_INSTANCEOF);
+            $attributes = $property->getAttributes(
+                ValidationInterface::class,
+                ReflectionAttribute::IS_INSTANCEOF
+            );
             foreach ($attributes as $attribute) {
                 $validator = $attribute->newInstance();
                 $value = $property->getValue($object);
