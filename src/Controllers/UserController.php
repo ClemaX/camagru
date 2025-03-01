@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Attributes\Controller;
 use App\Attributes\CurrentUser;
 use App\Attributes\Route;
 use App\Entities\User;
@@ -10,6 +11,7 @@ use App\Renderer;
 
 require_once __DIR__ . '/AbstractController.php';
 
+#[Controller('/user')]
 class UserController extends AbstractController
 {
     public function __construct(Renderer $renderer)
@@ -17,7 +19,7 @@ class UserController extends AbstractController
         parent::__construct($renderer);
     }
 
-    #[Route('/user/self')]
+    #[Route('/self')]
     public function self(#[CurrentUser] ?User $user)
     {
         if ($user === null) {
@@ -30,7 +32,7 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/user/self/settings')]
+    #[Route('/self/settings')]
     public function selfSettings()
     {
         return "TODO";

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Attributes\Controller;
 use App\Attributes\CurrentUser;
 use App\Attributes\Route;
 use App\Attributes\RequestBody;
@@ -14,6 +15,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use SensitiveParameter;
 
+require_once __DIR__ . '/Attributes/Controller.php';
 require_once __DIR__ . '/Attributes/CurrentUser.php';
 require_once __DIR__ . '/Attributes/RequestBody.php';
 require_once __DIR__ . '/Attributes/RequestParam.php';
@@ -132,14 +134,20 @@ class Router
     public function addController(object $controller)
     {
         $reflectionClass = new ReflectionClass($controller::class);
+
+        $controllerAttributes = $reflectionClass->getAttributes(Controller::class);
+        $controllerAttribute = reset($controllerAttributes);
+        $controllerPath = $controllerAttribute !== false ? $controllerAttribute->newInstance()->path : '/';
+
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method) {
             $attributes = $method->getAttributes(Route::class);
             foreach ($attributes as $attribute) {
                 $route = $attribute->newInstance();
+                $path = rtrim($controllerPath, '/') . '/' . ltrim($route->path, '/');
                 $this->routes[] = [
-                    'path' => $route->path,
+                    'path' => $path,
                     'method' => $route->method,
                     'controller' => $controller,
                     'action' => $method->getName(),

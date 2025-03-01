@@ -2,13 +2,15 @@
 
 namespace App\Controllers;
 
+use App\Attributes\Controller;
 use App\Attributes\CurrentUser;
-use App\Attributes\Route as AttributesRoute;
+use App\Attributes\Route;
 use App\Entities\User;
 use App\Renderer;
 
 require_once __DIR__ . '/AbstractController.php';
 
+#[Controller('/')]
 class HomeController extends AbstractController
 {
     public function __construct(Renderer $renderer)
@@ -16,7 +18,7 @@ class HomeController extends AbstractController
         parent::__construct($renderer);
     }
 
-    #[AttributesRoute('/')]
+    #[Route('')]
     public function index(#[CurrentUser] ?User $user)
     {
         $username = $user !== null ? $user->username : null;

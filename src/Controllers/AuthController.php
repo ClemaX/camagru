@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Attributes\Controller;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Attributes\Route;
@@ -18,6 +19,7 @@ require_once __DIR__ . '/AbstractController.php';
 
 require_once __DIR__ . '/../Exceptions/ConflictException.php';
 
+#[Controller('/auth')]
 class AuthController extends AbstractController
 {
     public function __construct(
@@ -27,7 +29,7 @@ class AuthController extends AbstractController
         parent::__construct($renderer);
     }
 
-    #[Route('/auth/signup')]
+    #[Route('/signup')]
     public function signup()
     {
         return $this->render("signup", [
@@ -37,7 +39,7 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/auth/signup', 'POST')]
+    #[Route('/signup', 'POST')]
     public function signupSubmit(
         #[SensitiveParameter] #[RequestBody] SignupDTO $dto
     ) {
@@ -51,16 +53,16 @@ class AuthController extends AbstractController
             ]);
         }
 
-        header('Location: /auth/verify-email');
+        header('Location: /verify-email');
     }
 
-    #[Route('/auth/verify-email')]
+    #[Route('/verify-email')]
     public function verifyEmail()
     {
         return $this->render("activate-account");
     }
 
-    #[Route('/auth/activate')]
+    #[Route('/activate')]
     public function activate(
         #[RequestParam] int $id,
         #[SensitiveParameter] #[RequestParam] string $token
@@ -72,7 +74,7 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/auth/login')]
+    #[Route('/login')]
     public function login()
     {
         return $this->render("login", [
@@ -81,7 +83,7 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/auth/login', 'POST')]
+    #[Route('/login', 'POST')]
     public function loginSubmit(
         #[SensitiveParameter] #[RequestBody] LoginDTO $dto
     ) {
@@ -97,7 +99,7 @@ class AuthController extends AbstractController
         header('Location: /');
     }
 
-    #[Route('/auth/logout', 'POST')]
+    #[Route('/logout', 'POST')]
     public function logout()
     {
         $this->authService->logout();

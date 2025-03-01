@@ -61,7 +61,6 @@ class Renderer
                     $path = str_replace("{\$$key}", $substitute, $path);
                 }
 
-
                 return rtrim($baseUrlPath, '/') . '/' . ltrim($path, '/');
             },
             $content
