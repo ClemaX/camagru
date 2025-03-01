@@ -6,7 +6,6 @@ use App\Attributes\CurrentUser;
 use App\Attributes\Route;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
-use App\Exceptions\HttpException;
 use App\Exceptions\InvalidCsrfTokenException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
