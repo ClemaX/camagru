@@ -1,6 +1,10 @@
 <?php
 
+namespace App;
+
 use App\Attributes\Validation\ValidationInterface;
+use ReflectionAttribute;
+use ReflectionObject;
 
 require_once __DIR__ . '/Attributes/Validation/ValidationInterface.php';
 require_once __DIR__ . '/Exceptions/ValidationException.php';
@@ -12,7 +16,6 @@ class Validator
         $errors = [];
         $reflection = new ReflectionObject($object);
         $properties = $reflection->getProperties();
-
 
         foreach ($properties as $property) {
             $attributes = $property->getAttributes(

@@ -6,7 +6,7 @@ class ValidationException extends HttpException
 {
     public function __construct(
         protected array $errors,
-        int $code = 4000
+        int $code = 4001
     ) {
         parent::__construct(
             400,

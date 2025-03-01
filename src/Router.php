@@ -13,7 +13,6 @@ use App\Services\UserSessionServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use SensitiveParameter;
-use Validator;
 
 require_once __DIR__ . '/Attributes/CurrentUser.php';
 require_once __DIR__ . '/Attributes/RequestBody.php';
@@ -22,7 +21,7 @@ require_once __DIR__ . '/Attributes/Route.php';
 require_once __DIR__ . '/Exceptions/InvalidCsrfTokenException.php';
 require_once __DIR__ . '/Exceptions/NotFoundException.php';
 require_once __DIR__ . '/Services/UserSessionServiceInterface.php';
-require_once __DIR__ . '/Validator.php';
+require_once __DIR__ . '/Mapper.php';
 
 class Router
 {
@@ -31,7 +30,7 @@ class Router
 
     public function __construct(
         private UserSessionServiceInterface $sessionService,
-        private Validator $validator = new Validator(),
+        private Mapper $mapper = new Mapper(),
         ?string $basePath = null,
     ) {
         $this->basePath = $basePath !== null
@@ -80,24 +79,6 @@ class Router
         return $parameters;
     }
 
-    private function validateAndCreateDTO(string $dtoClass, array $data)
-    {
-        $dto = $dtoClass::load($data);
-        foreach ($data as $key => $value) {
-            if (property_exists($dto, $key)) {
-                $dto->$key = $value;
-            }
-        }
-
-        $errors = $this->validator->validate($dto);
-
-        if (!empty($errors)) {
-            throw new ValidationException($errors);
-        }
-
-        return $dto;
-    }
-
     private function prepareArguments(
         array $parameters,
         array $requestParams
@@ -111,7 +92,7 @@ class Router
                 || !$this->sessionService->verifyCsrfToken($_POST['_token'])) {
                     throw new InvalidCsrfTokenException();
                 }
-                $dto = $this->validateAndCreateDTO($param['type'], $_POST);
+                $dto = $this->mapper->map($param['type'], $_POST);
             } elseif (strcmp($param['kind'], RequestParam::class) === 0) {
                 if (array_key_exists($param['name'], $requestParams)) {
                     $dto = $requestParams[$param['name']];
