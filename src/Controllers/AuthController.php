@@ -11,6 +11,7 @@ use App\Renderer;
 use App\Services\AuthService;
 use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\SignupDTO;
+use AuthException;
 use SensitiveParameter;
 
 require_once __DIR__ . '/AbstractController.php';
@@ -75,7 +76,7 @@ class AuthController extends AbstractController
     public function login()
     {
         return $this->render("login", [
-            "isInvalid" => false,
+            "errorMessage" => null,
             "username" => "",
         ]);
     }
@@ -86,9 +87,9 @@ class AuthController extends AbstractController
     ) {
         try {
             $this->authService->login($dto);
-        } catch (UnauthorizedException) {
+        } catch (AuthException $e) {
             return $this->render("login", [
-                "isInvalid" => true,
+                "errorMessage" => $e->getMessage(),
                 "username" => $dto->username
             ]);
         }

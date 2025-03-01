@@ -1,8 +1,8 @@
 <h1>Log In</h1>
 
-@if($isInvalid)
+@if($errorMessage !== null)
 <div class="alert alert-danger mt-3" role="alert">
-    Invalid credentials. Please try again.
+	{{ $errorMessage }}
 </div>
 @endif
 

@@ -9,11 +9,13 @@ use App\Exceptions\UnauthorizedException;
 use App\Repositories\UserRepository;
 use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\SignupDTO;
+use AuthLockedException;
 use DateInterval;
 use DateTime;
 use SensitiveParameter;
 
 require_once __DIR__ . '/../Enumerations/Role.php';
+require_once __DIR__ . '/../Exceptions/AuthLockedException.php';
 require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
 require_once __DIR__ . '/../Repositories/UserRepository.php';
 require_once __DIR__ . '/../Services/MailService.php';
@@ -120,9 +122,13 @@ class AuthService
     {
         $user = $this->userRepository->findByUsername($dto->username);
 
-        if ($user === null || $user->isLocked
+        if ($user === null
         || !password_verify($dto->password, $user->passwordHash)) {
             throw new UnauthorizedException();
+        }
+
+        if ($user->isLocked) {
+            throw new AuthLockedException();
         }
 
         $this->sessionService->login($user);
