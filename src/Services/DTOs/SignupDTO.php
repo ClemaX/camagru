@@ -6,6 +6,10 @@ use App\Attributes\Validation\ValidEmailAddress;
 use App\Attributes\Validation\ValidPassword;
 use App\Attributes\Validation\ValidUsername;
 
+require_once __DIR__ . '/../../Attributes/Validation/ValidEmailAddress.php';
+require_once __DIR__ . '/../../Attributes/Validation/ValidPassword.php';
+require_once __DIR__ . '/../../Attributes/Validation/ValidUsername.php';
+
 class SignupDTO
 {
     public function __construct(

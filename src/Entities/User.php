@@ -2,10 +2,13 @@
 
 namespace App\Entities;
 
-use App\Attributes\Validation\MinLength;
 use App\Attributes\Validation\NotNull;
 use App\Attributes\Validation\ValidEmailAddress;
 use App\Attributes\Validation\ValidUsername;
+
+require_once __DIR__ . '/../Attributes/Validation/NotNull.php';
+require_once __DIR__ . '/../Attributes/Validation/ValidEmailAddress.php';
+require_once __DIR__ . '/../Attributes/Validation/ValidUsername.php';
 
 class User
 {
@@ -14,7 +17,6 @@ class User
         #[ValidEmailAddress()]
         public string $emailAddress,
         #[NotNull()]
-        #[MinLength(3)]
         #[ValidUsername()]
         public string $username,
         public string $passwordHash,

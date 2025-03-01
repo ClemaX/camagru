@@ -4,7 +4,7 @@ namespace App\Attributes\Validation;
 
 use Attribute;
 
-require_once __DIR__ . '/ValidationInterface.php';
+require_once __DIR__ . '/MinLength.php';
 
 #[Attribute()]
 class ValidPassword extends MinLength

@@ -5,6 +5,9 @@ namespace App\Entities;
 use App\Attributes\Validation\MaxLength;
 use App\Attributes\Validation\NotNull;
 
+require_once __DIR__ . '/../Attributes/Validation/MaxLength.php';
+require_once __DIR__ . '/../Attributes/Validation/NotNull.php';
+
 class UserProfile
 {
     public function __construct(
