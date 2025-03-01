@@ -2,25 +2,24 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class ValidationException extends Exception
+class ValidationException extends HttpException
 {
-    protected array $errors;
+    public function __construct(
+        protected array $errors,
+        int $code = 4000
+    ) {
+        parent::__construct(
+            400,
+            "Validation Failed",
+            "One or more of the supplied fields are invalid.",
+            $code
+        );
 
-    public function __construct(array $errors, string $message = "Validation failed", int $code = 400)
-    {
-        parent::__construct($message, $code);
         $this->errors = $errors;
     }
 
     public function getErrors(): array
     {
         return $this->errors;
-    }
-
-    public static function withMessages(array $messages): self
-    {
-        return new static($messages);
     }
 }

@@ -89,10 +89,20 @@ $router->addController(new AuthController($renderer, $authService));
 $router->addController(new UserController($renderer, $userService));
 
 // Request dispatch
+try {
 $content = $router->dispatch(
     $_SERVER['REQUEST_URI'],
     $_SERVER['REQUEST_METHOD'],
 );
+} catch (HttpException $e) {
+    $content = $renderer->render('error', [
+        'title' => $e->getTitle(),
+        'message' => $e->getMessage(),
+        'code' => $e->getCode(),
+    ]);
+
+    $e->sendHeaders();
+}
 
 $pdo = null;
 

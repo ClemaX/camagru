@@ -17,6 +17,7 @@ require_once __DIR__ . '/Attributes/CurrentUser.php';
 require_once __DIR__ . '/Attributes/RequestBody.php';
 require_once __DIR__ . '/Attributes/RequestParam.php';
 require_once __DIR__ . '/Attributes/Route.php';
+require_once __DIR__ . '/Exceptions/NotFoundException.php';
 require_once __DIR__ . '/Services/UserSessionServiceInterface.php';
 require_once __DIR__ . '/Validator.php';
 
@@ -203,10 +204,6 @@ class Router
             }
         }
 
-        http_response_code(404);
-
-        ob_start();
-        require __DIR__ . '/../src/Views/404.php';
-        return ob_get_clean();
+        throw new NotFoundException();
     }
 }
