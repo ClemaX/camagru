@@ -38,7 +38,7 @@ create table "user"
     -- User properties
     email_address                   varchar(254)    unique not null,
     username                        varchar(16)     unique not null,
-    password_hash                   varchar(255)    not null,
+    password_hash                   varchar(255),
     is_locked                       boolean         not null            default true,
     locked_at                       bigint,
     unlock_token                    varchar(255)
@@ -102,7 +102,7 @@ create table user_settings
 --     insert into "user" (email_address, username)
 --     values (email_address, username)
 --     returning id into user_id;
-    
+
 --     insert into user_profile (user_id, name, description)
 --     values (user_id, username, description);
 

@@ -8,6 +8,8 @@ use App\Exceptions\InternalException;
 use App\Exceptions\UnauthorizedException;
 use App\Repositories\UserRepository;
 use App\Services\DTOs\LoginDTO;
+use App\Services\DTOs\PasswordResetDTO;
+use App\Services\DTOs\PasswordResetRequestDTO;
 use App\Services\DTOs\SignupDTO;
 use AuthLockedException;
 use DateInterval;
@@ -22,10 +24,13 @@ require_once __DIR__ . '/../Services/MailService.php';
 require_once __DIR__ . '/../Services/UserSessionServiceInterface.php';
 require_once __DIR__ . '/DTOs/LoginDTO.php';
 require_once __DIR__ . '/DTOs/SignupDTO.php';
+require_once __DIR__ . '/DTOs/PasswordResetDTO.php';
+require_once __DIR__ . '/DTOs/PasswordResetRequestDTO.php';
 
 class AuthService
 {
     private readonly string $unlockPath;
+    private readonly string $passwordChangePath;
     private readonly DateInterval $unlockTokenLifetime;
 
     public function __construct(
@@ -35,6 +40,7 @@ class AuthService
         #[SensitiveParameter] array $config,
     ) {
         $this->unlockPath = '/auth/activate';
+        $this->passwordChangePath = '/auth/choose-password';
         $this->unlockTokenLifetime = DateInterval::createFromDateString(
             $config['USER_UNLOCK_TOKEN_LIFETIME']
         );
@@ -114,6 +120,79 @@ class AuthService
         $user->unlockToken = null;
 
         $this->userRepository->update($user);
+
+        return true;
+    }
+
+    public function requestPasswordReset(
+        #[SensitiveParameter] PasswordResetRequestDTO $dto
+    ) {
+        $user = $this->userRepository->findByEmailAddress($dto->email);
+
+        if ($user === null) {
+            return;
+        }
+
+        $user->isLocked = true;
+        $user->lockedAt = time();
+        $user->unlockToken = bin2hex(random_bytes(32));
+        $user->passwordHash = null;
+
+        $this->userRepository->update($user);
+
+        $activationQueryParams = [
+            'id' => $user->id,
+            'token' => $user->unlockToken,
+        ];
+
+        $resetUrl = $this->passwordChangePath
+            . '?' . http_build_query($activationQueryParams);
+
+        $this->mailService->send(
+            $user->emailAddress,
+            'Camagru Password Reset',
+            'reset-password',
+            [
+                'username' => $user->username,
+                'resetUrl' => $resetUrl,
+            ]
+        );
+    }
+
+    public function resetPassword(
+        #[SensitiveParameter] PasswordResetDTO $dto
+    ): bool {
+        $now = new DateTime('now');
+
+        $user = $this->userRepository->findById($dto->userId);
+
+        if ($user === null
+        || !$user->isLocked || $user->passwordHash !== null) {
+            return false;
+        }
+
+        $lockedAt = DateTime::createFromFormat('U', $user->lockedAt);
+        $tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
+
+        if ($now >= $tokenExpiredAt
+        || strcmp($user->unlockToken, $dto->token) != 0) {
+            return false;
+        }
+
+        $passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
+
+        if ($passwordHash === false) {
+            throw new InternalException();
+        }
+
+        $user->passwordHash = $passwordHash;
+        $user->isLocked = false;
+        $user->lockedAt = null;
+        $user->unlockToken = null;
+
+        $this->userRepository->update($user);
+
+        $this->sessionService->login($user);
 
         return true;
     }

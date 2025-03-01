@@ -22,7 +22,7 @@
 						style="padding: 20px; text-align: center; background-color: #007bff"
 					>
 						<h1 style="color: #ffffff; margin: 0; font-size: 24px">
-							Welcome to Camagru
+							Camagru Password Reset
 						</h1>
 					</td>
 				</tr>
@@ -32,14 +32,14 @@
 							Dear {{ $username }},
 						</p>
 						<p style="font-size: 16px; line-height: 1.5; color: #333333">
-							Thank you for signing up! To activate your account, please click
+							To reset your password, please click
 							the button below:
 						</p>
 						<table cellpadding="0" cellspacing="0" width="100%">
 							<tr>
 								<td align="center" style="padding: 20px 0">
 									<a
-										href="{{ url({$activationUrl}) }}"
+										href="{{ url({$resetUrl}) }}"
 										style="
 											display: inline-block;
 											padding: 10px 20px;
@@ -50,7 +50,7 @@
 											font-weight: bold;
 										"
 									>
-										Activate Account
+										Reset Password
 									</a>
 								</td>
 							</tr>
@@ -60,7 +60,7 @@
 							into your browser:
 						</p>
 						<p style="font-size: 14px; line-height: 1.5; color: #666666">
-							{{ url({$activationUrl}) }}
+							{{ url({$resetUrl}) }}
 						</p>
 						<p style="font-size: 16px; line-height: 1.5; color: #333333">
 							This link will expire in 24 hours.

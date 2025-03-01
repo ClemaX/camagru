@@ -1,34 +1,25 @@
-<h1>Log In</h1>
+<h1>Reset Password</h1>
 
-@if($errorMessage !== null)
-<div class="alert alert-danger mt-3" role="alert">
-	{{ $errorMessage }}
+@if($isEmailSent)
+<div class="alert alert-success mt-3" role="alert">
+	An email has been sent to the provided address with instructions to reset your password.
 </div>
 @endif
 
 <form class="needs-validation d-flex flex-column gap-3" novalidate method="post">
 	@csrf
 	<div class="form-group">
-		<label for="username">Username</label>
-		<input type="text" class="form-control"
-					 id="username" name="username" required
-					 value="{{ $username }}">
+		<label for="email">Email address</label>
+		<input type="email" class="form-control"
+					 id="email" name="email" required
+					 pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" maxlength="254"
+					 value="{{ $email }}">
 		<div class="invalid-feedback">
-			Username is required.
+			Please enter a valid email address.
 		</div>
 	</div>
 
-	<div class="form-group">
-		<label for="password">Password</label>
-		<input type="password" class="form-control" id="password" name="password" required>
-		<div class="invalid-feedback">
-			Password is required.
-		</div>
-	</div>
-
-	<a href="{{ url(/auth/reset-password) }}">Reset password</a>
-
-	<button type="submit" class="btn btn-primary">Log In</button>
+	<button type="submit" class="btn btn-primary">Reset Password</button>
 </form>
 
 <script>

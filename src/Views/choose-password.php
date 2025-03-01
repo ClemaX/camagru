@@ -1,34 +1,27 @@
-<h1>Log In</h1>
+<h1>Choose Password</h1>
 
-@if($errorMessage !== null)
+@if($isUrlInvalid)
 <div class="alert alert-danger mt-3" role="alert">
-	{{ $errorMessage }}
+	The password reset URL is invalid or has expired.
 </div>
 @endif
 
 <form class="needs-validation d-flex flex-column gap-3" novalidate method="post">
 	@csrf
-	<div class="form-group">
-		<label for="username">Username</label>
-		<input type="text" class="form-control"
-					 id="username" name="username" required
-					 value="{{ $username }}">
-		<div class="invalid-feedback">
-			Username is required.
-		</div>
-	</div>
+
+	<input type="hidden" name="userId" value="{{ $userId }}" />
+	<input type="hidden" name="token" value="{{ $token }}" />
 
 	<div class="form-group">
 		<label for="password">Password</label>
-		<input type="password" class="form-control" id="password" name="password" required>
+		<input type="password" class="form-control" id="password" name="password" required
+					 pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\-+_!@#$%^&*., ?]).{8,}$" maxlength="254">
 		<div class="invalid-feedback">
-			Password is required.
+			Password must be at least 8 characters long and contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 special character.
 		</div>
 	</div>
 
-	<a href="{{ url(/auth/reset-password) }}">Reset password</a>
-
-	<button type="submit" class="btn btn-primary">Log In</button>
+	<button type="submit" class="btn btn-primary">Change Password</button>
 </form>
 
 <script>

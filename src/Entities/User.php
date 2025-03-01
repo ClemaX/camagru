@@ -19,7 +19,7 @@ class User
         #[NotNull()]
         #[ValidUsername()]
         public string $username,
-        public string $passwordHash,
+        public ?string $passwordHash,
         public bool $isLocked = true,
         public ?int $lockedAt = null,
         public ?string $unlockToken = null,
