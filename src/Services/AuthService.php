@@ -90,6 +90,7 @@ class AuthService
             [
                 'username' => $user->username,
                 'activationUrl' => $activationUrl,
+                'urlLifetime' => $this->unlockTokenLifetime->format('%i minutes'),
             ]
         );
     }
@@ -155,6 +156,7 @@ class AuthService
             [
                 'username' => $user->username,
                 'resetUrl' => $resetUrl,
+                'urlLifetime' => $this->unlockTokenLifetime->format('%i minutes'),
             ]
         );
     }

@@ -63,7 +63,7 @@
 							{{ url({$resetUrl}) }}
 						</p>
 						<p style="font-size: 16px; line-height: 1.5; color: #333333">
-							This link will expire in 24 hours.
+							This link will expire in {{ $urlLifetime }}.
 						</p>
 						<p style="font-size: 16px; line-height: 1.5; color: #333333">
 							Best regards,<br />The Camagru Team
