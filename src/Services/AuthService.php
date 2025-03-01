@@ -125,8 +125,13 @@ class AuthService
             throw new UnauthorizedException();
         }
 
-        $this->sessionService->setUser($user);
+        $this->sessionService->login($user);
 
         return $user;
+    }
+
+    public function logout()
+    {
+        $this->sessionService->logout();
     }
 }

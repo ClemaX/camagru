@@ -7,6 +7,7 @@ use App\Services\AuthService;
 use App\Controllers\HomeController;
 use App\Controllers\AuthController;
 use App\Controllers\UserController;
+use App\Exceptions\HttpException;
 use App\Renderer;
 use App\Services\MailService;
 use App\Services\UserService;
@@ -49,8 +50,8 @@ $sessionService = new DatabaseSessionService(
     $pdo,
     $userRepository,
 );
-session_set_save_handler($sessionService, true);
-session_start();
+
+$sessionService->start();
 
 // Router
 $router = new Router(
@@ -90,10 +91,10 @@ $router->addController(new UserController($renderer, $userService));
 
 // Request dispatch
 try {
-$content = $router->dispatch(
-    $_SERVER['REQUEST_URI'],
-    $_SERVER['REQUEST_METHOD'],
-);
+    $content = $router->dispatch(
+        $_SERVER['REQUEST_URI'],
+        $_SERVER['REQUEST_METHOD'],
+    );
 } catch (HttpException $e) {
     $content = $renderer->render('error', [
         'title' => $e->getTitle(),

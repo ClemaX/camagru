@@ -1,5 +1,6 @@
 <h1>Sign Up</h1>
 <form class="needs-validation d-flex flex-column gap-3" novalidate method="post">
+	@csrf
 	<div class="form-group">
 		<label for="username">Username</label>
 		<input type="text" class="form-control @if($conflict === 'username') is-invalid @endif"

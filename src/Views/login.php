@@ -7,6 +7,7 @@
 @endif
 
 <form class="needs-validation d-flex flex-column gap-3" novalidate method="post">
+	@csrf
 	<div class="form-group">
 		<label for="username">Username</label>
 		<input type="text" class="form-control"

@@ -6,6 +6,9 @@ use App\Attributes\CurrentUser;
 use App\Attributes\Route;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
+use App\Exceptions\HttpException;
+use App\Exceptions\InvalidCsrfTokenException;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
 use App\Services\UserSessionServiceInterface;
 use ReflectionClass;
@@ -17,6 +20,7 @@ require_once __DIR__ . '/Attributes/CurrentUser.php';
 require_once __DIR__ . '/Attributes/RequestBody.php';
 require_once __DIR__ . '/Attributes/RequestParam.php';
 require_once __DIR__ . '/Attributes/Route.php';
+require_once __DIR__ . '/Exceptions/InvalidCsrfTokenException.php';
 require_once __DIR__ . '/Exceptions/NotFoundException.php';
 require_once __DIR__ . '/Services/UserSessionServiceInterface.php';
 require_once __DIR__ . '/Validator.php';
@@ -25,7 +29,6 @@ class Router
 {
     private array $routes = [];
     public readonly string $basePath;
-
 
     public function __construct(
         private UserSessionServiceInterface $sessionService,
@@ -105,6 +108,10 @@ class Router
             $dto = null;
 
             if (strcmp($param['kind'], RequestBody::class) === 0) {
+                if (!array_key_exists('_token', $_POST)
+                || !$this->sessionService->verifyCsrfToken($_POST['_token'])) {
+                    throw new InvalidCsrfTokenException();
+                }
                 $dto = $this->validateAndCreateDTO($param['type'], $_POST);
             } elseif (strcmp($param['kind'], RequestParam::class) === 0) {
                 if (array_key_exists($param['name'], $requestParams)) {

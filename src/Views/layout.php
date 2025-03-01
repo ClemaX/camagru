@@ -25,7 +25,7 @@
 				</li>
 				@else
 				<li class="nav-item">
-					<a class="nav-link" href="{{ url(/user/self/settings) }}">Settings</a>
+					<a class="nav-link" href="{{ url(/user/self) }}">Profile</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link" href="{{ url(/) }}" onclick="logout(); return false;">Log Out</a>

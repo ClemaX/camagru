@@ -182,6 +182,14 @@ class Renderer
         );
     }
 
+    private function processCsrf(string $content)
+    {
+        $csrfToken = $this->sessionService->getCsrfToken();
+        $csrfField = '<input type="hidden" name="_token" value="' . htmlspecialchars($csrfToken) . '" />';
+
+        return str_replace('@csrf', $csrfField, $content);
+    }
+
     public function render(string $templateName, array $params = [])
     {
         $templateFile = __DIR__
@@ -195,12 +203,13 @@ class Renderer
         $content = file_get_contents($templateFile);
 
         $content = $this->processRoles($content);
+        $content = $this::processCsrf($content);
 
         $content = self::processIfStatements($content, $params);
         $content = self::processForLoops($content, $params);
 
-        $content = self::processParameters($content, $params);
         $content = self::processUrls($content, $params, $this->baseUrlPath);
+        $content = self::processParameters($content, $params);
 
         return $content;
     }
