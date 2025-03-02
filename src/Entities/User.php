@@ -51,10 +51,19 @@ class User
 	#[Column('unlock_token')]
 	public ?string $unlockToken = null;
 
+	#[Column('role_id')]
+	public Role $role;
+
 	#[OneToOne]
 	#[PrimaryKeyJoinColumn]
 	public UserProfile $profile;
 
-	#[Column('role_id')]
-	public Role $role;
+	#[Column('email_change_address')]
+	public ?string $emailChangeAddress = null;
+
+	#[Column('email_change_requested_at')]
+	public ?int $emailChangeRequestedAt = null;
+
+	#[Column('email_change_token')]
+	public ?string $emailChangeToken = null;
 }

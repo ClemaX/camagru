@@ -26,7 +26,7 @@
 		</div>
 	</div>
 
-	<a href="{{ url(/auth/reset-password) }}">Reset password</a>
+	<a href="{{ url('/auth/reset-password') }}">Reset password</a>
 
 	<button type="submit" class="btn btn-primary">Log In</button>
 </form>

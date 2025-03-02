@@ -329,7 +329,18 @@ class EntityManager
 		self::bindParameters($stmt, $data);
 		$stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
-		return $stmt->execute();
+		$success = $stmt->execute();
+
+		$oneToOneProperties = self::getOneToOneRelations($modelClass);
+
+		foreach ($oneToOneProperties as $property) {
+			$this->merge(
+				$property->getValue($model),
+				$property->getType()->getName(),
+			);
+		}
+
+		return $success;
 	}
 
 	public function delete(int $id, string $modelClass): bool

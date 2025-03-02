@@ -39,7 +39,7 @@
 							<tr>
 								<td align="center" style="padding: 20px 0">
 									<a
-										href="{{ url({$resetUrl}) }}"
+										href="{{ url("{$resetUrl}") }}"
 										style="
 											display: inline-block;
 											padding: 10px 20px;
@@ -60,7 +60,7 @@
 							into your browser:
 						</p>
 						<p style="font-size: 14px; line-height: 1.5; color: #666666">
-							{{ url({$resetUrl}) }}
+							{{ url("{$resetUrl}") }}
 						</p>
 						<p style="font-size: 16px; line-height: 1.5; color: #333333">
 							This link will expire in {{ $urlLifetime }}.

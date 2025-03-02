@@ -9,6 +9,7 @@ use App\Attributes\Route;
 use App\Exceptions\ConflictException;
 use App\Renderer;
 use App\Services\AuthService;
+use App\Services\DTOs\EmailChangeDTO;
 use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\PasswordResetDTO;
 use App\Services\DTOs\PasswordResetRequestDTO;
@@ -127,6 +128,15 @@ class AuthController extends AbstractController
 		header('Location: /');
 
 		return '';
+	}
+
+	#[Route('/change-email', 'POST')]
+	public function requestEmailChangeSubmit(
+		#[RequestBody] EmailChangeDTO $dto
+	) {
+		$this->authService->requestEmailChange($dto);
+
+		return $this->render('verify-new-email');
 	}
 
 	#[Route('/login')]

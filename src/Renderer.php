@@ -50,17 +50,20 @@ class Renderer
 			function ($matches) use ($params, $baseUrlPath) {
 				$path = $matches[1];
 
-				foreach ($params as $key => $value) {
-					$substitute = $value != null
-						? (
-							$key === 'content'
-							? $value
-							: htmlspecialchars($value)
-						)
-						: "";
+				extract($params, EXTR_SKIP);
 
-					$path = str_replace("{\$$key}", $substitute, $path);
-				}
+				$path = eval("return $path;");
+				// foreach ($params as $key => $value) {
+				// 	$substitute = $value != null
+				// 		? (
+				// 			$key === 'content'
+				// 			? $value
+				// 			: htmlspecialchars($value)
+				// 		)
+				// 		: "";
+
+				// 	$path = str_replace("{\$$key}", $substitute, $path);
+				// }
 
 				return rtrim($baseUrlPath, '/') . '/' . ltrim($path, '/');
 			},
@@ -177,12 +180,18 @@ class Renderer
 		);
 	}
 
-	private function processCsrf(string $content)
+	private function processForms(string $content): string
 	{
 		$csrfToken = $this->sessionService->getCsrfToken();
 		$csrfField = '<input type="hidden" name="_token" value="' . htmlspecialchars($csrfToken) . '" />';
 
-		return str_replace('@csrf', $csrfField, $content);
+		$content = str_replace('@csrf', $csrfField, $content);
+		$content = preg_replace_callback('/@method\s*\(\'(.*?)\'\)/s', function ($matches) {
+			$method = $matches[1];
+			return '<input type="hidden" name="_method" value="' . htmlspecialchars($method) . '" />';
+		}, $content);
+
+		return $content;
 	}
 
 	public function render(string $templateName, array $params = [])
@@ -198,7 +207,7 @@ class Renderer
 		$content = file_get_contents($templateFile);
 
 		$content = $this->processRoles($content);
-		$content = $this::processCsrf($content);
+		$content = $this::processForms($content);
 
 		$content = self::processIfStatements($content, $params);
 		$content = self::processForLoops($content, $params);

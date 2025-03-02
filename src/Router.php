@@ -187,6 +187,10 @@ class Router
 			$requestParams = [];
 		}
 
+		if ($requestMethod === 'POST' && array_key_exists('_method', $_POST)) {
+			$requestMethod = $_POST['_method'];
+		}
+
 		foreach ($this->routes as $route) {
 			if ($route['path'] === $requestPath
 			&& $route['method'] === $requestMethod) {

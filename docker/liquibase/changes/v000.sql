@@ -42,6 +42,9 @@ create table "user"
     is_locked                       boolean                 not null            default true,
     locked_at                       bigint,
     unlock_token                    varchar(255),
+    email_change_address            varchar(254),
+    email_change_requested_at       bigint,
+    email_change_token              varchar(255),
     role_id                         int                     not null,
     -- Constraints
     foreign key(role_id)            references "role"(id)   on delete       cascade

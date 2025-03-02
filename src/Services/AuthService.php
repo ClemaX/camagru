@@ -9,6 +9,7 @@ use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
 use App\Exceptions\UnauthorizedException;
 use App\Repositories\UserRepository;
+use App\Services\DTOs\EmailChangeDTO;
 use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\PasswordResetDTO;
 use App\Services\DTOs\PasswordResetRequestDTO;
@@ -123,7 +124,7 @@ class AuthService
 		$tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
 
 		if ($now >= $tokenExpiredAt
-		|| strcmp($user->unlockToken, $token) != 0) {
+		|| !hash_equals($user->unlockToken, $token)) {
 			return false;
 		}
 
@@ -188,7 +189,7 @@ class AuthService
 		$tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
 
 		if ($now >= $tokenExpiredAt
-		|| strcmp($user->unlockToken, $dto->token) != 0) {
+		|| !hash_equals($user->unlockToken, $dto->token)) {
 			return false;
 		}
 
@@ -206,6 +207,56 @@ class AuthService
 		$this->userRepository->update($user);
 
 		$this->sessionService->login($user);
+
+		return true;
+	}
+
+	public function requestEmailChange(
+		#[SensitiveParameter] EmailChangeDTO $dto,
+	) {
+		$user = $this->sessionService->getUser();
+
+		if ($user === null) {
+			throw new UnauthorizedException();
+		}
+
+		if ($this->userRepository->findByEmailAddress($dto->email) != null) {
+			throw new ConflictException('email');
+		}
+
+		$user->emailChangeAddress = $dto->email;
+		$user->emailChangeRequestedAt = time();
+		$user->emailChangeToken = bin2hex(random_bytes(32));
+
+		$this->userRepository->save($user);
+	}
+
+	public function changeEmail(int $userId, #[SensitiveParameter] string $token)
+	{
+		$now = new DateTime('now');
+
+		$user = $this->userRepository->findById($userId);
+
+		if ($user === null
+		|| $user->emailChangeAddress == null) {
+			return false;
+		}
+
+		$emailChangeRequestedAt = DateTime::createFromFormat('U', $user->emailChangeRequestedAt);
+		$tokenExpiredAt = $emailChangeRequestedAt->add($this->unlockTokenLifetime);
+
+		if ($now >= $tokenExpiredAt
+		|| !hash_equals($user->emailChangeToken, $token)) {
+			return false;
+		}
+
+		// $user->isLocked = false;
+		$user->emailAddress = $user->emailChangeAddress;
+		$user->emailChangeAddress = null;
+		$user->emailChangeRequestedAt = null;
+		$user->emailChangeToken = null;
+
+		$this->userRepository->update($user);
 
 		return true;
 	}

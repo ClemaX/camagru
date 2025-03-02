@@ -5,13 +5,13 @@
 		<label for="username">Username</label>
 		<input type="text" class="form-control @if($conflict === 'username') is-invalid @endif"
 					 id="username" name="username" required
-					 pattern="^[a-zA-Z0-9_-]{1,16}$" maxlength="16"
+					 pattern="^[a-zA-Z0-9_-]{3,16}$" maxlength="16"
 					 value="{{ $username }}">
 		<div class="invalid-feedback">
 			@if($conflict === 'username')
 				This username is already taken. Please choose another.
 			@else
-				Username must be 1-16 characters long and contain only letters, numbers, underscores, and hyphens.
+				Username must be 3-16 characters long and contain only letters, numbers, underscores, and hyphens.
 			@endif
 		</div>
 	</div>
