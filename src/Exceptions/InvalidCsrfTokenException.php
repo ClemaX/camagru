@@ -12,7 +12,7 @@ class InvalidCsrfTokenException extends HttpException
             401,
             "Invalid CSRF Token",
             "Your CSRF token is expired or invalid. Please go back, refresh and try again.",
-            4011
+            4012
         );
     }
 }
