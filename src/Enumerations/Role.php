@@ -2,9 +2,9 @@
 
 namespace App\Enumerations;
 
-enum Role: string
+enum Role: int
 {
-	case ADMIN = 'ADMIN';
-	case USER = 'USER';
-	case GUEST = 'GUEST';
+	case GUEST = 0;
+	case USER = 1;
+	case ADMIN = 2;
 }

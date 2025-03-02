@@ -5,25 +5,22 @@ namespace App\Entities;
 use App\Attributes\Entity\Column;
 use App\Attributes\Entity\Entity;
 use App\Attributes\Entity\Id;
-// use App\Attributes\Entity\JoinTable;
-// use App\Attributes\Entity\ManyToMany;
 use App\Attributes\Entity\OneToOne;
 use App\Attributes\Entity\PrimaryKeyJoinColumn;
 use App\Attributes\Validation\NotNull;
 use App\Attributes\Validation\ValidEmailAddress;
 use App\Attributes\Validation\ValidUsername;
+use App\Enumerations\Role;
 
 require_once __DIR__ . '/../Attributes/Entity/Column.php';
 require_once __DIR__ . '/../Attributes/Entity/Entity.php';
 require_once __DIR__ . '/../Attributes/Entity/Id.php';
-// require_once __DIR__ . '/../Attributes/Entity/JoinTable.php';
-// require_once __DIR__ . '/../Attributes/Entity/ManyToMany.php';
 require_once __DIR__ . '/../Attributes/Entity/OneToOne.php';
 require_once __DIR__ . '/../Attributes/Validation/NotNull.php';
 require_once __DIR__ . '/../Attributes/Validation/ValidEmailAddress.php';
 require_once __DIR__ . '/../Attributes/Validation/ValidUsername.php';
+require_once __DIR__ . '/../Enumerations/Role.php';
 require_once __DIR__ . '/UserProfile.php';
-require_once __DIR__ . '/UserRole.php';
 
 #[Entity('"user"')]
 class User
@@ -58,7 +55,6 @@ class User
 	#[PrimaryKeyJoinColumn]
 	public UserProfile $profile;
 
-	// #[ManyToMany]
-	// #[JoinTable('user_role')]
-	// public UserRole $role;
+	#[Column('role_id')]
+	public Role $role;
 }

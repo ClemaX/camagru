@@ -31,28 +31,20 @@ create table role
 create table "user"
 (
     -- Base properties
-    id                              bigint          primary key         generated always as identity,
+    id                              bigint                  primary key         generated always as identity,
     -- entity_version                  int             not null            default 0,
     -- created_at                      timestamp       not null            default current_timestamp,
     -- updated_at                      timestamp       not null            default current_timestamp,
     -- User properties
-    email_address                   varchar(254)    unique not null,
-    username                        varchar(16)     unique not null,
+    email_address                   varchar(254)            unique not null,
+    username                        varchar(16)             unique not null,
     password_hash                   varchar(255),
-    is_locked                       boolean         not null            default true,
+    is_locked                       boolean                 not null            default true,
     locked_at                       bigint,
-    unlock_token                    varchar(255)
-);
-
---- Users - Roles
-create table user_role
-(
-    user_id                         bigint                  not null,
+    unlock_token                    varchar(255),
     role_id                         int                     not null,
     -- Constraints
-    foreign key(user_id)            references "user"(id)   on delete   cascade,
-    foreign key(role_id)            references role(id)     on delete   cascade,
-    primary key(user_id, role_id)
+    foreign key(role_id)            references "role"(id)   on delete       cascade
 );
 
 --- User - Profile

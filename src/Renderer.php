@@ -156,7 +156,7 @@ class Renderer
 			function ($matches) use ($userRoles) {
 				if ($userRoles === null) {
 					$user = $this->sessionService->getUser();
-					$userRoles = [$user !== null ? Role::USER : Role::GUEST];
+					$userRoles = [$user !== null ? $user->role : Role::GUEST];
 				}
 
 				$roles = str_getcsv($matches[1], escape: '\\');
@@ -167,7 +167,7 @@ class Renderer
 				$hasRole = array_find(
 					$userRoles,
 					function (Role $userRole) use ($roles) {
-						return in_array($userRole->value, $roles);
+						return in_array($userRole->name, $roles);
 					}
 				) !== null;
 

@@ -8,7 +8,9 @@ use App\Attributes\Entity\Id;
 use App\Attributes\Entity\OneToOne;
 use App\Attributes\Entity\PrimaryKeyJoinColumn;
 use App\Exceptions\InternalException;
+use BackedEnum;
 use PDO;
+use PDOStatement;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -146,9 +148,13 @@ abstract class AbstractRepository
 
 		foreach ($columnProperties as $property) {
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
-			$propertyName = $property->name;
-			// TODO: Use $property->setValue
-			$model->$propertyName = $data[$column->name];
+			if (enum_exists($property->getType()->getName())) {
+				$enumType = $property->getType()->getName();
+				$enumValue = $enumType::from($data[$column->name]);
+				$property->setValue($model, $enumValue);
+			} else {
+				$property->setValue($model, $data[$column->name]);
+			}
 		}
 
 		$id = $idColumnProperty->getValue($model);
@@ -207,10 +213,8 @@ abstract class AbstractRepository
 
 		foreach ($columnProperties as $property) {
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
-			$propertyName = $property->name;
-			// TODO: Use $property->getValue
 
-			$data[$column->name] = $model->$propertyName;
+			$data[$column->name] = $property->getValue($model);
 		}
 
 		return $data;
@@ -238,6 +242,19 @@ abstract class AbstractRepository
 		return array_map(fn ($data) => $this->load($data), $results);
 	}
 
+	private function bindParameters(PDOStatement $stmt, array $data)
+	{
+		foreach ($data as $key => $value) {
+			if ($value instanceof BackedEnum) {
+				$type = PDO::PARAM_STR;
+				$value = $value->value;
+			} else {
+				$type = $this->getParamType($value);
+			}
+			$stmt->bindValue(":$key", $value, $type);
+		}
+	}
+
 	private function saveInternal(object $model, ?string $modelClass = null, ?int $id = null): int
 	{
 		if ($modelClass === null) {
@@ -261,10 +278,11 @@ abstract class AbstractRepository
 
 		$stmt = $this->pdo->prepare("INSERT INTO {$this->getTableName($modelClass)} ($fields) VALUES ($placeholders)");
 
-		foreach ($data as $key => $value) {
-			$type = $this->getParamType($value);
-			$stmt->bindValue(":$key", $value, $type);
+		if ($stmt === false) {
+			throw new InternalException();
 		}
+
+		$this->bindParameters($stmt, $data);
 
 		$success = $stmt->execute();
 
@@ -297,17 +315,18 @@ abstract class AbstractRepository
 	public function update($model): bool
 	{
 		$data = $this->dump($model);
-		$id = $data['id'];
-		unset($data['id']);
+
+		$idColumnProperty = $this->getIdColumn();
+		$idColumn = $idColumnProperty->getAttributes(Column::class)[0]->newInstance();
+
+		$id = $idColumnProperty->getValue($model);
+		unset($data[$idColumn->name]);
 
 		$setClause = implode(', ', array_map(fn ($field) => "$field = :$field", array_keys($data)));
 
-		$stmt = $this->pdo->prepare("UPDATE {$this->getTableName()} SET $setClause WHERE id = :id");
+		$stmt = $this->pdo->prepare("UPDATE {$this->getTableName()} SET $setClause WHERE " . $idColumn->name . " = :id");
 
-		foreach ($data as $key => $value) {
-			$type = $this->getParamType($value);
-			$stmt->bindValue(":$key", $value, $type);
-		}
+		$this->bindParameters($stmt, $data);
 		$stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
 		return $stmt->execute();

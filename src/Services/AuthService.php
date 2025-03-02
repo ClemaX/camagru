@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entities\User;
 use App\Entities\UserProfile;
+use App\Enumerations\Role;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
 use App\Exceptions\UnauthorizedException;
@@ -32,6 +33,7 @@ class AuthService
 {
 	private readonly string $unlockPath;
 	private readonly string $passwordChangePath;
+	private readonly string $adminEmailAddress;
 	private readonly DateInterval $unlockTokenLifetime;
 
 	public function __construct(
@@ -45,6 +47,7 @@ class AuthService
 		$this->unlockTokenLifetime = DateInterval::createFromDateString(
 			$config['USER_UNLOCK_TOKEN_LIFETIME']
 		);
+		$this->adminEmailAddress = $config['ADMIN_EMAIL'];
 	}
 
 	public function signup(#[SensitiveParameter] SignupDTO $dto)
@@ -66,8 +69,9 @@ class AuthService
 		$unlockToken = bin2hex(random_bytes(32));
 
 		$profile = new UserProfile();
-
 		$profile->description = '';
+
+		$role = ($dto->email === $this->adminEmailAddress) ? Role::ADMIN : Role::USER;
 
 		$user = new User();
 
@@ -78,6 +82,7 @@ class AuthService
 		$user->lockedAt = time();
 		$user->unlockToken = $unlockToken;
 		$user->profile = $profile;
+		$user->role = $role;
 
 		$userId = $this->userRepository->save($user);
 
