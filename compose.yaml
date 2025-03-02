@@ -10,6 +10,8 @@ services:
     depends_on:
       php:
         condition: service_healthy
+      grunt:
+        condition: service_started
     networks:
       - front-tier
     healthcheck:
@@ -43,6 +45,34 @@ services:
       timeout: 5s
       retries: 3
 
+  grunt:
+    build:
+      context: ./docker/grunt
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./js:/app/js
+      - ./scss:/app/scss
+      - ./public/js:/app/public/js
+      - ./public/css:/app/public/css
+
+  # scss:
+  #   build:
+  #     context: ./docker/sass
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./scss:/app/scss
+  #     - ./public/css:/app/public/css
+  #   command: sass --watch /app/scss:/app/public/css --style compressed
+
+  # js-minify:
+  #   build:
+  #     context: ./docker/uglify
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./js:/app/js
+  #     - ./public/js:/app/public/js
+  #   command: uglifyjs --watch /app/js:/app/public/js --compress --mangle
+
   smtp:
     image: haravich/fake-smtp-server:20250216
     ports:
@@ -56,7 +86,7 @@ services:
       interval: 5s
       timeout: 10s
       retries: 60
-      
+
   pgadmin:
     image: dpage/pgadmin4:9.0.0
     depends_on:

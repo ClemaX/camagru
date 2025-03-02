@@ -1,0 +1,20 @@
+FROM node:23.9.0-alpine3.20
+
+WORKDIR /app
+
+# Install Ruby, Sass and Grunt CLI
+RUN apk update \
+&& apk add --no-cache ruby \
+&& gem install sass \
+&& npm install -g grunt-cli
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy Gruntfile
+COPY Gruntfile.js ./
+
+CMD ["grunt"]
