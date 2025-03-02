@@ -33,6 +33,14 @@ module.exports = function (grunt) {
 				],
 			},
 		},
+		copy: {
+      fonts: {
+        expand: true,
+        cwd: 'node_modules/bootstrap-icons/font/fonts/',
+        src: '*',
+        dest: 'public/css/fonts/'
+      }
+    },
 		watch: {
 			scss: {
 				files: ["scss/**/*.scss"],
@@ -47,7 +55,8 @@ module.exports = function (grunt) {
 
 	grunt.loadNpmTasks("grunt-contrib-sass");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
-	grunt.registerTask("default", ["sass", "uglify", "watch"]);
+	grunt.registerTask("default", ["sass", "uglify", "copy", "watch"]);
 };
