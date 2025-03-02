@@ -29,196 +29,196 @@ require_once __DIR__ . '/DTOs/PasswordResetRequestDTO.php';
 
 class AuthService
 {
-    private readonly string $unlockPath;
-    private readonly string $passwordChangePath;
-    private readonly DateInterval $unlockTokenLifetime;
+	private readonly string $unlockPath;
+	private readonly string $passwordChangePath;
+	private readonly DateInterval $unlockTokenLifetime;
 
-    public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly UserSessionServiceInterface $sessionService,
-        private readonly MailService $mailService,
-        #[SensitiveParameter] array $config,
-    ) {
-        $this->unlockPath = '/auth/activate';
-        $this->passwordChangePath = '/auth/choose-password';
-        $this->unlockTokenLifetime = DateInterval::createFromDateString(
-            $config['USER_UNLOCK_TOKEN_LIFETIME']
-        );
-    }
+	public function __construct(
+		private readonly UserRepository $userRepository,
+		private readonly UserSessionServiceInterface $sessionService,
+		private readonly MailService $mailService,
+		#[SensitiveParameter] array $config,
+	) {
+		$this->unlockPath = '/auth/activate';
+		$this->passwordChangePath = '/auth/choose-password';
+		$this->unlockTokenLifetime = DateInterval::createFromDateString(
+			$config['USER_UNLOCK_TOKEN_LIFETIME']
+		);
+	}
 
-    public function signup(#[SensitiveParameter] SignupDTO $dto)
-    {
-        if ($this->userRepository->findByUsername($dto->username) != null) {
-            throw new ConflictException('username');
-        }
+	public function signup(#[SensitiveParameter] SignupDTO $dto)
+	{
+		if ($this->userRepository->findByUsername($dto->username) != null) {
+			throw new ConflictException('username');
+		}
 
-        if ($this->userRepository->findByEmailAddress($dto->email) != null) {
-            throw new ConflictException('email');
-        }
+		if ($this->userRepository->findByEmailAddress($dto->email) != null) {
+			throw new ConflictException('email');
+		}
 
-        $passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
+		$passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
 
-        if ($passwordHash === false) {
-            throw new InternalException();
-        }
+		if ($passwordHash === false) {
+			throw new InternalException();
+		}
 
-        $unlockToken = bin2hex(random_bytes(32));
+		$unlockToken = bin2hex(random_bytes(32));
 
-        $user = new User();
+		$user = new User();
 
-        $user->emailAddress = $dto->email;
-        $user->username = $dto->username;
-        $user->passwordHash = $passwordHash;
-        $user->isLocked = true;
-        $user->lockedAt = time();
-        $user->unlockToken = $unlockToken;
+		$user->emailAddress = $dto->email;
+		$user->username = $dto->username;
+		$user->passwordHash = $passwordHash;
+		$user->isLocked = true;
+		$user->lockedAt = time();
+		$user->unlockToken = $unlockToken;
 
-        $userId = $this->userRepository->save($user);
+		$userId = $this->userRepository->save($user);
 
-        $activationQueryParams = [
-            'id' => $userId,
-            'token' => $unlockToken,
-        ];
+		$activationQueryParams = [
+			'id' => $userId,
+			'token' => $unlockToken,
+		];
 
-        $activationUrl = $this->unlockPath
-            . '?' . http_build_query($activationQueryParams);
+		$activationUrl = $this->unlockPath
+			. '?' . http_build_query($activationQueryParams);
 
-        $this->mailService->send(
-            $user->emailAddress,
-            'Welcome to Camagru',
-            'activate-account',
-            [
-                'username' => $user->username,
-                'activationUrl' => $activationUrl,
-                'urlLifetime' => $this->unlockTokenLifetime->format('%i minutes'),
-            ]
-        );
-    }
+		$this->mailService->send(
+			$user->emailAddress,
+			'Welcome to Camagru',
+			'activate-account',
+			[
+				'username' => $user->username,
+				'activationUrl' => $activationUrl,
+				'urlLifetime' => $this->unlockTokenLifetime->format('%i minutes'),
+			]
+		);
+	}
 
-    public function activate(
-        int $userId,
-        #[SensitiveParameter] string $token
-    ): bool {
-        $now = new DateTime('now');
+	public function activate(
+		int $userId,
+		#[SensitiveParameter] string $token
+	): bool {
+		$now = new DateTime('now');
 
-        $user = $this->userRepository->findById($userId);
+		$user = $this->userRepository->findById($userId);
 
-        if ($user === null
-        || !$user->isLocked || $user->passwordHash === null) {
-            return false;
-        }
+		if ($user === null
+		|| !$user->isLocked || $user->passwordHash === null) {
+			return false;
+		}
 
-        $lockedAt = DateTime::createFromFormat('U', $user->lockedAt);
-        $tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
+		$lockedAt = DateTime::createFromFormat('U', $user->lockedAt);
+		$tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
 
-        if ($now >= $tokenExpiredAt
-        || strcmp($user->unlockToken, $token) != 0) {
-            return false;
-        }
+		if ($now >= $tokenExpiredAt
+		|| strcmp($user->unlockToken, $token) != 0) {
+			return false;
+		}
 
-        $user->isLocked = false;
-        $user->lockedAt = null;
-        $user->unlockToken = null;
+		$user->isLocked = false;
+		$user->lockedAt = null;
+		$user->unlockToken = null;
 
-        $this->userRepository->update($user);
+		$this->userRepository->update($user);
 
-        return true;
-    }
+		return true;
+	}
 
-    public function requestPasswordReset(
-        #[SensitiveParameter] PasswordResetRequestDTO $dto
-    ) {
-        $user = $this->userRepository->findByEmailAddress($dto->email);
+	public function requestPasswordReset(
+		#[SensitiveParameter] PasswordResetRequestDTO $dto
+	) {
+		$user = $this->userRepository->findByEmailAddress($dto->email);
 
-        if ($user === null) {
-            return;
-        }
+		if ($user === null) {
+			return;
+		}
 
-        $user->isLocked = true;
-        $user->lockedAt = time();
-        $user->unlockToken = bin2hex(random_bytes(32));
-        $user->passwordHash = null;
+		$user->isLocked = true;
+		$user->lockedAt = time();
+		$user->unlockToken = bin2hex(random_bytes(32));
+		$user->passwordHash = null;
 
-        $this->userRepository->update($user);
+		$this->userRepository->update($user);
 
-        $activationQueryParams = [
-            'id' => $user->id,
-            'token' => $user->unlockToken,
-        ];
+		$activationQueryParams = [
+			'id' => $user->id,
+			'token' => $user->unlockToken,
+		];
 
-        $resetUrl = $this->passwordChangePath
-            . '?' . http_build_query($activationQueryParams);
+		$resetUrl = $this->passwordChangePath
+			. '?' . http_build_query($activationQueryParams);
 
-        $this->mailService->send(
-            $user->emailAddress,
-            'Camagru Password Reset',
-            'reset-password',
-            [
-                'username' => $user->username,
-                'resetUrl' => $resetUrl,
-                'urlLifetime' => $this->unlockTokenLifetime->format('%i minutes'),
-            ]
-        );
-    }
+		$this->mailService->send(
+			$user->emailAddress,
+			'Camagru Password Reset',
+			'reset-password',
+			[
+				'username' => $user->username,
+				'resetUrl' => $resetUrl,
+				'urlLifetime' => $this->unlockTokenLifetime->format('%i minutes'),
+			]
+		);
+	}
 
-    public function resetPassword(
-        #[SensitiveParameter] PasswordResetDTO $dto
-    ): bool {
-        $now = new DateTime('now');
+	public function resetPassword(
+		#[SensitiveParameter] PasswordResetDTO $dto
+	): bool {
+		$now = new DateTime('now');
 
-        $user = $this->userRepository->findById($dto->userId);
+		$user = $this->userRepository->findById($dto->userId);
 
-        if ($user === null
-        || !$user->isLocked || $user->passwordHash !== null) {
-            return false;
-        }
+		if ($user === null
+		|| !$user->isLocked || $user->passwordHash !== null) {
+			return false;
+		}
 
-        $lockedAt = DateTime::createFromFormat('U', $user->lockedAt);
-        $tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
+		$lockedAt = DateTime::createFromFormat('U', $user->lockedAt);
+		$tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
 
-        if ($now >= $tokenExpiredAt
-        || strcmp($user->unlockToken, $dto->token) != 0) {
-            return false;
-        }
+		if ($now >= $tokenExpiredAt
+		|| strcmp($user->unlockToken, $dto->token) != 0) {
+			return false;
+		}
 
-        $passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
+		$passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
 
-        if ($passwordHash === false) {
-            throw new InternalException();
-        }
+		if ($passwordHash === false) {
+			throw new InternalException();
+		}
 
-        $user->passwordHash = $passwordHash;
-        $user->isLocked = false;
-        $user->lockedAt = null;
-        $user->unlockToken = null;
+		$user->passwordHash = $passwordHash;
+		$user->isLocked = false;
+		$user->lockedAt = null;
+		$user->unlockToken = null;
 
-        $this->userRepository->update($user);
+		$this->userRepository->update($user);
 
-        $this->sessionService->login($user);
+		$this->sessionService->login($user);
 
-        return true;
-    }
+		return true;
+	}
 
-    public function login(#[SensitiveParameter] LoginDTO $dto)
-    {
-        $user = $this->userRepository->findByUsername($dto->username);
+	public function login(#[SensitiveParameter] LoginDTO $dto)
+	{
+		$user = $this->userRepository->findByUsername($dto->username);
 
-        if ($user === null
-        || !password_verify($dto->password, $user->passwordHash)) {
-            throw new UnauthorizedException();
-        }
+		if ($user === null
+		|| !password_verify($dto->password, $user->passwordHash)) {
+			throw new UnauthorizedException();
+		}
 
-        if ($user->isLocked) {
-            throw new AuthLockedException();
-        }
+		if ($user->isLocked) {
+			throw new AuthLockedException();
+		}
 
-        $this->sessionService->login($user);
+		$this->sessionService->login($user);
 
-        return $user;
-    }
+		return $user;
+	}
 
-    public function logout()
-    {
-        $this->sessionService->logout();
-    }
+	public function logout()
+	{
+		$this->sessionService->logout();
+	}
 }

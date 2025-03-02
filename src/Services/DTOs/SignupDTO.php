@@ -12,10 +12,10 @@ require_once __DIR__ . '/../../Attributes/Validation/ValidUsername.php';
 
 class SignupDTO
 {
-    #[ValidUsername()]
-    public string $username;
-    #[ValidEmailAddress()]
-    public string $email;
-    #[ValidPassword()]
-    public string $password;
+	#[ValidUsername()]
+	public string $username;
+	#[ValidEmailAddress()]
+	public string $email;
+	#[ValidPassword()]
+	public string $password;
 }

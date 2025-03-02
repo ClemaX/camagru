@@ -2,16 +2,16 @@
 
 function getConfig()
 {
-    $config = require __DIR__ . '/config.default.php';
+	$config = require __DIR__ . '/config.default.php';
 
-    foreach ($config as $key => $value) {
-        $envValue = getenv($key);
-        if ($envValue !== false) {
-            $config[$key] = $envValue;
-        }
-    }
+	foreach ($config as $key => $value) {
+		$envValue = getenv($key);
+		if ($envValue !== false) {
+			$config[$key] = $envValue;
+		}
+	}
 
-    return $config;
+	return $config;
 }
 
 $config = getConfig();

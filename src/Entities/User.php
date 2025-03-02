@@ -14,28 +14,28 @@ require_once __DIR__ . '/../Attributes/Validation/ValidUsername.php';
 
 class User
 {
-    #[NotNull()]
-    #[ValidEmailAddress()]
-    #[Column("email_address")]
-    public string $emailAddress;
+	#[NotNull()]
+	#[ValidEmailAddress()]
+	#[Column("email_address")]
+	public string $emailAddress;
 
-    #[NotNull()]
-    #[ValidUsername()]
-    #[Column("username")]
-    public string $username;
+	#[NotNull()]
+	#[ValidUsername()]
+	#[Column("username")]
+	public string $username;
 
-    #[Column("password_hash")]
-    public ?string $passwordHash;
+	#[Column("password_hash")]
+	public ?string $passwordHash;
 
-    #[Column("is_locked")]
-    public bool $isLocked = true;
+	#[Column("is_locked")]
+	public bool $isLocked = true;
 
-    #[Column("locked_at")]
-    public ?int $lockedAt = null;
+	#[Column("locked_at")]
+	public ?int $lockedAt = null;
 
-    #[Column("unlock_token")]
-    public ?string $unlockToken = null;
+	#[Column("unlock_token")]
+	public ?string $unlockToken = null;
 
-    #[Column("id")]
-    public int $id = 0;
+	#[Column("id")]
+	public int $id = 0;
 }

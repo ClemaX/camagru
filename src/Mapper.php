@@ -12,34 +12,34 @@ require_once __DIR__ . '/Exceptions/ValidationException.php';
 
 class Mapper
 {
-    public function __construct(private Validator $validator = new Validator())
-    {
-    }
+	public function __construct(private Validator $validator = new Validator())
+	{
+	}
 
-    public function map(string $dtoClass, array $data): object
-    {
-        $reflectionClass = new ReflectionClass($dtoClass);
+	public function map(string $dtoClass, array $data): object
+	{
+		$reflectionClass = new ReflectionClass($dtoClass);
 
-        $dto = new $dtoClass();
+		$dto = new $dtoClass();
 
-        $properties = $reflectionClass->getProperties();
+		$properties = $reflectionClass->getProperties();
 
-        foreach ($properties as $property) {
-            $key = $property->name;
+		foreach ($properties as $property) {
+			$key = $property->name;
 
-            if (!array_key_exists($key, $data)) {
-                throw new MappingException();
-            }
+			if (!array_key_exists($key, $data)) {
+				throw new MappingException();
+			}
 
-            $dto->$key = $data[$key];
-        }
+			$dto->$key = $data[$key];
+		}
 
-        $errors = $this->validator->validate($dto);
+		$errors = $this->validator->validate($dto);
 
-        if (!empty($errors)) {
-            throw new ValidationException($errors);
-        }
+		if (!empty($errors)) {
+			throw new ValidationException($errors);
+		}
 
-        return $dto;
-    }
+		return $dto;
+	}
 }

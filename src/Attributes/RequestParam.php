@@ -7,12 +7,12 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class RequestParam
 {
-    public function __construct(private ?string $name = null)
-    {
-    }
+	public function __construct(private ?string $name = null)
+	{
+	}
 
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
+	public function getName(): ?string
+	{
+		return $this->name;
+	}
 }
