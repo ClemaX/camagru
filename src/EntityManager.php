@@ -201,15 +201,16 @@ class EntityManager
 		return $data;
 	}
 
-	public function findBy(array $criteria, $modelClass)
+	public function findBy(array $criteria, $modelClass): ?object
 	{
 		if (empty($criteria)) {
-			return $this->findAll($modelClass);
+			throw new InternalException("Criteria cannot be empty");
 		}
 
-		$conditions = implode(' AND ', array_map(function ($key, $value) {
-			return $key . ' = ' . ' :' . $key;
-		}, $criteria));
+		$conditions = implode(
+			' AND ',
+			array_map(fn ($field) => "$field = :$field", array_keys($criteria))
+		);
 
 		$stmt = $this->pdo->prepare("SELECT * FROM " . self::getTableName($modelClass) ." WHERE " . $conditions);
 

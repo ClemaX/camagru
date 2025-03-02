@@ -15,8 +15,8 @@ abstract class AbstractRepository
 
 	abstract protected function getModelClass(): string;
 
-	/** @return EntityT $model */
-	protected function findBy(array $criteria): object
+	/** @return ?EntityT $model */
+	protected function findBy(array $criteria): ?object
 	{
 		return $this->entityManager->findBy($criteria, $this->getModelClass());
 	}
