@@ -3,6 +3,10 @@
 namespace App\Repositories;
 
 use App\Attributes\Entity\Column;
+use App\Attributes\Entity\Entity;
+use App\Attributes\Entity\Id;
+use App\Attributes\Entity\OneToOne;
+use App\Attributes\Entity\PrimaryKeyJoinColumn;
 use App\Exceptions\InternalException;
 use PDO;
 use ReflectionClass;
@@ -20,7 +24,6 @@ abstract class AbstractRepository
 		$this->pdo = $pdo;
 	}
 
-	abstract protected function getTableName(): string;
 	abstract protected function getModelClass(): string;
 
 	private function getParamType($value): int
@@ -36,10 +39,68 @@ abstract class AbstractRepository
 		}
 	}
 
-	/** @return ReflectionProperty[] */
-	private function getColumns(): array
+	protected function getTableName(?string $modelClass = null): string
 	{
-		$modelClass = $this->getModelClass();
+		if ($modelClass === null) {
+			$modelClass = $this->getModelClass();
+		}
+
+		$reflectionClass = new ReflectionClass($modelClass);
+
+		$entityAttributes = $reflectionClass->getAttributes(Entity::class);
+
+		if (empty($entityAttributes)) {
+			throw new InternalException("Entity class must have an Entity attribute");
+		}
+
+		return $entityAttributes[0]->newInstance()->tableName;
+	}
+
+	private function getIdColumn(?string $modelClass = null): ReflectionProperty
+	{
+		if ($modelClass === null) {
+			$modelClass = $this->getModelClass();
+		}
+
+		$reflectionClass = new ReflectionClass($modelClass);
+
+		$idProperties = array_filter(
+			$reflectionClass->getProperties(),
+			function ($property) {
+				return !empty($property->getAttributes(Id::class));
+			}
+		);
+
+		if (empty($idProperties)) {
+			throw new InternalException("Entity class must have a property with an Id attribute");
+		}
+
+		$idProperty = $idProperties[0];
+
+		$columnAttributes = $idProperty->getAttributes(Column::class);
+		if (empty($columnAttributes)) {
+			throw new InternalException("Entity Id property must have a Column attribute");
+		}
+
+		return $idProperty;
+	}
+
+	private function getIdColumnAttribute(?string $modelClass = null): Column
+	{
+		$idProperty = $this->getIdColumn($modelClass);
+
+		$columnAttribute = $idProperty->getAttributes(Column::class)[0];
+
+		return $columnAttribute->newInstance();
+	}
+
+	/** @return ReflectionProperty[] */
+	private function getColumns(?string $modelClass = null): array
+	{
+		if ($modelClass === null) {
+			$modelClass = $this->getModelClass();
+		}
+
 		$reflectionClass = new ReflectionClass($modelClass);
 
 		$columnProperties = array_filter(
@@ -52,33 +113,103 @@ abstract class AbstractRepository
 		return $columnProperties;
 	}
 
-	/** @return EntityT */
-	protected function load(array $data): object
+	/** @return ReflectionProperty[] */
+	private function getOneToOneRelations(?string $modelClass = null): array
 	{
-		$modelClass = $this->getModelClass();
-		$columnProperties = $this->getColumns();
+		if ($modelClass === null) {
+			$modelClass = $this->getModelClass();
+		}
+
+		$reflectionClass = new ReflectionClass($modelClass);
+
+		$columnProperties = array_filter(
+			$reflectionClass->getProperties(),
+			function ($property) {
+				return !empty($property->getAttributes(OneToOne::class));
+			}
+		);
+
+		return $columnProperties;
+	}
+
+	/** @return EntityT */
+	protected function load(array $data, ?string $modelClass = null): object
+	{
+		if ($modelClass === null) {
+			$modelClass = $this->getModelClass();
+		}
+
+		$columnProperties = $this->getColumns($modelClass);
+		$idColumnProperty = $this->getIdColumn($modelClass);
 
 		$model = new $modelClass();
 
 		foreach ($columnProperties as $property) {
-
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
 			$propertyName = $property->name;
+			// TODO: Use $property->setValue
 			$model->$propertyName = $data[$column->name];
+		}
+
+		$id = $idColumnProperty->getValue($model);
+
+		$oneToOneProperties = $this->getOneToOneRelations($modelClass);
+
+		foreach ($oneToOneProperties as $property) {
+			$propertyType = $property->getType();
+
+			if ($propertyType->isBuiltin()) {
+				throw new InternalException('Unsupported relation property type');
+			}
+
+			$propertyClass = $propertyType->getName();
+
+			$primaryKeyJoinColumns = $property->getAttributes(PrimaryKeyJoinColumn::class);
+			if (empty($primaryKeyJoinColumns)) {
+				throw new InternalException('Unsupported relation type');
+			}
+
+			// $primaryKeyJoinColumn = $primaryKeyJoinColumns[0];
+
+			$propertyIdColumn = $this->getIdColumnAttribute($propertyClass);
+
+			$stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName($propertyClass)} WHERE " . $propertyIdColumn->name . " = :id");
+			$stmt->execute(['id' => $id]);
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			// var_dump($stmt);
+
+			if (!$result && !$propertyType->allowsNull()) {
+				throw new InternalException('Non-nullable relation could not be found');
+			}
+
+			$propertyModel = $this->load($result, $propertyClass);
+
+			$property->setValue($model, $propertyModel);
+			// var_dump($propertyModel);
+
+			// $propertyName = $property->name;
+			// $model->$propertyName = $data[$column->name];
 		}
 
 		return $model;
 	}
 
 	/** @param EntityT $model */
-	protected function dump(object $model): array
+	protected function dump(object $model, ?string $modelClass = null): array
 	{
-		$columnProperties = $this->getColumns();
+		if ($modelClass === null) {
+			$modelClass = $this->getModelClass();
+		}
+
+		$columnProperties = $this->getColumns($modelClass);
 		$data = [];
 
 		foreach ($columnProperties as $property) {
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
 			$propertyName = $property->name;
+			// TODO: Use $property->getValue
+
 			$data[$column->name] = $model->$propertyName;
 		}
 
@@ -107,18 +238,28 @@ abstract class AbstractRepository
 		return array_map(fn ($data) => $this->load($data), $results);
 	}
 
-	public function save($model): int
+	private function saveInternal(object $model, ?string $modelClass = null, ?int $id = null): int
 	{
-		$data = $this->dump($model);
+		if ($modelClass === null) {
+			$modelClass = $this->getModelClass();
+		}
 
-		if ($data['id'] == 0) {
-			unset($data['id']);
+		$data = $this->dump($model, $modelClass);
+
+		$idColumn = $this->getIdColumnAttribute($modelClass);
+
+		if ($data[$idColumn->name] === 0) {
+			if ($id !== null) {
+				$data[$idColumn->name] = $id;
+			} else {
+				unset($data[$idColumn->name]);
+			}
 		}
 
 		$fields = implode(', ', array_keys($data));
 		$placeholders = ':' . implode(', :', array_keys($data));
 
-		$stmt = $this->pdo->prepare("INSERT INTO {$this->getTableName()} ($fields) VALUES ($placeholders)");
+		$stmt = $this->pdo->prepare("INSERT INTO {$this->getTableName($modelClass)} ($fields) VALUES ($placeholders)");
 
 		foreach ($data as $key => $value) {
 			$type = $this->getParamType($value);
@@ -131,9 +272,26 @@ abstract class AbstractRepository
 			throw new InternalException();
 		}
 
-		$id = (int)$this->pdo->lastInsertId();
+		$insertedId = (int)$this->pdo->lastInsertId();
 
-		return $id;
+		$oneToOneProperties = $this->getOneToOneRelations($modelClass);
+
+		// TODO: Use transactions to rollback if relation insertion fails
+
+		foreach ($oneToOneProperties as $property) {
+			$this->saveInternal(
+				$property->getValue($model),
+				$property->getType()->getName(),
+				$insertedId,
+			);
+		}
+
+		return $insertedId;
+	}
+
+	public function save($model): int
+	{
+		return $this->saveInternal($model);
 	}
 
 	public function update($model): bool

@@ -8,7 +8,7 @@ use Attribute;
 class Controller
 {
 	public function __construct(
-		public string $path,
+		public readonly string $path,
 	) {
 	}
 }

@@ -5,10 +5,9 @@ namespace App\Attributes\Entity;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class Column
+class Id
 {
-	public function __construct(
-		public readonly string $name,
-	) {
+	public function __construct()
+	{
 	}
 }

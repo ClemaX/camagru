@@ -8,8 +8,8 @@ use Attribute;
 class Route
 {
 	public function __construct(
-		public string $path,
-		public string $method = 'GET'
+		public readonly string $path,
+		public readonly string $method = 'GET'
 	) {
 	}
 }

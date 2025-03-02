@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entities\User;
+use App\Entities\UserProfile;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
 use App\Exceptions\UnauthorizedException;
@@ -64,6 +65,10 @@ class AuthService
 
 		$unlockToken = bin2hex(random_bytes(32));
 
+		$profile = new UserProfile();
+
+		$profile->description = '';
+
 		$user = new User();
 
 		$user->emailAddress = $dto->email;
@@ -72,6 +77,7 @@ class AuthService
 		$user->isLocked = true;
 		$user->lockedAt = time();
 		$user->unlockToken = $unlockToken;
+		$user->profile = $profile;
 
 		$userId = $this->userRepository->save($user);
 

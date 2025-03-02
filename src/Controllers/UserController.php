@@ -28,7 +28,7 @@ class UserController extends AbstractController
 
 		return $this->render('profile', [
 			'username' => $user->username,
-			'email' => $user->emailAddress,
+			'profile' => $user->profile,
 		]);
 	}
 

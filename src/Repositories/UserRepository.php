@@ -12,11 +12,6 @@ require_once __DIR__ . '/../Entities/User.php';
 /** @extends AbstractRepository<User> */
 class UserRepository extends AbstractRepository
 {
-	protected function getTableName(): string
-	{
-		return '"user"';
-	}
-
 	protected function getModelClass(): string
 	{
 		return User::class;
