@@ -7,6 +7,7 @@ use App\Services\AuthService;
 use App\Controllers\HomeController;
 use App\Controllers\AuthController;
 use App\Controllers\UserController;
+use App\EntityManager;
 use App\Exceptions\HttpException;
 use App\Renderer;
 use App\Services\MailService;
@@ -22,66 +23,70 @@ require __DIR__ . '/../src/Services/UserService.php';
 require __DIR__ . '/../src/Controllers/HomeController.php';
 require __DIR__ . '/../src/Controllers/AuthController.php';
 require __DIR__ . '/../src/Controllers/UserController.php';
+require __DIR__ . '/../src/EntityManager.php';
 
 // Debug
 if (strcmp($config['DEBUG'], 'true') === 0) {
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+	error_reporting(E_ALL);
 }
 
 // Database
 try {
-    $pdo = new PDO(
-        $config['DATABASE_DSN'],
-        $config['DATABASE_USERNAME'],
-        $config['DATABASE_PASSWORD']
-    );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$pdo = new PDO(
+		$config['DATABASE_DSN'],
+		$config['DATABASE_USERNAME'],
+		$config['DATABASE_PASSWORD']
+	);
+	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die('Connection failed: ' . $e->getMessage());
+	die('Connection failed: ' . $e->getMessage());
 }
 
+// Entity Manager
+$entityManager = new EntityManager($pdo);
+
 // Repositories
-$userRepository = new UserRepository($pdo);
+$userRepository = new UserRepository($entityManager);
 
 // Session
 $sessionService = new DatabaseSessionService(
-    $pdo,
-    $userRepository,
+	$pdo,
+	$userRepository,
 );
 
 $sessionService->start();
 
 // Router
 $router = new Router(
-    $sessionService,
+	$sessionService,
 );
 
 // Renderer
 $renderer = new Renderer(
-    $sessionService,
-    'Views',
-    $router->basePath,
+	$sessionService,
+	'Views',
+	$router->basePath,
 );
 $mailRenderer = new Renderer(
-    $sessionService,
-    'Views' . DIRECTORY_SEPARATOR . 'Mails',
-    $config['EXTERNAL_URL'],
+	$sessionService,
+	'Views' . DIRECTORY_SEPARATOR . 'Mails',
+	$config['EXTERNAL_URL'],
 );
 
 // Services
 $mailService = new MailService(
-    $mailRenderer,
+	$mailRenderer,
 );
 $authService = new AuthService(
-    $userRepository,
-    $sessionService,
-    $mailService,
-    $config,
+	$userRepository,
+	$sessionService,
+	$mailService,
+	$config,
 );
 $userService = new UserService(
-    $userRepository,
+	$userRepository,
 );
 
 // Controllers
@@ -91,22 +96,22 @@ $router->addController(new UserController($renderer, $userService));
 
 // Request dispatch
 try {
-    $content = $router->dispatch(
-        $_SERVER['REQUEST_URI'],
-        $_SERVER['REQUEST_METHOD'],
-    );
+	$content = $router->dispatch(
+		$_SERVER['REQUEST_URI'],
+		$_SERVER['REQUEST_METHOD'],
+	);
 } catch (HttpException $e) {
-    $content = $renderer->render('error', [
-        'title' => $e->getTitle(),
-        'message' => $e->getMessage(),
-        'code' => $e->getCode(),
-    ]);
+	$content = $renderer->render('error', [
+		'title' => $e->getTitle(),
+		'message' => $e->getMessage(),
+		'code' => $e->getCode(),
+	]);
 
-    $e->sendHeaders();
+	$e->sendHeaders();
 }
 
 $pdo = null;
 
 echo $renderer->render('layout', [
-    "content" => $content,
+	"content" => $content,
 ]);
