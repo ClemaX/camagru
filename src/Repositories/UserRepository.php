@@ -33,7 +33,7 @@ class UserRepository extends AbstractRepository
         }
 
         $modelClass = $this->getModelClass();
-        return $modelClass::load($result);
+        return $this->load($result);
     }
 
     public function findByEmailAddress(string $emailAddress): ?User
@@ -47,6 +47,6 @@ class UserRepository extends AbstractRepository
         }
 
         $modelClass = $this->getModelClass();
-        return $modelClass::load($result);
+        return $this->load($result);
     }
 }

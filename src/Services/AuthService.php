@@ -64,14 +64,14 @@ class AuthService
 
         $unlockToken = bin2hex(random_bytes(32));
 
-        $user = new User(
-            emailAddress: $dto->email,
-            username: $dto->username,
-            passwordHash: $passwordHash,
-            isLocked: true,
-            lockedAt: time(),
-            unlockToken: $unlockToken,
-        );
+        $user = new User();
+
+        $user->emailAddress = $dto->email;
+        $user->username = $dto->username;
+        $user->passwordHash = $passwordHash;
+        $user->isLocked = true;
+        $user->lockedAt = time();
+        $user->unlockToken = $unlockToken;
 
         $userId = $this->userRepository->save($user);
 

@@ -2,8 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Attributes\Entity\Column;
 use App\Exceptions\InternalException;
 use PDO;
+use ReflectionClass;
+use ReflectionProperty;
 
 /**
  * @template EntityT
@@ -33,8 +36,57 @@ abstract class AbstractRepository
         }
     }
 
+    /** @return ReflectionProperty[] */
+    private function getColumns(): array
+    {
+        $modelClass = $this->getModelClass();
+        $reflectionClass = new ReflectionClass($modelClass);
+
+        $columnProperties = array_filter(
+            $reflectionClass->getProperties(),
+            function ($property) {
+                return !empty($property->getAttributes(Column::class));
+            }
+        );
+
+        return $columnProperties;
+    }
+
+    /** @return EntityT */
+    protected function load(array $data): object
+    {
+        $modelClass = $this->getModelClass();
+        $columnProperties = $this->getColumns();
+
+        $model = new $modelClass();
+
+        foreach ($columnProperties as $property) {
+
+            $column = $property->getAttributes(Column::class)[0]->newInstance();
+            $propertyName = $property->name;
+            $model->$propertyName = $data[$column->name];
+        }
+
+        return $model;
+    }
+
+    /** @param EntityT $model */
+    protected function dump(object $model): array
+    {
+        $columnProperties = $this->getColumns();
+        $data = [];
+
+        foreach ($columnProperties as $property) {
+            $column = $property->getAttributes(Column::class)[0]->newInstance();
+            $propertyName = $property->name;
+            $data[$column->name] = $model->$propertyName;
+        }
+
+        return $data;
+    }
+
     /** @return ?EntityT */
-    public function findById(int $id)
+    public function findById(int $id): ?object
     {
         $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE id = :id");
         $stmt->execute(['id' => $id]);
@@ -44,8 +96,7 @@ abstract class AbstractRepository
             return null;
         }
 
-        $modelClass = $this->getModelClass();
-        return $modelClass::load($result);
+        return $this->load($result);
     }
 
     public function findAll(): array
@@ -53,13 +104,13 @@ abstract class AbstractRepository
         $stmt = $this->pdo->query("SELECT * FROM {$this->getTableName()}");
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $modelClass = $this->getModelClass();
-        return array_map(fn ($data) => $modelClass::load($data), $results);
+        return array_map(fn ($data) => $this->load($data), $results);
     }
 
     public function save($model): int
     {
-        $data = $model->toArray();
+        $data = $this->dump($model);
+
         if ($data['id'] == 0) {
             unset($data['id']);
         }
@@ -87,7 +138,7 @@ abstract class AbstractRepository
 
     public function update($model): bool
     {
-        $data = $model->toArray();
+        $data = $this->dump($model);
         $id = $data['id'];
         unset($data['id']);
 
