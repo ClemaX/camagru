@@ -22,19 +22,20 @@ class Renderer
         string $content,
         array $params
     ): string {
-        foreach ($params as $key => $value) {
-            $substitute = $value != null
-                ? ($key === 'content' ? $value : htmlspecialchars($value))
-                : "";
 
-            $content = str_replace(
-                "{{ \$$key }}",
-                $substitute,
-                $content
-            );
-        }
+        $pattern = '/{{\s*(.*?)\s*}}/s';
 
-        return $content;
+        return preg_replace_callback(
+            $pattern,
+            function ($matches) use ($params) {
+                $expression = $matches[1];
+
+                extract($params, EXTR_SKIP);
+
+                return eval("return $expression;");
+            },
+            $content
+        );
     }
 
     private static function processUrls(
@@ -94,7 +95,7 @@ class Renderer
         string $content,
         array $params
     ): string {
-        $pattern = '/@for\s*\((.*?)\)(.*?)@endfor/s';
+        $pattern = '/@foreach\s*\((.*?)\)(.*?)@endforeach/s';
         return preg_replace_callback(
             $pattern,
             function ($matches) use ($params) {
