@@ -78,15 +78,10 @@ class Renderer
 			$ifBlock = $matches[2];
 			$elseBlock = isset($matches[3]) ? $matches[3] : '';
 
-			foreach ($params as $key => $value) {
-				$condition = str_replace(
-					"\$$key",
-					var_export($value, true),
-					$condition
-				);
-			}
+			extract($params, EXTR_SKIP);
 
 			$result = eval("return $condition;");
+
 			return $result ? $ifBlock : $elseBlock;
 		}, $content);
 	}
