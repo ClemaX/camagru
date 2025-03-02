@@ -38,6 +38,11 @@
 		{{ $content }}
 	</div>
 
-	<script src="/js/main.min.js"></script>
+	<script>
+		const logout = async () => {
+			await fetch('{{ url(/auth/logout) }}', { method: 'POST' });
+			window.location = '{{ url(/) }}';
+		}
+	</script>
 </body>
 </html>
