@@ -11,15 +11,24 @@
 <body>
 	<nav class="navbar navbar-expand-lg bg-body-tertiary">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="{{ url('/') }}">Camagru</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<a class="navbar-brand" href="{{ url('/') }}">
+				<img src="/img/icon.svg" alt="Logo" width="30" height="30"
+					class="d-inline-block align-text-top">
+				Camagru
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+				data-bs-target="#navbarNav" aria-controls="navbarNav"
+				aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="collapse navbar-collapse" id="navbarNav">
+			<div class="collapse navbar-collapse justify-content-between"
+				id="navbarNav">
 				<ul class="navbar-nav">
 					<li class="nav-item">
 						<a class="nav-link" href="{{ url('/') }}">Home</a>
 					</li>
+				</ul>
+				<ul class="navbar-nav">
 					@role(GUEST)
 					<li class="nav-item">
 						<a class="nav-link" href="{{ url('/auth/signup') }}">Sign Up</a>
@@ -52,6 +61,8 @@
 			window.location = "{{ url('/') }}";
 		}
 	</script>
+
+	<script src="/js/collapse.min.js"></script>
 
 	@env(development)
 	<script id="__bs_script__">//<![CDATA[
