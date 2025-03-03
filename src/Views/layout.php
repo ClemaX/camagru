@@ -6,6 +6,7 @@
 	<meta name="darkreader-lock" />
 	<title>Camagru</title>
 	<link href="/css/main.css" rel="stylesheet">
+	<link rel="icon" href="/img/icon.svg" type="image/svg+xml">
 </head>
 <body>
 	<nav class="navbar navbar-expand-lg">
