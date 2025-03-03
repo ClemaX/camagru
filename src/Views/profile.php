@@ -6,8 +6,9 @@
 <div class="card">
 	<div class="card-header d-flex justify-content-between">
 		<h1 class="card-title">{{ $username }}</h1>
-		<button class="btn btn-primary" aria-label="Edit Profile" onclick="showEditModal()">
-			<i class="bi-pencil"></i> Edit
+		<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Profile"
+			data-bs-toggle="modal" data-bs-target="#profileEditModal">
+			<i class="bi-pencil"></i><span>Edit</span>
 		</button>
 	</div>
 	<div class="card-body">
@@ -62,15 +63,11 @@
 <script src="/js/modal.min.js"></script>
 
 <script>
-	const showEditModal = () => {
-		new Modal(document.getElementById('profileEditModal')).show();
-	}
-
 	(function() {
 	'use strict';
 		window.addEventListener('load', function() {
 			@if($conflict !== null)
-			showEditModal();
+			new Modal(document.getElementById('profileEditModal')).show();
 			@endif
 
 			var forms = document.getElementsByClassName('needs-validation');

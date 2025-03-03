@@ -21,6 +21,7 @@ require_once __DIR__ . '/../Attributes/Validation/ValidEmailAddress.php';
 require_once __DIR__ . '/../Attributes/Validation/ValidUsername.php';
 require_once __DIR__ . '/../Enumerations/Role.php';
 require_once __DIR__ . '/UserProfile.php';
+require_once __DIR__ . '/UserSettings.php';
 
 #[Entity('"user"')]
 class User
@@ -57,6 +58,10 @@ class User
 	#[OneToOne]
 	#[PrimaryKeyJoinColumn]
 	public UserProfile $profile;
+
+	#[OneToOne]
+	#[PrimaryKeyJoinColumn]
+	public UserSettings $settings;
 
 	#[Column('email_change_address')]
 	public ?string $emailChangeAddress = null;

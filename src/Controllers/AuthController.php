@@ -130,13 +130,16 @@ class AuthController extends AbstractController
 		return '';
 	}
 
-	#[Route('/change-email', 'POST')]
-	public function requestEmailChangeSubmit(
-		#[RequestBody] EmailChangeDTO $dto
+	#[Route('/change-email')]
+	public function changeEmail(
+		#[RequestParam] int $id,
+		#[SensitiveParameter] #[RequestParam] string $token,
 	) {
-		$this->authService->requestEmailChange($dto);
+		$isChanged = $this->authService->changeEmail($id, $token);
 
-		return $this->render('verify-new-email');
+		return $this->render("changed-email", [
+			'isChanged' => $isChanged,
+		]);
 	}
 
 	#[Route('/login')]

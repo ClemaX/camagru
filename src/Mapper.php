@@ -19,19 +19,20 @@ class Mapper
 	public function map(string $dtoClass, array $data): object
 	{
 		$reflectionClass = new ReflectionClass($dtoClass);
+		$properties = $reflectionClass->getProperties();
 
 		$dto = new $dtoClass();
-
-		$properties = $reflectionClass->getProperties();
 
 		foreach ($properties as $property) {
 			$key = $property->name;
 
-			if (!array_key_exists($key, $data)) {
+			if ($property->getType()->isBuiltin() && $property->getType()->getName() === 'bool') {
+				$property->setValue($dto, array_key_exists($key, $data));
+			} elseif (array_key_exists($key, $data)) {
+				$property->setValue($dto, $data[$key]);
+			} else {
 				throw new MappingException();
 			}
-
-			$dto->$key = $data[$key];
 		}
 
 		$errors = $this->validator->validate($dto);

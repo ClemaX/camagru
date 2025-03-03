@@ -14,15 +14,13 @@ require_once __DIR__ . '/../Attributes/Entity/Id.php';
 require_once __DIR__ . '/../Attributes/Validation/MaxLength.php';
 require_once __DIR__ . '/../Attributes/Validation/NotNull.php';
 
-#[Entity("user_profile")]
-class UserProfile
+#[Entity("user_settings")]
+class UserSettings
 {
 	#[Id]
 	#[Column("user_id")]
 	public int $userId = 0;
 
-	#[NotNull]
-	#[MaxLength(140)]
-	#[Column("description")]
-	public string $description = '';
+	#[Column("comment_notification")]
+	public bool $commentNotification = true;
 }

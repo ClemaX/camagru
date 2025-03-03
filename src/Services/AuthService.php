@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entities\User;
 use App\Entities\UserProfile;
+use App\Entities\UserSettings;
 use App\Enumerations\Role;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
@@ -11,6 +12,7 @@ use App\Exceptions\UnauthorizedException;
 use App\Repositories\UserRepository;
 use App\Services\DTOs\EmailChangeDTO;
 use App\Services\DTOs\LoginDTO;
+use App\Services\DTOs\PasswordChangeDTO;
 use App\Services\DTOs\PasswordResetDTO;
 use App\Services\DTOs\PasswordResetRequestDTO;
 use App\Services\DTOs\SignupDTO;
@@ -25,8 +27,10 @@ require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
 require_once __DIR__ . '/../Repositories/UserRepository.php';
 require_once __DIR__ . '/../Services/MailService.php';
 require_once __DIR__ . '/../Services/UserSessionServiceInterface.php';
+require_once __DIR__ . '/DTOs/EmailChangeDTO.php';
 require_once __DIR__ . '/DTOs/LoginDTO.php';
 require_once __DIR__ . '/DTOs/SignupDTO.php';
+require_once __DIR__ . '/DTOs/PasswordChangeDTO.php';
 require_once __DIR__ . '/DTOs/PasswordResetDTO.php';
 require_once __DIR__ . '/DTOs/PasswordResetRequestDTO.php';
 
@@ -34,6 +38,7 @@ class AuthService
 {
 	private readonly string $unlockPath;
 	private readonly string $passwordChangePath;
+	private readonly string $emailChangeVerifyPath;
 	private readonly string $adminEmailAddress;
 	private readonly DateInterval $unlockTokenLifetime;
 
@@ -45,6 +50,7 @@ class AuthService
 	) {
 		$this->unlockPath = '/auth/activate';
 		$this->passwordChangePath = '/auth/choose-password';
+		$this->emailChangeVerifyPath = '/auth/change-email';
 		$this->unlockTokenLifetime = DateInterval::createFromDateString(
 			$config['USER_UNLOCK_TOKEN_LIFETIME']
 		);
@@ -69,9 +75,8 @@ class AuthService
 
 		$unlockToken = bin2hex(random_bytes(32));
 
+		$settings = new UserSettings();
 		$profile = new UserProfile();
-		$profile->description = '';
-
 		$role = ($dto->email === $this->adminEmailAddress) ? Role::ADMIN : Role::USER;
 
 		$user = new User();
@@ -83,6 +88,7 @@ class AuthService
 		$user->lockedAt = time();
 		$user->unlockToken = $unlockToken;
 		$user->profile = $profile;
+		$user->settings = $settings;
 		$user->role = $role;
 
 		$userId = $this->userRepository->save($user);
@@ -211,15 +217,25 @@ class AuthService
 		return true;
 	}
 
-	public function requestEmailChange(
-		#[SensitiveParameter] EmailChangeDTO $dto,
+	public function changePassword(
+		User $user,
+		#[SensitiveParameter] PasswordChangeDTO $dto,
 	) {
-		$user = $this->sessionService->getUser();
+		$passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
 
-		if ($user === null) {
-			throw new UnauthorizedException();
+		if ($passwordHash === false) {
+			throw new InternalException();
 		}
 
+		$user->passwordHash = $passwordHash;
+
+		$this->userRepository->update($user);
+	}
+
+	public function requestEmailChange(
+		User $user,
+		#[SensitiveParameter] EmailChangeDTO $dto,
+	) {
 		if ($this->userRepository->findByEmailAddress($dto->email) != null) {
 			throw new ConflictException('email');
 		}
@@ -228,11 +244,34 @@ class AuthService
 		$user->emailChangeRequestedAt = time();
 		$user->emailChangeToken = bin2hex(random_bytes(32));
 
-		$this->userRepository->save($user);
+		if (!$this->userRepository->update($user)) {
+			throw new InternalException();
+		}
+
+		$verifyQueryParams = [
+			'id' => $user->id,
+			'token' => $user->emailChangeToken,
+		];
+
+		$verifyUrl = $this->emailChangeVerifyPath
+			. '?' . http_build_query($verifyQueryParams);
+
+		$this->mailService->send(
+			$user->emailChangeAddress,
+			'Camagru Email Verification',
+			'verify-email',
+			[
+				'username' => $user->username,
+				'verifyUrl' => $verifyUrl,
+				'urlLifetime' => $this->unlockTokenLifetime->format('%i minutes'),
+			]
+		);
 	}
 
-	public function changeEmail(int $userId, #[SensitiveParameter] string $token)
-	{
+	public function changeEmail(
+		int $userId,
+		#[SensitiveParameter] string $token
+	): bool {
 		$now = new DateTime('now');
 
 		$user = $this->userRepository->findById($userId);
@@ -250,7 +289,6 @@ class AuthService
 			return false;
 		}
 
-		// $user->isLocked = false;
 		$user->emailAddress = $user->emailChangeAddress;
 		$user->emailChangeAddress = null;
 		$user->emailChangeRequestedAt = null;

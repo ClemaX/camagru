@@ -6,7 +6,8 @@ use App\Entities\User;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
 use App\Repositories\UserRepository;
-use ProfileUpdateDTO;
+use App\Services\DTOs\ProfileUpdateDTO;
+use App\Services\DTOs\SettingsUpdateDTO;
 
 require_once __DIR__ . '/../Entities/User.php';
 require_once __DIR__ . '/../Repositories/UserRepository.php';
@@ -26,6 +27,17 @@ class UserService
 
 		$user->username = $dto->username;
 		$user->profile->description = $dto->description;
+
+		if (!$this->userRepository->update($user)) {
+			throw new InternalException();
+		}
+
+		return $user;
+	}
+
+	public function updateSettings(User $user, SettingsUpdateDTO $dto): User
+	{
+		$user->settings->commentNotification = $dto->commentNotification;
 
 		if (!$this->userRepository->update($user)) {
 			throw new InternalException();

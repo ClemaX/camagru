@@ -92,7 +92,7 @@ $userService = new UserService(
 // Controllers
 $router->addController(new HomeController($renderer));
 $router->addController(new AuthController($renderer, $authService));
-$router->addController(new UserController($renderer, $userService));
+$router->addController(new UserController($renderer, $userService, $authService));
 
 // Request dispatch
 try {

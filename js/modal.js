@@ -88,7 +88,6 @@ class Modal {
 			const onKeyDown = (event) => {
 				if (event.key === "Escape" && this.isShown) {
 					this.hide();
-					document.removeEventListener("keydown", onKeyDown);
 				}
 			};
 
@@ -99,7 +98,6 @@ class Modal {
 				if (event.target === this.element) {
 					if (this.isShown) {
 						this.hide();
-						this.element.removeEventListener("mousedown", onMouseDown);
 					}
 				}
 			};
@@ -107,3 +105,19 @@ class Modal {
 		}
 	}
 }
+
+(function() {
+	'use strict';
+	document.addEventListener('DOMContentLoaded', function() {
+		const modalTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
+
+		modalTriggers.forEach((trigger, index) => {
+
+			const targetModalId = trigger.getAttribute('data-bs-target');
+
+			const modal = new Modal(document.querySelector(targetModalId));
+
+			trigger.addEventListener('click', () => modal.show());
+		});
+	});
+})();

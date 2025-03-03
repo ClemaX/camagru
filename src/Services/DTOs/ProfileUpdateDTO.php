@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Services\DTOs;
+
 use App\Attributes\Validation\MaxLength;
 use App\Attributes\Validation\ValidUsername;
 
