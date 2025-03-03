@@ -51,6 +51,10 @@ class Modal {
 		}
 	}
 
+	toggle() {
+		!this.isShown ? this.show() : this.hide();
+	}
+
 	showBackdrop() {
 		this.backdrop = document.createElement("div");
 		this.backdrop.className = "modal-backdrop fade";
@@ -117,7 +121,7 @@ class Modal {
 
 			const modal = new Modal(document.querySelector(targetModalId));
 
-			trigger.addEventListener('click', () => modal.show());
+			trigger.addEventListener('click', () => modal.toggle());
 		});
 	});
 })();
