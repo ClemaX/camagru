@@ -63,13 +63,16 @@ module.exports = function (grunt) {
 		browserSync: {
 			default_options: {
 				bsFiles: {
-					src: ["public/css/**/*.css", "public/js/**/*.js", "src/**/*.php"],
+					src: [
+						"public/css/**/*.css",
+						"public/js/**/*.js",
+						"public/index.php",
+						"src/**/*.php",
+					],
 				},
 				options: {
 					watchTask: true,
-					proxy: "web:8080",
-					// host: "camagru.localhost",
-					port: 8080,
+					port: 80,
 					open: false,
 				},
 			},

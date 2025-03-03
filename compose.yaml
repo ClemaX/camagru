@@ -10,7 +10,7 @@ services:
       php:
         condition: service_healthy
       grunt:
-        condition: service_started
+        condition: service_healthy
     networks:
       - front-tier
     healthcheck:
@@ -59,6 +59,12 @@ services:
       - ./public/img:/app/public/img:rw
     networks:
       - front-tier
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3001"]
+      interval: 5s
+      timeout: 10s
+      retries: 60
 
   mail:
     image: haravich/fake-smtp-server:20250216
