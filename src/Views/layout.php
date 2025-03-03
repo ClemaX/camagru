@@ -46,13 +46,14 @@
 		{{ $content }}
 	</div>
 
-	@env(development)
 	<script>
 		const logout = async () => {
 			await fetch("{{ url('/auth/logout') }}", { method: 'POST' });
 			window.location = "{{ url('/') }}";
 		}
 	</script>
+
+	@env(development)
 	<script id="__bs_script__">//<![CDATA[
 		(function() {
 			try {
