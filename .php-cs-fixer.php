@@ -1,16 +1,13 @@
 <?php
+
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
+use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 
-$finder = PhpCsFixer\Finder::create()
-	/*
-	->exclude('somedir')
-	maybe we should parse `./.vscode/settings.json`
-	looking for "files.exclude" / "search.exclude" here?
-	*/
+$finder = Finder::create()
 	->in(__DIR__);
 
-$config = new PhpCsFixer\Config();
+$config = new Config();
 
 $config->setRules([
 		'@PSR2' => true,
@@ -19,6 +16,6 @@ $config->setRules([
 	->setIndent("\t")
 	->setLineEnding("\n")
 	->setFinder($finder)
-	->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect());
+	->setParallelConfig(ParallelConfigFactory::detect());
 
 return $config;
