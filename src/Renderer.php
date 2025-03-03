@@ -56,17 +56,6 @@ class Renderer
 				extract($params, EXTR_SKIP);
 
 				$path = eval("return $path;");
-				// foreach ($params as $key => $value) {
-				// 	$substitute = $value != null
-				// 		? (
-				// 			$key === 'content'
-				// 			? $value
-				// 			: htmlspecialchars($value)
-				// 		)
-				// 		: "";
-
-				// 	$path = str_replace("{\$$key}", $substitute, $path);
-				// }
 
 				return rtrim($baseUrlPath, '/') . '/' . ltrim($path, '/');
 			},
