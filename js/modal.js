@@ -110,18 +110,48 @@ class Modal {
 	}
 }
 
+const _modals = {};
+
+const getOrCreateModal = (target) => {
+	if (!(target.id in _modals)) {
+		_modals[target.id] = new Modal(target);
+	}
+
+	return _modals[target.id];
+}
+
 (function() {
 	'use strict';
+
+	const getTargetOrClosest = (trigger) => {
+		const selector = trigger.getAttribute('data-bs-target');
+		const target = selector
+			? document.querySelector(selector) : trigger.closest('.modal');
+
+		if (!target) return null;
+
+		return getOrCreateModal(target);
+	}
+
 	document.addEventListener('DOMContentLoaded', function() {
-		const modalTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
+		const modalToggleTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
 
-		modalTriggers.forEach((trigger, index) => {
+		modalToggleTriggers.forEach((trigger) => {
+			const modal = getTargetOrClosest(trigger);
 
-			const targetModalId = trigger.getAttribute('data-bs-target');
-
-			const modal = new Modal(document.querySelector(targetModalId));
+			if (!modal) return;
 
 			trigger.addEventListener('click', () => modal.toggle());
+		});
+
+		const modalDimsissTriggers = document.querySelectorAll('[data-bs-dismiss="modal"]');
+
+		modalDimsissTriggers.forEach((trigger) => {
+			const modal = getTargetOrClosest(trigger);
+
+			if (!modal) return;
+
+			trigger.addEventListener('click', () => modal.hide());
 		});
 	});
 })();
