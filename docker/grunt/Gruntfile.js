@@ -37,29 +37,43 @@ module.exports = function (grunt) {
 			options: {
 				plugins: [
 					{
-						name: 'preset-default',
+						name: "preset-default",
 						params: {
 							overrides: {
 								inlineStyles: false,
-							}
-						}
-					}
-				]
+							},
+						},
+					},
+				],
 			},
 			dist: {
 				files: {
-					'public/img/icon.svg': 'svg/icon.svg'
-				}
-			}
+					"public/img/icon.svg": "svg/icon.svg",
+				},
+			},
 		},
 		copy: {
-      fonts: {
-        expand: true,
-        cwd: 'node_modules/bootstrap-icons/font/fonts/',
-        src: '*',
-        dest: 'public/css/fonts/'
-      }
-    },
+			fonts: {
+				expand: true,
+				cwd: "node_modules/bootstrap-icons/font/fonts/",
+				src: "*",
+				dest: "public/css/fonts/",
+			},
+		},
+		browserSync: {
+			default_options: {
+				bsFiles: {
+					src: ["public/css/**/*.css", "public/js/**/*.js", "src/**/*.php"],
+				},
+				options: {
+					watchTask: true,
+					proxy: "web:8080",
+					// host: "camagru.localhost",
+					port: 8080,
+					open: false,
+				},
+			},
+		},
 		watch: {
 			scss: {
 				files: ["scss/**/*.scss"],
@@ -78,9 +92,17 @@ module.exports = function (grunt) {
 
 	grunt.loadNpmTasks("grunt-contrib-sass");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
-  grunt.loadNpmTasks("grunt-svgmin");
-  grunt.loadNpmTasks("grunt-contrib-copy");
+	grunt.loadNpmTasks("grunt-svgmin");
+	grunt.loadNpmTasks("grunt-contrib-copy");
+	grunt.loadNpmTasks("grunt-browser-sync");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
-	grunt.registerTask("default", ["sass", "uglify", "svgmin", "copy", "watch"]);
+	grunt.registerTask("default", [
+		"sass",
+		"uglify",
+		"svgmin",
+		"copy",
+		"browserSync",
+		"watch",
+	]);
 };

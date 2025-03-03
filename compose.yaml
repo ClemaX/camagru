@@ -50,12 +50,15 @@ services:
       context: ./docker/grunt
       dockerfile: Dockerfile.dev
     volumes:
-      - ./js:/app/js
-      - ./scss:/app/scss
-      - ./svg:/app/svg
-      - ./public/js:/app/public/js
-      - ./public/css:/app/public/css
-      - ./public/img:/app/public/img
+      - ./js:/app/js:ro
+      - ./scss:/app/scss:ro
+      - ./svg:/app/svg:ro
+      - ./src:/app/src:ro
+      - ./public/js:/app/public/js:rw
+      - ./public/css:/app/public/css:rw
+      - ./public/img:/app/public/img:rw
+    networks:
+      - front-tier
 
   mail:
     image: haravich/fake-smtp-server:20250216
