@@ -8,4 +8,5 @@ return [
 	'DATABASE_PASSWORD' => 'camagru',
 	'USER_UNLOCK_TOKEN_LIFETIME' => '15 minutes',
 	'DEBUG' => 'false',
+	'APP_ENV' => 'production',
 ];
