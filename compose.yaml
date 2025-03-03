@@ -1,12 +1,12 @@
 services:
   web:
-    image: nginx:1.27.4-alpine-slim
+    image: nginxinc/nginx-unprivileged:1.26.3-alpine3.20-slim
     ports:
-      - "8080:80"
+      - "80:8080"
     volumes:
       - ./src:/var/www/html/src:ro
       - ./public:/var/www/html/public:ro
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx:/etc/nginx/conf.d:ro
     depends_on:
       php:
         condition: service_healthy
@@ -38,6 +38,7 @@ services:
         condition: service_completed_successfully
     networks:
       - data-tier
+      - back-tier
       - front-tier
     healthcheck:
       test: ["CMD-SHELL", "php -r 'echo \"PHP is running.\";'"]
@@ -57,12 +58,10 @@ services:
       - ./public/css:/app/public/css
       - ./public/img:/app/public/img
 
-  smtp:
+  mail:
     image: haravich/fake-smtp-server:20250216
-    ports:
-      - 1080:1080
     networks:
-      - data-tier
+      - back-tier
       - front-tier
     healthcheck:
       test:
