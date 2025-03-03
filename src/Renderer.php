@@ -11,11 +11,14 @@ require_once __DIR__ . '/Services/UserSessionServiceInterface.php';
 
 class Renderer
 {
+	private readonly string $appEnvironment;
 	public function __construct(
 		private readonly UserSessionServiceInterface $sessionService,
 		private readonly string $templateDir,
 		private readonly string $baseUrlPath,
+		array $config,
 	) {
+		$this->appEnvironment = $config['APP_ENV'];
 	}
 
 	private static function processParameters(
@@ -149,6 +152,27 @@ class Renderer
 		);
 	}
 
+	private function processEnv(string $content): string
+	{
+		$pattern = '/@env\s*\((.*?)\)(.*?)(?:@else(.*?))?@endenv/s';
+		$currentEnv = $this->appEnvironment;
+
+		return preg_replace_callback(
+			$pattern,
+			function ($matches) use ($currentEnv) {
+				$environments = str_getcsv($matches[1], escape: '\\');
+
+				$ifBlock = $matches[2];
+				$elseBlock = isset($matches[3]) ? $matches[3] : '';
+
+				$isMatchingEnv = array_find($environments, fn ($environment) => $environment === $currentEnv) !== null;
+
+				return $isMatchingEnv ? $ifBlock : $elseBlock;
+			},
+			$content
+		);
+	}
+
 	private function processRoles(string $content): string
 	{
 		$pattern = '/@role\s*\((.*?)\)(.*?)(?:@else(.*?))?@endrole/s';
@@ -206,6 +230,7 @@ class Renderer
 
 		$content = file_get_contents($templateFile);
 
+		$content = $this->processEnv($content);
 		$content = $this->processRoles($content);
 		$content = $this::processForms($content);
 

@@ -27,6 +27,7 @@ services:
       DATABASE_DSN: pgsql:host=db;dbname=${POSTGRES_DB};port=5432
       DATABASE_USERNAME: ${POSTGRES_USER}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_ENV: development
     volumes:
       - ./docker/php/msmtprc:/etc/msmtprc:ro
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro

@@ -68,11 +68,13 @@ $renderer = new Renderer(
 	$sessionService,
 	'Views',
 	$router->basePath,
+	$config,
 );
 $mailRenderer = new Renderer(
 	$sessionService,
 	'Views' . DIRECTORY_SEPARATOR . 'Mails',
 	$config['EXTERNAL_URL'],
+	$config,
 );
 
 // Services
