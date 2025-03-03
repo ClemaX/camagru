@@ -9,9 +9,9 @@
 			<div class="form-group">
 				<label for="username">Username</label>
 				<input type="text" class="form-control @if($conflict === 'username') is-invalid @endif"
-							id="username" name="username" required
-							pattern="^[a-zA-Z0-9_-]{3,16}$" maxlength="16"
-							value="{{ $username }}">
+					id="username" name="username" required
+					pattern="^[a-zA-Z0-9_\-]{3,16}$" maxlength="16"
+					value="{{ $username }}">
 				<div class="invalid-feedback">
 					@if($conflict === 'username')
 						This username is already taken. Please choose another.
@@ -24,9 +24,9 @@
 			<div class="form-group">
 				<label for="email">Email address</label>
 				<input type="email" class="form-control @if($conflict === 'email') is-invalid @endif"
-							id="email" name="email" required
-							pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" maxlength="254"
-							value="{{ $email }}">
+					id="email" name="email" required
+					pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" maxlength="254"
+					value="{{ $email }}">
 				<div class="invalid-feedback">
 					@if($conflict === 'email')
 						This email is already registered. Please use another email or log in.
@@ -49,20 +49,5 @@
 		</form>
 	</div>
 </div>
-<script>
-(function() {
-	'use strict';
-	window.addEventListener('load', function() {
-		var forms = document.getElementsByClassName('needs-validation');
-		var validation = Array.prototype.filter.call(forms, function(form) {
-			form.addEventListener('submit', function(event) {
-				if (form.checkValidity() === false) {
-					event.preventDefault();
-					event.stopPropagation();
-				}
-				form.classList.add('was-validated');
-			}, false);
-		});
-	}, false);
-})();
-</script>
+
+<script src="/js/form.min.js"></script>

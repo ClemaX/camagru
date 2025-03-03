@@ -34,7 +34,7 @@
 					<input type="text"
 						class="form-control @if($conflict === 'username') is-invalid @endif"
 						id="username" name="username" required
-						pattern="^[a-zA-Z0-9_-]{3,16}$" maxlength="16"
+						pattern="^[a-zA-Z0-9_\-]{3,16}$" maxlength="16"
 						value="{{ $formUsername }}">
 					<div class="invalid-feedback">
 						@if($conflict === 'username')
