@@ -52,26 +52,10 @@ services:
     volumes:
       - ./js:/app/js
       - ./scss:/app/scss
+      - ./svg:/app/svg
       - ./public/js:/app/public/js
       - ./public/css:/app/public/css
-
-  # scss:
-  #   build:
-  #     context: ./docker/sass
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - ./scss:/app/scss
-  #     - ./public/css:/app/public/css
-  #   command: sass --watch /app/scss:/app/public/css --style compressed
-
-  # js-minify:
-  #   build:
-  #     context: ./docker/uglify
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - ./js:/app/js
-  #     - ./public/js:/app/public/js
-  #   command: uglifyjs --watch /app/js:/app/public/js --compress --mangle
+      - ./public/img:/app/public/img
 
   smtp:
     image: haravich/fake-smtp-server:20250216

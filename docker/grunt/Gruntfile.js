@@ -33,6 +33,25 @@ module.exports = function (grunt) {
 				],
 			},
 		},
+		svgmin: {
+			options: {
+				plugins: [
+					{
+						name: 'preset-default',
+						params: {
+							overrides: {
+								inlineStyles: false,
+							}
+						}
+					}
+				]
+			},
+			dist: {
+				files: {
+					'public/img/icon.svg': 'svg/icon.svg'
+				}
+			}
+		},
 		copy: {
       fonts: {
         expand: true,
@@ -50,13 +69,18 @@ module.exports = function (grunt) {
 				files: ["js/**/*.js"],
 				tasks: ["uglify"],
 			},
+			svg: {
+				files: ["svg/**/*.svg"],
+				tasks: ["svgmin"],
+			},
 		},
 	});
 
 	grunt.loadNpmTasks("grunt-contrib-sass");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-svgmin");
   grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
-	grunt.registerTask("default", ["sass", "uglify", "copy", "watch"]);
+	grunt.registerTask("default", ["sass", "uglify", "svgmin", "copy", "watch"]);
 };
