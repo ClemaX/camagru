@@ -74,6 +74,7 @@ module.exports = function (grunt) {
 					watchTask: true,
 					port: 80,
 					open: false,
+					notify: false,
 				},
 			},
 		},
