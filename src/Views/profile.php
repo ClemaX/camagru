@@ -47,8 +47,8 @@
 
 				<div class="form-group">
 					<label for="description">Description</label>
-					<textarea class="form-control" id="description" name="description"
-					rows="3">{{ $formDescription }}</textarea>
+					<textarea class="form-control no-resize" id="description"
+						name="description" rows="3">{{ $formDescription }}</textarea>
 					<div class="invalid-feedback">
 						Description must be at most 140 characters long.
 					</div>
