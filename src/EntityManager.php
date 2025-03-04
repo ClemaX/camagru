@@ -5,10 +5,13 @@ namespace App;
 use App\Attributes\Entity\Column;
 use App\Attributes\Entity\Entity;
 use App\Attributes\Entity\Id;
+use App\Attributes\Entity\JoinColumn;
+use App\Attributes\Entity\ManyToOne;
 use App\Attributes\Entity\OneToOne;
 use App\Attributes\Entity\PrimaryKeyJoinColumn;
 use App\Exceptions\InternalException;
 use BackedEnum;
+use DateTime;
 use PDO;
 use PDOStatement;
 use ReflectionClass;
@@ -18,6 +21,8 @@ require_once __DIR__ . '/Attributes/Entity/Column.php';
 require_once __DIR__ . '/Attributes/Entity/Entity.php';
 require_once __DIR__ . '/Attributes/Entity/Id.php';
 require_once __DIR__ . '/Attributes/Entity/OneToOne.php';
+require_once __DIR__ . '/Attributes/Entity/JoinColumn.php';
+require_once __DIR__ . '/Attributes/Entity/ManyToOne.php';
 require_once __DIR__ . '/Attributes/Entity/PrimaryKeyJoinColumn.php';
 require_once __DIR__ . '/Exceptions/InternalException.php';
 
@@ -104,6 +109,21 @@ class EntityManager
 		return $columnProperties;
 	}
 
+	/** @return ReflectionProperty[] */
+	private static function getManyToOneRelations(string $modelClass): array
+	{
+		$reflectionClass = new ReflectionClass($modelClass);
+
+		$columnProperties = array_filter(
+			$reflectionClass->getProperties(),
+			function ($property) {
+				return !empty($property->getAttributes(ManyToOne::class));
+			}
+		);
+
+		return $columnProperties;
+	}
+
 	private static function getParamType($value): int
 	{
 		if (is_bool($value)) {
@@ -139,13 +159,18 @@ class EntityManager
 
 		foreach ($columnProperties as $property) {
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
+
 			if (enum_exists($property->getType()->getName())) {
 				$enumType = $property->getType()->getName();
-				$enumValue = $enumType::from($data[$column->name]);
-				$property->setValue($model, $enumValue);
+				$value = $enumType::from($data[$column->name]);
+			} elseif ($property->getType()->getName() === DateTime::class) {
+				$value = new DateTime();
+				$value->setTimestamp($data[$column->name]);
 			} else {
-				$property->setValue($model, $data[$column->name]);
+				$value = $data[$column->name];
 			}
+
+			$property->setValue($model, $value);
 		}
 
 		$id = $idColumnProperty->getValue($model);
@@ -181,6 +206,40 @@ class EntityManager
 			$property->setValue($model, $propertyModel);
 		}
 
+		$manyToOneProperties = self::getManyToOneRelations($modelClass);
+
+		foreach ($manyToOneProperties as $property) {
+			$propertyType = $property->getType();
+
+			if ($propertyType->isBuiltin()) {
+				throw new InternalException('Unsupported relation property type');
+			}
+
+			$propertyClass = $propertyType->getName();
+
+			$joinColumns = $property->getAttributes(JoinColumn::class);
+			if (empty($joinColumns)) {
+				throw new InternalException('Unsupported relation type');
+			}
+
+			$propertyIdColumn = self::getIdColumnAttribute($propertyClass);
+			$foreignIdColumnName = $joinColumns[0]->newInstance()->name;
+
+			$foreignId = $data[$foreignIdColumnName];
+
+			$stmt = $this->pdo->prepare("SELECT * FROM " . self::getTableName($propertyClass) . " WHERE " . $propertyIdColumn->name . " = :id");
+			$stmt->execute(['id' => $foreignId]);
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if (!$result && !$propertyType->allowsNull()) {
+				throw new InternalException('Non-nullable relation could not be found');
+			}
+
+			$propertyModel = $this->load($result, $propertyClass);
+
+			$property->setValue($model, $propertyModel);
+		}
+
 		return $model;
 	}
 
@@ -189,10 +248,32 @@ class EntityManager
 		$columnProperties = $this->getColumns($modelClass);
 		$data = [];
 
+
 		foreach ($columnProperties as $property) {
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
+			$value = $property->getValue($model);
 
-			$data[$column->name] = $property->getValue($model);
+			if ($property->getType()->getName() === DateTime::class) {
+				$data[$column->name] = $value->getTimestamp();
+			} else {
+				$data[$column->name] = $value;
+			}
+		}
+
+		$manyToOneProperties = $this->getManyToOneRelations($modelClass);
+
+		foreach ($manyToOneProperties as $property) {
+			$joinColumns = $property->getAttributes(JoinColumn::class);
+			if (empty($joinColumns)) {
+				throw new InternalException('Unsupported relation type');
+			}
+
+			$column = $joinColumns[0]->newInstance();
+			$foreignIdColumn = $this->getIdColumn($property->getType()->getName());
+
+			$foreignEntity = $property->getValue($model);
+
+			$data[$column->name] = $foreignIdColumn->getValue($foreignEntity);
 		}
 
 		return $data;
