@@ -21,13 +21,8 @@
 				aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="collapse navbar-collapse justify-content-between"
+			<div class="collapse navbar-collapse justify-content-end"
 				id="navbarNav">
-				<ul class="navbar-nav mb-2 mb-sm-0">
-					<li class="nav-item">
-						<a class="nav-link" href="{{ url('/') }}">Home</a>
-					</li>
-				</ul>
 				<ul class="navbar-nav">
 					@role(GUEST)
 					<li class="nav-item">
