@@ -66,7 +66,7 @@
 
 	@env(development)
 	<script id="__bs_script__">//<![CDATA[
-		(function() {
+		(() => {
 			try {
 				var script = document.createElement('script');
 				if ('async') {

@@ -120,7 +120,7 @@ const getOrCreateModal = (target) => {
 	return _modals[target.id];
 }
 
-(function() {
+(() => {
 	'use strict';
 
 	const getTargetOrClosest = (trigger) => {
@@ -133,7 +133,7 @@ const getOrCreateModal = (target) => {
 		return getOrCreateModal(target);
 	}
 
-	document.addEventListener('DOMContentLoaded', function() {
+	document.addEventListener('DOMContentLoaded', () => {
 		const modalToggleTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
 
 		modalToggleTriggers.forEach((trigger) => {

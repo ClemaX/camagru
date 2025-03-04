@@ -32,13 +32,11 @@
 	const gallery = document.getElementById('gallery');
 
 	gallery.querySelectorAll('.card-img-top').forEach(img => {
-		// console.debug(img);
-
-		img.addEventListener('load', function (event) {
-			// console.debug(event);
+		img.addEventListener('load', (event) => {
 			event.target.classList.remove('placeholder');
 		});
-		img.addEventListener('click', function(event) {
+
+		img.addEventListener('click', (event) => {
 			document.getElementById('modalImage').src = this.src;
 			new Modal(document.getElementById('imageModal')).show();
 		});
