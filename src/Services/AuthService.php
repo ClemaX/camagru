@@ -91,10 +91,10 @@ class AuthService
 		$user->settings = $settings;
 		$user->role = $role;
 
-		$userId = $this->userRepository->save($user);
+		$user = $this->userRepository->save($user);
 
 		$activationQueryParams = [
-			'id' => $userId,
+			'id' => $user->id,
 			'token' => $unlockToken,
 		];
 

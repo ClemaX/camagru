@@ -21,9 +21,6 @@ require_once __DIR__ . '/Attributes/Entity/OneToOne.php';
 require_once __DIR__ . '/Attributes/Entity/PrimaryKeyJoinColumn.php';
 require_once __DIR__ . '/Exceptions/InternalException.php';
 
-require_once __DIR__ . '/Exceptions/InternalException.php';
-require_once __DIR__ . '/Exceptions/InternalException.php';
-
 class EntityManager
 {
 	public function __construct(protected readonly PDO $pdo)
@@ -251,7 +248,12 @@ class EntityManager
 		return $this->load($result, $modelClass);
 	}
 
-	public function findAll($modelClass): array
+	/**
+	 * @template EntityT of object
+	 * @param class-string<EntityT> $modelClass
+	 * @return EntityT[]
+	 * */
+	public function findAll(string $modelClass): array
 	{
 		$stmt = $this->pdo->query("SELECT * FROM " . self::getTableName($modelClass) ."");
 
@@ -264,10 +266,17 @@ class EntityManager
 		return array_map(fn ($data) => $this->load($data, $modelClass), $results);
 	}
 
-	public function save(object $model, string $modelClass, ?int $id = null): int
+	/**
+	 * @template EntityT of object
+	 * @param EntityT $model
+	 * @param class-string<EntityT> $modelClass
+	 * @return EntityT
+	 * */
+	public function save(object $model, string $modelClass, ?int $id = null): object
 	{
 		$data = $this->dump($model, $modelClass);
 
+		$idProperty = $this->getIdColumn($modelClass);
 		$idColumn = $this->getIdColumnAttribute($modelClass);
 
 		if ($data[$idColumn->name] === 0) {
@@ -309,10 +318,18 @@ class EntityManager
 			);
 		}
 
-		return $insertedId;
+		$idProperty->setValue($model, $insertedId);
+
+		return $model;
 	}
 
-	public function merge(object $model, string $modelClass): bool
+	/**
+	 * @template EntityT of object
+	 * @param EntityT $model
+	 * @param class-string<EntityT> $modelClass
+	 * @return EntityT
+	 * */
+	public function merge(object $model, string $modelClass): object
 	{
 		$data = self::dump($model, $modelClass);
 
@@ -331,6 +348,10 @@ class EntityManager
 
 		$success = $stmt->execute();
 
+		if (!$success) {
+			throw new InternalException("Could not execute PDO statement");
+		}
+
 		$oneToOneProperties = self::getOneToOneRelations($modelClass);
 
 		foreach ($oneToOneProperties as $property) {
@@ -340,9 +361,13 @@ class EntityManager
 			);
 		}
 
-		return $success;
+		return $model;
 	}
 
+	/**
+	 * @template EntityT of object
+	 * @param class-string<EntityT> $modelClass
+	 */
 	public function delete(int $id, string $modelClass): bool
 	{
 		$stmt = $this->pdo->prepare("DELETE FROM " . self::getTableName($modelClass) . " WHERE id = :id");

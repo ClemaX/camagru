@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\EntityManager;
 
 /**
- * @template EntityT
+ * @template EntityT of object
  */
 abstract class AbstractRepository
 {
@@ -33,14 +33,20 @@ abstract class AbstractRepository
 		return $this->entityManager->findAll($this->getModelClass());
 	}
 
-	/** @param EntityT $model */
-	public function save($model): int
+	/**
+	 * @param EntityT $model
+	 * @return EntityT
+	 * */
+	public function save(object $model): object
 	{
 		return $this->entityManager->save($model, $this->getModelClass());
 	}
 
-	/** @param EntityT $model */
-	public function update($model): bool
+	/**
+	 * @param EntityT $model
+	 * @return EntityT
+	 * */
+	public function update(object $model): object
 	{
 		return $this->entityManager->merge($model, $this->getModelClass());
 	}
