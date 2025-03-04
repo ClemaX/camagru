@@ -97,25 +97,16 @@
 	</div>
 </div>
 
+<script src="/js/form.min.js"></script>
 <script src="/js/modal.min.js"></script>
 
 <script>
-	(function() {
+	(() => {
 		'use strict';
-		@if($conflict === 'email')
+		window.addEventListener('load', () => {
+			@if($conflict === 'email')
 		new Modal(document.getElementById('emailEditModal')).show();
-		@endif
-		window.addEventListener('load', function() {
-			var forms = document.getElementsByClassName('needs-validation');
-			var validation = Array.prototype.filter.call(forms, function(form) {
-				form.addEventListener('submit', function(event) {
-					if (form.checkValidity() === false) {
-						event.preventDefault();
-						event.stopPropagation();
-					}
-					form.classList.add('was-validated');
-				}, false);
-			});
+			@endif
 		}, false);
 	})();
 </script>
