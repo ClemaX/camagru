@@ -72,7 +72,7 @@
 						<label for="email">New Email address</label>
 						<input type="email" class="form-control @if($conflict === 'email') is-invalid @endif"
 							id="email" name="email" required
-							pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" maxlength="254"
+							pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" maxlength="254"
 							value="{{ $formEmail }}">
 						<div class="invalid-feedback">
 							@if($conflict === 'email')

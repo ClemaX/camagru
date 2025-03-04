@@ -25,8 +25,8 @@
 					<label for="email">Email address</label>
 					<input type="email" class="form-control @if($conflict === 'email') is-invalid @endif"
 						id="email" name="email" required
-						pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" maxlength="254"
-						value="{{ $email }}">
+						pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
+						maxlength="254" value="{{ $email }}">
 					<div class="invalid-feedback">
 						@if($conflict === 'email')
 							This email is already registered. Please use another email or log in.
