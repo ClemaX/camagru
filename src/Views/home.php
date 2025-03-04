@@ -37,8 +37,11 @@
 		});
 
 		img.addEventListener('click', (event) => {
-			document.getElementById('modalImage').src = this.src;
-			new Modal(document.getElementById('imageModal')).show();
+			const modal = document.getElementById('modalImage');
+
+			modal.src = event.target.src;
+
+			getOrCreateModal(document.getElementById('imageModal')).show();
 		});
 	});
 </script>
