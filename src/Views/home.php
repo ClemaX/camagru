@@ -1,32 +1,27 @@
-<div id="gallery" class="container">
-	<div class="row g-3">
-		@foreach ($images as $image)
-			<div class="col-4">
-				<div class="card" aria-hidden="true">
-					<div class="ratio ratio-1x1">
-						<img src="{{ $image->url }}" class="card-img-top placeholder" alt="{{ $image->description }}">
-					</div>
-					<div class="card-body">
-						<h5 class="card-title">{{ $image->title }}</h5>
-						<p class="card-text">{{ $image->description }}</p>
-						<!-- <a href="#" tabindex="-1" class="btn btn-primary disabled placeholder col-6"></a> -->
-					</div>
-				</div>
-			</div>
-		@endforeach
-	</div>
-</div>
-<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-body p-0">
-				<img src="" class="img-fluid" id="modalImage">
+<div id="gallery" class="gallery-container">
+	@foreach ($posts as $post)
+	<div class="card mb-4" aria-hidden="true">
+		<div class="ratio ratio-1x1">
+			<img src="{{ $post->imageUrl }}" class="card-img-top placeholder"
+				alt="{{ $post->description }}">
+		</div>
+		<div class="card-body">
+			<h5 class="card-title">{{ $post->title }}</h5>
+			<p class="card-text">{{ $post->description }}</p>
+			<div class="d-flex gap-3">
+				<button class="btn btn-danger d-flex gap-2">
+					<i class="bi-heart"></i>
+					Like
+				</button>
+				<button class="btn btn-info d-flex gap-2">
+					<i class="bi-chat"></i>
+					Comment
+				</button>
 			</div>
 		</div>
 	</div>
+	@endforeach
 </div>
-
-<script src="/js/modal.min.js"></script>
 
 <script>
 	const gallery = document.getElementById('gallery');
@@ -34,14 +29,6 @@
 	gallery.querySelectorAll('.card-img-top').forEach(img => {
 		img.addEventListener('load', (event) => {
 			event.target.classList.remove('placeholder');
-		});
-
-		img.addEventListener('click', (event) => {
-			const modal = document.getElementById('modalImage');
-
-			modal.src = event.target.src;
-
-			getOrCreateModal(document.getElementById('imageModal')).show();
 		});
 	});
 </script>

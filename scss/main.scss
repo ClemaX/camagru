@@ -9,3 +9,8 @@ body {
 .no-resize {
 	resize: none;
 }
+
+.gallery-container {
+  @include make-container();
+	width: 75vmin;
+}
