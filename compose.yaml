@@ -48,8 +48,8 @@ services:
 
   grunt:
     build:
-      context: ./docker/grunt
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: docker/grunt/Dockerfile.dev
     volumes:
       - ./js:/app/js:ro
       - ./scss:/app/scss:ro

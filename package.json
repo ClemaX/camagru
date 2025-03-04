@@ -8,6 +8,7 @@
     "grunt-contrib-sass": "^2.0.0",
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-contrib-watch": "^1.1.0",
+    "grunt-purgecss": "^7.0.2",
     "grunt-svgmin": "^7.0.0"
   }
 }

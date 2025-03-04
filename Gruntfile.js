@@ -33,6 +33,22 @@ module.exports = function (grunt) {
 				],
 			},
 		},
+		purgecss: {
+      target: {
+        options: {
+          content: ["src/Views/**/*.php", "public/js/**/*.js"],
+        },
+        files: [
+          {
+            expand: true,
+            cwd: "public/css",
+            src: ["**/*.css"],
+            dest: "public/css",
+            ext: ".min.css",
+          },
+        ],
+      },
+    },
 		svgmin: {
 			options: {
 				plugins: [
@@ -81,11 +97,11 @@ module.exports = function (grunt) {
 		watch: {
 			scss: {
 				files: ["scss/**/*.scss"],
-				tasks: ["sass"],
+				tasks: ["sass", "purgecss"],
 			},
 			js: {
 				files: ["js/**/*.js"],
-				tasks: ["uglify"],
+				tasks: ["uglify", "purgecss"],
 			},
 			svg: {
 				files: ["svg/**/*.svg"],
@@ -96,6 +112,7 @@ module.exports = function (grunt) {
 
 	grunt.loadNpmTasks("grunt-contrib-sass");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
+	grunt.loadNpmTasks('grunt-purgecss');
 	grunt.loadNpmTasks("grunt-svgmin");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-browser-sync");
@@ -104,6 +121,7 @@ module.exports = function (grunt) {
 	grunt.registerTask("default", [
 		"sass",
 		"uglify",
+		"purgecss",
 		"svgmin",
 		"copy",
 		"browserSync",
