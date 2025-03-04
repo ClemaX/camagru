@@ -21,8 +21,15 @@
 				aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="collapse navbar-collapse justify-content-end"
+			<div class="collapse navbar-collapse justify-content-between"
 				id="navbarNav">
+				<ul class="navbar-nav">
+					@role(USER, ADMIN)
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url('/post') }}">Post</a>
+					</li>
+					@endrole
+				</ul>
 				<ul class="navbar-nav">
 					@role(GUEST)
 					<li class="nav-item">

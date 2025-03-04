@@ -1,29 +1,33 @@
 <?php
 
-use App\Router;
-use App\Repositories\UserRepository;
 use App\Services\DatabaseSessionService;
 use App\Services\AuthService;
-use App\Controllers\HomeController;
+use App\Controllers\PostController;
 use App\Controllers\AuthController;
 use App\Controllers\UserController;
 use App\EntityManager;
 use App\Exceptions\HttpException;
 use App\Renderer;
+use App\Repositories\UserRepository;
+use App\Repositories\PostRepository;
+use App\Router;
 use App\Services\MailService;
+use App\Services\PostService;
 use App\Services\UserService;
 
-require __DIR__ . '/../src/config.php';
-require __DIR__ . '/../src/Router.php';
-require __DIR__ . '/../src/Renderer.php';
-require __DIR__ . '/../src/Repositories/UserRepository.php';
-require __DIR__ . '/../src/Services/DatabaseSessionService.php';
-require __DIR__ . '/../src/Services/AuthService.php';
-require __DIR__ . '/../src/Services/UserService.php';
-require __DIR__ . '/../src/Controllers/HomeController.php';
-require __DIR__ . '/../src/Controllers/AuthController.php';
-require __DIR__ . '/../src/Controllers/UserController.php';
-require __DIR__ . '/../src/EntityManager.php';
+require_once __DIR__ . '/../src/config.php';
+require_once __DIR__ . '/../src/Router.php';
+require_once __DIR__ . '/../src/Renderer.php';
+require_once __DIR__ . '/../src/Repositories/UserRepository.php';
+require_once __DIR__ . '/../src/Repositories/PostRepository.php';
+require_once __DIR__ . '/../src/Services/DatabaseSessionService.php';
+require_once __DIR__ . '/../src/Services/AuthService.php';
+require_once __DIR__ . '/../src/Services/UserService.php';
+require_once __DIR__ . '/../src/Services/PostService.php';
+require_once __DIR__ . '/../src/Controllers/AuthController.php';
+require_once __DIR__ . '/../src/Controllers/UserController.php';
+require_once __DIR__ . '/../src/Controllers/PostController.php';
+require_once __DIR__ . '/../src/EntityManager.php';
 
 // Debug
 if (strcmp($config['DEBUG'], 'true') === 0) {
@@ -49,6 +53,7 @@ $entityManager = new EntityManager($pdo);
 
 // Repositories
 $userRepository = new UserRepository($entityManager);
+$postRepository = new PostRepository($entityManager);
 
 // Session
 $sessionService = new DatabaseSessionService(
@@ -90,11 +95,24 @@ $authService = new AuthService(
 $userService = new UserService(
 	$userRepository,
 );
+$postService = new PostService(
+	$postRepository,
+);
 
 // Controllers
-$router->addController(new HomeController($renderer));
-$router->addController(new AuthController($renderer, $authService));
-$router->addController(new UserController($renderer, $userService, $authService));
+$router->addController(new PostController(
+	$renderer,
+	$postService,
+));
+$router->addController(new AuthController(
+	$renderer,
+	$authService,
+));
+$router->addController(new UserController(
+	$renderer,
+	$userService,
+	$authService,
+));
 
 // Request dispatch
 try {

@@ -9,7 +9,6 @@ use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Exceptions\InvalidCsrfTokenException;
 use App\Exceptions\NotFoundException;
-use App\Exceptions\ValidationException;
 use App\Services\UserSessionServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;

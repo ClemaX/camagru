@@ -80,6 +80,22 @@ create table user_settings
     foreign key(user_id)        references "user"(id)   on delete   cascade
 );
 
+--- Post
+create table post
+(
+    -- Base properties
+    id                      bigint                  primary key generated always as identity,
+    created_at              timestamp               not null    default current_timestamp,
+    updated_at              timestamp               not null    default current_timestamp,
+
+    -- Post properties
+    title                   varchar(64)             not null,
+    description             varchar(512)            not null    default '',
+    author_id               bigint                  not null,
+    -- Constraints
+    foreign key(author_id)  references "user"(id)   on delete   cascade
+);
+
 ------------------------
 ---- App Procedures ----
 ------------------------
