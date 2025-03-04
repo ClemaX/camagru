@@ -9,7 +9,7 @@
 	<link rel="icon" href="/img/icon.svg" type="image/svg+xml">
 </head>
 <body>
-	<nav class="navbar navbar-expand-lg bg-body-tertiary">
+	<nav class="navbar navbar-expand-sm bg-body-tertiary">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="{{ url('/') }}">
 				<img src="/img/icon.svg" alt="Logo" width="30" height="30"
@@ -23,7 +23,7 @@
 			</button>
 			<div class="collapse navbar-collapse justify-content-between"
 				id="navbarNav">
-				<ul class="navbar-nav">
+				<ul class="navbar-nav mb-2 mb-sm-0">
 					<li class="nav-item">
 						<a class="nav-link" href="{{ url('/') }}">Home</a>
 					</li>
