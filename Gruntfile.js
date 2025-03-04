@@ -80,8 +80,8 @@ module.exports = function (grunt) {
 			default_options: {
 				bsFiles: {
 					src: [
-						"public/css/**/*.css",
-						"public/js/**/*.js",
+						"public/css/**/*.min.css",
+						"public/js/**/*.min.js",
 						"public/index.php",
 						"src/**/*.php",
 					],
@@ -101,7 +101,11 @@ module.exports = function (grunt) {
 			},
 			js: {
 				files: ["js/**/*.js"],
-				tasks: ["uglify", "purgecss"],
+				tasks: ["uglify"],
+			},
+			cssConsumers: {
+				files: ["public/js/**/*.js", "src/**/*.php"],
+				tasks: ["purgecss"],
 			},
 			svg: {
 				files: ["svg/**/*.svg"],
