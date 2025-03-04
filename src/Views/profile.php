@@ -1,36 +1,39 @@
-@role(ADMIN)
-<div class="alert alert-info mt-3" role="alert">
-	You're the administrator!
-</div>
-@endrole
-<div class="card">
-	<div class="card-header d-flex justify-content-between">
-		<h1 class="card-title">{{ $username }}</h1>
-		<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Profile"
-			data-bs-toggle="modal" data-bs-target="#profileEditModal">
-			<i class="bi-pencil"></i><span>Edit</span>
-		</button>
+<div class="container">
+	@role(ADMIN)
+	<div class="alert alert-info mt-3" role="alert">
+		You're the administrator!
 	</div>
-	<div class="card-body">
-		<p class="card-text">
-			@if($profile->description === '')
-				Your profile description is currently empty.
-				You can update your profile information by pressing the edit button.
-			@else
-				{{ $profile->description }}
-			@endif
-		</p>
+	@endrole
+	<div class="card">
+		<div class="card-header d-flex justify-content-between">
+			<h1 class="card-title">{{ $username }}</h1>
+			<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Profile"
+				data-bs-toggle="modal" data-bs-target="#profileEditModal">
+				<i class="bi-pencil"></i><span>Edit</span>
+			</button>
 		</div>
+		<div class="card-body">
+			<p class="card-text">
+				@if($profile->description === '')
+					Your profile description is currently empty.
+					You can update your profile information by pressing the edit button.
+				@else
+					{{ $profile->description }}
+				@endif
+			</p>
+			</div>
+	</div>
 </div>
+
 <div class="modal fade" id="profileEditModal" tabindex="-1" aria-hidden="true"
 	aria-labelledby="profileEditModalLabel">
 	<div class="modal-dialog modal-dialog-centered modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
-        <h1 class="modal-title fs-5" id="profileEditModalLabel">Profile</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"
+				<h1 class="modal-title fs-5" id="profileEditModalLabel">Profile</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"
 					aria-label="Close"></button>
-      </div>
+			</div>
 
 			<div class="modal-body">
 				<form class="needs-validation d-flex flex-column gap-3" novalidate method="post">
@@ -67,7 +70,7 @@
 	</div>
 </div>
 
-<script src="/js/form.min.js"></script>
+<script src="/js/form.min.js" defer></script>
 <script src="/js/modal.min.js"></script>
 
 <script>

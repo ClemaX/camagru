@@ -8,8 +8,8 @@
 	<link href="/css/main.min.css" rel="stylesheet">
 	<link rel="icon" href="/img/icon.svg" type="image/svg+xml">
 </head>
-<body>
-	<nav class="navbar navbar-expand-sm bg-body-tertiary">
+<body class="overflow-hidden">
+	<nav class="navbar navbar-expand-sm fixed-top bg-body-tertiary">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="{{ url('/') }}">
 				<img src="/img/icon.svg" alt="Logo" width="30" height="30"
@@ -51,7 +51,8 @@
 			</div>
 		</div>
 	</nav>
-	<div class="container mt-4">
+	<div class="container-fluid overflow-auto py-4"
+		style="height: calc(100vh - 60px); margin-top: 60px;">
 		{{ $content }}
 	</div>
 

@@ -1,27 +1,29 @@
-<div class="card">
-	<div class="card-header d-flex justify-content-between">
-		<h1 class="card-title">Settings</h1>
-		<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Settings"
-			data-bs-toggle="modal" data-bs-target="#settingsEditModal">
-			<i class="bi-pencil"></i><span>Edit</span>
-		</button>
-	</div>
-	<div class="card-body">
-		<p class="card-text">
-			<strong>Email Address:</strong> {{ $email }}
-		</p>
-		<p class="card-text">
-			<strong>Comment Notifications:</strong> {{ $settings->commentNotification ? "Enabled" : "Disabled" }}
-		</p>
-		<div class="d-flex gap-3">
+<div class="container">
+	<div class="card">
+		<div class="card-header d-flex justify-content-between">
+			<h1 class="card-title">Settings</h1>
 			<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Settings"
-				data-bs-toggle="modal" data-bs-target="#emailEditModal">
-				Change Email Address
+				data-bs-toggle="modal" data-bs-target="#settingsEditModal">
+				<i class="bi-pencil"></i><span>Edit</span>
 			</button>
-			<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Settings"
-				data-bs-toggle="modal" data-bs-target="#passwordEditModal">
-				Change Password
-			</button>
+		</div>
+		<div class="card-body">
+			<p class="card-text">
+				<strong>Email Address:</strong> {{ $email }}
+			</p>
+			<p class="card-text">
+				<strong>Comment Notifications:</strong> {{ $settings->commentNotification ? "Enabled" : "Disabled" }}
+			</p>
+			<div class="d-flex gap-3">
+				<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Settings"
+					data-bs-toggle="modal" data-bs-target="#emailEditModal">
+					Change Email Address
+				</button>
+				<button class="btn btn-primary d-flex gap-2 align-items-center" aria-label="Edit Settings"
+					data-bs-toggle="modal" data-bs-target="#passwordEditModal">
+					Change Password
+				</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -114,7 +116,7 @@
 	</div>
 </div>
 
-<script src="/js/form.min.js"></script>
+<script src="/js/form.min.js" defer></script>
 <script src="/js/modal.min.js"></script>
 
 <script>
