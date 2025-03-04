@@ -6,11 +6,40 @@ body {
 	--ml-ignore: true;
 }
 
+main {
+	.container, .gallery-container {
+		padding-top: $spacer;
+		padding-bottom: $spacer;
+	}
+}
+
 .no-resize {
 	resize: none;
 }
 
 .gallery-container {
   @include make-container();
-	width: 75vmin;
+	max-width: 75vmin;
+}
+
+.post-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: stretch;
+}
+
+ul.sticker-list {
+	margin-left: 0;
+	padding-left: 0;
+
+	li {
+		margin-left: 0;
+		padding-left: 0;
+	}
+}
+
+.sticker-list-placeholder, ul.sticker-list li {
+	width: 15vmin;
+	height: 15vmin;
 }

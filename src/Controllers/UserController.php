@@ -35,7 +35,7 @@ class UserController extends AbstractController
 	}
 
 	#[Route('/self')]
-	public function self(#[CurrentUser] ?User $user): string
+	public function self(#[SensitiveParameter] #[CurrentUser] ?User $user): string
 	{
 		if ($user === null) {
 			throw new UnauthorizedException();
@@ -52,7 +52,7 @@ class UserController extends AbstractController
 
 	#[Route('/self', 'PATCH')]
 	public function selfUpdate(
-		#[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
 		#[RequestBody] ProfileUpdateDTO $dto
 	): string {
 		if ($user === null) {
@@ -82,7 +82,7 @@ class UserController extends AbstractController
 
 	#[Route('/self/settings')]
 	public function selfSettings(
-		#[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
 		#[RequestParam] ?string $formEmail,
 		#[RequestParam] ?string $conflict
 	): string {
@@ -104,7 +104,7 @@ class UserController extends AbstractController
 
 	#[Route('/self/settings', 'PATCH')]
 	public function selfSettingsUpdate(
-		#[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
 		#[RequestBody] SettingsUpdateDTO $dto
 	): string {
 		if ($user === null) {
@@ -123,7 +123,7 @@ class UserController extends AbstractController
 
 	#[Route('/self/new-email', 'PUT')]
 	public function requestEmailChangeSubmit(
-		#[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
 		#[SensitiveParameter] #[RequestBody] EmailChangeDTO $dto
 	) {
 		if ($user === null) {
@@ -151,7 +151,7 @@ class UserController extends AbstractController
 
 	#[Route('/self/password', 'PUT')]
 	public function changePasswordSubmit(
-		#[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
 		#[SensitiveParameter] #[RequestBody] PasswordChangeDTO $dto
 	) {
 		if ($user === null) {
