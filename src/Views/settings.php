@@ -27,8 +27,14 @@
 </div>
 
 <div class="modal fade" id="settingsEditModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
 		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="settingsEditModalLabel">Settings</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"
+					aria-label="Close"></button>
+			</div>
+
 			<div class="modal-body">
 				<form class="needs-validation d-flex flex-column gap-3" novalidate method="post">
 					@csrf
@@ -47,15 +53,21 @@
 </div>
 
 <div class="modal fade" id="emailEditModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
 		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="emailEditModal">Email</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"
+					aria-label="Close"></button>
+			</div>
+
 			<div class="modal-body">
 				<form class="needs-validation d-flex flex-column gap-3" novalidate
 					method="post" action="{{ url('/user/self/new-email') }}">
 					@csrf
 					@method('PUT')
 					<div class="form-group">
-						<label for="email">Email address</label>
+						<label for="email">New Email address</label>
 						<input type="email" class="form-control @if($conflict === 'email') is-invalid @endif"
 							id="email" name="email" required
 							pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" maxlength="254"
@@ -68,7 +80,7 @@
 							@endif
 						</div>
 					</div>
-					<button type="submit" class="btn btn-primary">Change Email</button>
+					<button type="submit" class="btn btn-primary">Send Verification Email</button>
 				</form>
 			</div>
 		</div>
@@ -76,15 +88,20 @@
 </div>
 
 <div class="modal fade" id="passwordEditModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
 		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="passwordEditModal">Password</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"
+					aria-label="Close"></button>
+			</div>
 			<div class="modal-body">
 				<form class="needs-validation d-flex flex-column gap-3" novalidate
 					method="post" action="{{ url('/user/self/password') }}">
 					@csrf
 					@method('PUT')
 					<div class="form-group">
-						<label for="password">Password</label>
+						<label for="password">New password</label>
 						<input type="password" class="form-control" id="password" name="password" required
 									pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\-+_!@#$%^&*., ?]).{8,}$" maxlength="254">
 						<div class="invalid-feedback">
@@ -105,7 +122,7 @@
 		'use strict';
 		window.addEventListener('load', () => {
 			@if($conflict === 'email')
-		new Modal(document.getElementById('emailEditModal')).show();
+			getOrCreateModal(document.getElementById('emailEditModal')).show();
 			@endif
 		}, false);
 	})();

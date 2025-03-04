@@ -15,16 +15,23 @@
 		<p class="card-text">
 			@if($profile->description === '')
 				Your profile description is currently empty.
-				You can update your profile by pressing the edit button.
+				You can update your profile information by pressing the edit button.
 			@else
 				{{ $profile->description }}
 			@endif
 		</p>
 		</div>
 </div>
-<div class="modal fade" id="profileEditModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
+<div class="modal fade" id="profileEditModal" tabindex="-1" aria-hidden="true"
+	aria-labelledby="profileEditModalLabel">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
 		<div class="modal-content">
+			<div class="modal-header">
+        <h1 class="modal-title fs-5" id="profileEditModalLabel">Profile</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+					aria-label="Close"></button>
+      </div>
+
 			<div class="modal-body">
 				<form class="needs-validation d-flex flex-column gap-3" novalidate method="post">
 					@csrf
@@ -68,7 +75,7 @@
 		'use strict';
 		window.addEventListener('load', () => {
 			@if($conflict !== null)
-			new Modal(document.getElementById('profileEditModal')).show();
+			getOrCreateModal(document.getElementById('profileEditModal')).show();
 			@endif
 		}, false);
 	})();
