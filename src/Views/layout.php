@@ -74,7 +74,7 @@
 				if ('async') {
 					script.async = true;
 				}
-				script.src = 'http://HOST:80/browser-sync/browser-sync-client.js?v=2.29.3'.replace("HOST", location.hostname);
+				script.src = '/browser-sync/browser-sync-client.js?v=2.29.3';
 				if (document.body) {
 					document.body.appendChild(script);
 				} else if (document.head) {

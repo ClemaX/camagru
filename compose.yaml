@@ -2,7 +2,7 @@ services:
   web:
     image: nginxinc/nginx-unprivileged:1.26.3-alpine3.20-slim
     ports:
-      - "80:8080"
+      - "8080:8080"
     volumes:
       - ./public:/var/www/html/public:ro
       - ./docker/nginx:/etc/nginx/conf.d:ro

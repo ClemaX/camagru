@@ -88,7 +88,7 @@ module.exports = function (grunt) {
 				},
 				options: {
 					watchTask: true,
-					port: 80,
+					port: 8080,
 					open: false,
 					notify: false,
 				},
