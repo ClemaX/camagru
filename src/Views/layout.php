@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark" class="no-js">
+<html lang="en" data-bs-theme="dark">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,10 +36,15 @@
 						<a class="nav-link" href="{{ url('/user/self') }}">Profile</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ url('/user/self/settings') }}">Settings</a>
+						<a class="nav-link" href="{{ url('/user/self/settings') }}">
+							Settings
+						</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ url('/') }}" onclick="logout(); return false;">Log Out</a>
+						<a class="nav-link" href="{{ url('/') }}"
+							onclick="logout(); return false;">
+							Log Out
+						</a>
 					</li>
 					@endrole
 				</ul>
@@ -50,14 +55,15 @@
 		{{ $content }}
 	</div>
 
+	<script src="/js/main.min.js"></script>
+	<script src="/js/collapse.min.js" defer></script>
+
 	<script>
 		const logout = async () => {
 			await fetch("{{ url('/auth/logout') }}", { method: 'POST' });
 			window.location = "{{ url('/') }}";
 		}
 	</script>
-
-	<script src="/js/collapse.min.js"></script>
 
 	@env(development)
 	<script id="__bs_script__">//<![CDATA[
