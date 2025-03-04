@@ -80,16 +80,26 @@ class Collapse {
 	}
 }
 
-(function() {
+const _collapses = {};
+
+const getOrCreateCollapse = (target) => {
+	if (!(target.id in _collapses)) {
+		_collapses[target.id] = new Collapse(target);
+	}
+
+	return _collapses[target.id];
+}
+
+(() => {
 	'use strict';
-	document.addEventListener('DOMContentLoaded', function() {
+	document.addEventListener('DOMContentLoaded', () => {
 		const collapseTriggers = document.querySelectorAll(
 			'[data-bs-toggle="collapse"]');
 
-		collapseTriggers.forEach((trigger, index) => {
+		collapseTriggers.forEach((trigger) => {
 			const targetcollapseId = trigger.getAttribute('data-bs-target');
 
-			const collapse = new Collapse(document.querySelector(targetcollapseId));
+			const collapse = getOrCreateCollapse(document.querySelector(targetcollapseId));
 
 			trigger.addEventListener('click', () => collapse.toggle());
 		});
