@@ -58,10 +58,10 @@
 			</div>
 		</div>
 	</nav>
-	<div class="overflow-auto"
+	<main class="xoverflow-auto"
 		style="height: calc(100vh - 60px); margin-top: 60px;">
 		{{ $content }}
-	</div>
+	</main>
 
 	<script src="/js/main.min.js"></script>
 	<script src="/js/collapse.min.js" defer></script>

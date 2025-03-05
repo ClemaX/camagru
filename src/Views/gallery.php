@@ -1,4 +1,4 @@
-<div id="gallery" class="gallery-container py-4">
+<div id="gallery" class="gallery-container">
 	@foreach ($posts as $post)
 	<article class="card mb-4" aria-hidden="true">
 		<div class="card-header">
