@@ -1,4 +1,4 @@
-<div class="post-container flex-column flex-md-row gap-">
+<div class="post-container flex-column flex-md-row gap-4">
 	<div>
 		<div id="sticker-sheet" class="h-100 overflow-auto p-4 fade">
 			<ul class="sticker-list d-flex flex-md-column gap-3" style="min-width: min-content;">
@@ -50,14 +50,14 @@
 	</div>
 </div>
 
+<script src="/js/image-editor.min.js"></script>
+
 <script>
 	const stickerSheet = document.getElementById('sticker-sheet');
 	const video = document.getElementById('video');
 	const canvas = document.getElementById('canvas');
-	const context = canvas.getContext('2d');
+	// const context = canvas.getContext('2d');
 	const snapshotButton = document.getElementById('snapshot-button');
-
-	context.imageSmoothingEnabled = false;
 
 	const dragStartHandler = (e) => {
 		const rect = e.target.getBoundingClientRect();
@@ -81,80 +81,7 @@
 		sticker.addEventListener('dragstart', dragStartHandler);
 	}
 
-	canvas.addEventListener('dragover', (e) => {
-		e.preventDefault();
-		canvas.classList.add('highlight');
-	});
-
-	canvas.addEventListener('dragleave', () => {
-		canvas.classList.remove('highlight');
-	});
-
-	canvas.addEventListener("drop", (e) => {
-		e.preventDefault();
-		canvas.classList.remove('highlight');
-
-		console.debug(e);
-
-		const files = e.dataTransfer.files;
-
-		var imageSource = null;
-
-		var dropX = e.offsetX;
-		var dropY = e.offsetY;
-
-		var dragOffsetX = 0;
-		var dragOffsetY = 0;
-
-		var scaledWidth = 0;
-		var scaledHeight = 0;
-
-		const img = new Image();
-
-		img.onload = (e) => {
-			const canvasRect = canvas.getBoundingClientRect();
-
-			const canvasScale = canvas.width / canvasRect.width;
-
-			const width = scaledWidth * canvasScale;
-			const height = scaledHeight * canvasScale;
-
-			const scale = scaledWidth / img.width;
-
-			const x = (dropX - dragOffsetX) * canvasScale;
-			const y = (dropY - dragOffsetY) * canvasScale;
-
-			context.drawImage(img, x, y, width, height);
-		}
-
-		if (files.length === 1 && files[0].type.startsWith('image/')) {
-			const file = files[0];
-			const reader = new FileReader();
-
-			reader.onload = (e) => {
-				img.src = e.target.result;
-			};
-
-			reader.readAsDataURL(file);
-		}
-		else {
-			try {
-				const { offsetX, offsetY, width, height } = JSON.parse(e.dataTransfer.getData('application/sticker'));
-
-				dragOffsetX = offsetX;
-				dragOffsetY = offsetY;
-
-				scaledWidth = width;
-				scaledHeight = height;
-			}
-			catch {
-				console.debug("Unsupported drop:", e, files);
-				return;
-			}
-
-			img.src = e.dataTransfer.getData('text/uri-list');
-		}
-	});
+	const CanvasEditor = new CanvasEditor(canvas);
 
 	navigator.mediaDevices
 		.getUserMedia({ video: true, audio: false })
@@ -177,8 +104,8 @@
 		const sourceX = (video.videoWidth - minDimension) / 2;
 		const sourceY = (video.videoHeight - minDimension) / 2;
 
-		context.drawImage(video, sourceX, sourceY, minDimension, minDimension,
-			0, 0, canvas.width, canvas.height);
+		CanvasEditor.setBackgroundImage(video, sourceX, sourceY,
+			minDimension, minDimension);
 
 		video.style.display = 'none';
 		canvas.style.display = 'block';
