@@ -24,14 +24,14 @@
 			<div class="collapse navbar-collapse justify-content-between"
 				id="navbarNav">
 				<ul class="navbar-nav">
-					@role(USER, ADMIN)
+					@role("USER", "ADMIN")
 					<li class="nav-item">
 						<a class="nav-link" href="{{ url('/post') }}">Post</a>
 					</li>
 					@endrole
 				</ul>
 				<ul class="navbar-nav">
-					@role(GUEST)
+					@role("GUEST")
 					<li class="nav-item">
 						<a class="nav-link" href="{{ url('/auth/signup') }}">Sign Up</a>
 					</li>
@@ -58,7 +58,7 @@
 			</div>
 		</div>
 	</nav>
-	<div class="container-fluid overflow-auto py-4"
+	<div class="overflow-auto"
 		style="height: calc(100vh - 60px); margin-top: 60px;">
 		{{ $content }}
 	</div>
@@ -73,7 +73,7 @@
 		}
 	</script>
 
-	@env(development)
+	@env("development")
 	<script id="__bs_script__">//<![CDATA[
 		(() => {
 			try {

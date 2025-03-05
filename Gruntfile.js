@@ -63,9 +63,16 @@ module.exports = function (grunt) {
 				],
 			},
 			dist: {
-				files: {
-					"public/img/icon.svg": "svg/icon.svg",
-				},
+
+        files: [
+          {
+            expand: true,
+            cwd: "svg",
+            src: ["**/*.svg"],
+            dest: "public/img",
+            ext: ".svg",
+          },
+        ],
 			},
 		},
 		copy: {

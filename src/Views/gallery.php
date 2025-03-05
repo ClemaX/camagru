@@ -1,4 +1,4 @@
-<div id="gallery" class="gallery-container">
+<div id="gallery" class="gallery-container py-4">
 	@foreach ($posts as $post)
 	<article class="card mb-4" aria-hidden="true">
 		<div class="card-header">
@@ -17,7 +17,7 @@
 			<div class="d-flex gap-3">
 				<button class="btn btn-danger d-flex gap-2">
 					<i class="bi-heart"></i>
-					Like
+					1 Like
 				</button>
 				<button class="btn btn-info d-flex gap-2">
 					<i class="bi-chat"></i>

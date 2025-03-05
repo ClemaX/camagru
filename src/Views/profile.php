@@ -1,5 +1,5 @@
 <div class="container">
-	@role(ADMIN)
+	@role("ADMIN")
 	<div class="alert alert-info mt-3" role="alert">
 		You're the administrator!
 	</div>
