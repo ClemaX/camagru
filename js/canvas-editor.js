@@ -9,6 +9,7 @@
  * @typedef Layer
  * @type {object}
  * @property {string} id - Layer ID.
+ * @property {HTMLImageElement} image - Layer Image.
  * @property {Vector} position - Layer Position.
  * @property {Vector} dimensions - Layer Dimensions.
  */
@@ -870,10 +871,7 @@ class CanvasEditor {
 			y: Math.sign(layer.dimensions.y),
 		};
 
-		this.context.scale(
-			dimensionSigns.x,
-			dimensionSigns.y
-		);
+		this.context.scale(dimensionSigns.x, dimensionSigns.y);
 
 		this.context.drawImage(
 			layer.image,
@@ -897,5 +895,51 @@ class CanvasEditor {
 		}
 
 		this._drawSelectionHandles();
+	}
+
+	/**
+	 * Export the background and layers as SVG.
+	 *
+	 * @returns {Blob}
+	 */
+	export() {
+		const svgNs = "http://www.w3.org/2000/svg";
+		const xLinkNs = "http://www.w3.org/1999/xlink";
+
+		const svg = document.createElementNS(svgNs, "svg");
+		svg.setAttribute("width", this.canvas.width);
+		svg.setAttribute("height", this.canvas.height);
+		svg.setAttribute("xmlns", svgNs);
+
+		if (this.background) {
+			const background = document.createElementNS(svgNs, "image");
+			background.setAttribute("id", "background");
+			background.setAttribute("x", 0);
+			background.setAttribute("y", 0);
+			background.setAttribute("width", this.canvas.width);
+			background.setAttribute("height", this.canvas.height);
+			background.setAttributeNS(xLinkNs, "href", this.background.src);
+
+			svg.appendChild(background);
+		}
+
+		this.layers.forEach((layer) => {
+			const image = document.createElementNS(svgNs, "image");
+			image.setAttribute("id", layer.id);
+			image.setAttribute("x", layer.position.x);
+			image.setAttribute("y", layer.position.y);
+			image.setAttribute("width", layer.dimensions.x);
+			image.setAttribute("height", layer.dimensions.y);
+			image.setAttributeNS(xLinkNs, "href", layer.image.src);
+
+			svg.appendChild(image);
+		});
+
+		const svgData = new XMLSerializer().serializeToString(svg);
+		const svgBlob = new Blob([svgData], {
+			type: "image/svg+xml;charset=utf-8",
+		});
+
+		return svgBlob;
 	}
 }
