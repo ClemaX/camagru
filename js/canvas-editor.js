@@ -482,12 +482,24 @@ class CanvasEditor {
 				}
 			} else {
 				switch (e.key) {
+					case "Shift":
+						keepAspectRatio = true;
+						break;
+
 					case "Delete":
 						if (this.selectedLayer) {
 							this.executeCommand(new DeleteCommand(this.selectedLayer.id));
 						}
 						break;
 				}
+			}
+		});
+
+		document.addEventListener("keyup", (e) => {
+			switch (e.key) {
+				case "Shift":
+					keepAspectRatio = false;
+					break;
 			}
 		});
 
@@ -567,6 +579,8 @@ class CanvasEditor {
 		var dragOrigin = undefined;
 		/** @type {Vector | undefined} */
 		var draggedCorner = undefined;
+		/** @type {boolean} keepAspectRatio */
+		var keepAspectRatio = false;
 
 		/**
 		 * @param {DragEvent} e
@@ -579,39 +593,52 @@ class CanvasEditor {
 				y: position.y - dragOrigin.y,
 			};
 
-			if (draggedCorner.x === 0) {
-				transformCommand.setTranslation({
-					x: delta.x,
-					y: transformCommand.translation.y,
-				});
+			let scaleX, scaleY;
+			let translationX = transformCommand.translation.x;
+			let translationY = transformCommand.translation.y;
 
-				transformCommand.setScale({
-					x: 1 - delta.x / transformCommand.initialDimensions.x,
-					y: transformCommand.scale.y,
-				});
+			if (draggedCorner.x === 0) {
+				scaleX = 1 - delta.x / transformCommand.initialDimensions.x;
+				translationX = delta.x;
 			} else {
-				// this.selectedLayer.dimensions.x += delta.x;
-				transformCommand.setScale({
-					x: 1 + delta.x / transformCommand.initialDimensions.x,
-					y: transformCommand.scale.y,
-				});
+				scaleX = 1 + delta.x / transformCommand.initialDimensions.x;
 			}
 
 			if (draggedCorner.y === 0) {
-				transformCommand.setTranslation({
-					x: transformCommand.translation.x,
-					y: delta.y,
-				});
-				transformCommand.setScale({
-					x: transformCommand.scale.x,
-					y: 1 - delta.y / transformCommand.initialDimensions.y,
-				});
+				scaleY = 1 - delta.y / transformCommand.initialDimensions.y;
+				translationY = delta.y;
 			} else {
-				transformCommand.setScale({
-					x: transformCommand.scale.x,
-					y: 1 + delta.y / transformCommand.initialDimensions.y,
-				});
+				scaleY = 1 + delta.y / transformCommand.initialDimensions.y;
 			}
+
+			if (keepAspectRatio) {
+				const aspectRatio =
+					transformCommand.initialDimensions.x /
+					transformCommand.initialDimensions.y;
+				if (Math.abs(delta.x) > Math.abs(delta.y)) {
+					scaleY = scaleX / aspectRatio;
+					if (draggedCorner.y === 0) {
+						translationY = transformCommand.initialDimensions.y * (1 - scaleY);
+					}
+				} else {
+					scaleX = scaleY * aspectRatio;
+					if (draggedCorner.x === 0) {
+						translationX = transformCommand.initialDimensions.x * (1 - scaleX);
+					}
+				}
+			}
+
+			transformCommand.setScale({
+				x: scaleX,
+				y: scaleY,
+			});
+
+			transformCommand.setTranslation({
+				x: translationX,
+				y: translationY,
+			});
+
+			console.debug(transformCommand);
 
 			transformCommand.execute(this);
 		};
@@ -779,7 +806,7 @@ class CanvasEditor {
 
 		this.context.beginPath();
 		this.context.setLineDash([10, 5]);
-		this.context.strokeStyle = "gray";
+		this.context.strokeStyle = "white";
 		this.context.lineWidth = 1;
 
 		this.context.globalCompositeOperation = "difference";
@@ -795,9 +822,7 @@ class CanvasEditor {
 
 		this.context.setLineDash([]);
 
-		const primaryColor = getComputedStyle(document.documentElement)
-			.getPropertyValue("--bs-primary")
-			.trim();
+		const primaryColor = "#4D80FF";
 
 		this.context.fillStyle = primaryColor;
 
