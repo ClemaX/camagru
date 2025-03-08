@@ -840,35 +840,22 @@ class CanvasEditor {
 	 * @param {Layer} layer
 	 */
 	_drawLayer(layer) {
-		// const sourceRatio = layer.image.width / layer.image.height;
-		// const destinationRatio = layer.dimensions.x / layer.dimensions.y;
-
-		const scale = {
-			x: layer.dimensions.x / layer.image.width,
-			y: layer.dimensions.y / layer.image.height,
+		const dimensionSigns = {
+			x: Math.sign(layer.dimensions.x),
+			y: Math.sign(layer.dimensions.y),
 		};
 
-		// console.debug(destinationRatio / sourceRatio);
-
-		console.debug("scale: ", scale);
-
 		this.context.scale(
-			Math.sign(layer.dimensions.x),
-			Math.sign(layer.dimensions.y)
+			dimensionSigns.x,
+			dimensionSigns.y
 		);
-
-		// if (destinationRatio < sourceRatio) {
-
-		// } else if (destinationRatio > sourceRatio) {
-
-		// }
 
 		this.context.drawImage(
 			layer.image,
-			layer.position.x,
-			layer.position.y,
-			layer.dimensions.x,
-			layer.dimensions.y
+			dimensionSigns.x * layer.position.x,
+			dimensionSigns.y * layer.position.y,
+			dimensionSigns.x * layer.dimensions.x,
+			dimensionSigns.y * layer.dimensions.y
 		);
 
 		this.context.setTransform(1, 0, 0, 1, 0, 0);
