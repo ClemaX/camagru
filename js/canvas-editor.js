@@ -613,7 +613,7 @@ class CanvasEditor {
 				});
 			}
 
-			transformCommand.execute(editor);
+			transformCommand.execute(this);
 		};
 
 		/**
@@ -665,7 +665,7 @@ class CanvasEditor {
 				y: delta.y,
 			});
 
-			transformCommand.execute(editor);
+			transformCommand.execute(this);
 		};
 
 		const onLayerDragStart = (layer, position) => {
