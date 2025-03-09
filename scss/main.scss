@@ -2,12 +2,20 @@
 @import "../node_modules/bootstrap/scss/bootstrap";
 @import "../node_modules/bootstrap-icons/font/bootstrap-icons";
 
+$navbar-height: $nav-link-height + $navbar-padding-y + $nav-link-padding-y;
+
 body {
 	--ml-ignore: true;
 }
 
 main {
-	.container, .gallery-container {
+	overflow-y: auto;
+
+	height: calc(100vh - #{$navbar-height});
+	margin-top: #{$navbar-height};
+
+	.container,
+	.gallery-container {
 		padding-top: $spacer;
 		padding-bottom: $spacer;
 	}
@@ -18,7 +26,7 @@ main {
 }
 
 .gallery-container {
-  @include make-container();
+	@include make-container();
 	max-width: 75vmin;
 }
 
@@ -39,7 +47,8 @@ ul.sticker-list {
 	}
 }
 
-.sticker-list-placeholder, ul.sticker-list li {
+.sticker-list-placeholder,
+ul.sticker-list li {
 	width: 15vmin;
-	height: 15vmin;
+	max-height: 15vmin;
 }

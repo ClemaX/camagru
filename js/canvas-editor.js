@@ -79,7 +79,7 @@ class DrawCommand extends Command {
 		);
 		editor.selectLayer(this.layerId);
 
-		editor.redraw();
+		editor._redraw();
 	}
 
 	/**
@@ -90,7 +90,7 @@ class DrawCommand extends Command {
 	undo(editor) {
 		editor.removeLayer(this.layerId);
 
-		editor.redraw();
+		editor._redraw();
 	}
 }
 
@@ -120,7 +120,7 @@ class DeleteCommand extends Command {
 	execute(editor) {
 		this.layer = editor.removeLayer(this.layerId);
 
-		editor.redraw();
+		editor._redraw();
 	}
 
 	/**
@@ -139,7 +139,7 @@ class DeleteCommand extends Command {
 
 		editor.selectLayer(this.layerId);
 
-		editor.redraw();
+		editor._redraw();
 	}
 }
 
@@ -200,7 +200,7 @@ class TransformCommand extends Command {
 		layer.dimensions.x = this.initialDimensions.x * this.scale.x;
 		layer.dimensions.y = this.initialDimensions.y * this.scale.y;
 
-		editor.redraw();
+		editor._redraw();
 	}
 
 	/**
@@ -219,7 +219,7 @@ class TransformCommand extends Command {
 		layer.dimensions.x = this.initialDimensions.x;
 		layer.dimensions.y = this.initialDimensions.y;
 
-		editor.redraw();
+		editor._redraw();
 	}
 }
 
@@ -243,7 +243,7 @@ class CanvasEditor {
 		/** @type {CanvasRenderingContext2D} */
 		this.context = canvas.getContext("2d");
 
-		/** @type {HTMLImageElement | undefined} */
+		/** @type {Layer | undefined} */
 		this.background = undefined;
 
 		/** @type {Layer[]} */
@@ -291,6 +291,11 @@ class CanvasEditor {
 		}
 	}
 
+	removeBackgroundImage() {
+		this.background = undefined;
+		this._redraw();
+	}
+
 	/**
 	 * Set the background image.
 	 *
@@ -301,6 +306,8 @@ class CanvasEditor {
 	 * @param {number} height
 	 */
 	setBackgroundImage(image, sourceX, sourceY, width, height) {
+		this.background = undefined;
+
 		this.context.drawImage(
 			image,
 			sourceX,
@@ -315,12 +322,23 @@ class CanvasEditor {
 
 		const src = this.canvas.toDataURL();
 
+		for (const layer of this.layers) {
+			this._drawLayer(layer);
+		}
+
+		this._drawSelectionHandles();
+
 		const img = new Image();
 
 		img.addEventListener("load", (_) => {
-			this.background = img;
+			this.background = {
+				id: "background",
+				image: img,
+				position: { x: 0, y: 0 },
+				dimensions: { x: this.canvas.width, y: this.canvas.height },
+			};
 
-			this.redraw();
+			this._redraw();
 		});
 
 		img.src = src;
@@ -508,6 +526,14 @@ class CanvasEditor {
 			e.preventDefault();
 		});
 
+		this.beforeUnloadHandler = (event) => {
+			// Recommended
+			event.preventDefault();
+
+			// Included for legacy support, e.g. Chrome/Edge < 119
+			event.returnValue = true;
+		};
+
 		/**
 		 * @param {DragEvent} e
 		 */
@@ -639,8 +665,6 @@ class CanvasEditor {
 				y: translationY,
 			});
 
-			console.debug(transformCommand);
-
 			transformCommand.execute(this);
 		};
 
@@ -710,7 +734,6 @@ class CanvasEditor {
 		};
 
 		const onLayerDragEnd = () => {
-			// console.debug("Layer drag end");
 			this.canvas.removeEventListener("mousemove", onLayerDragUpdate);
 			this.canvas.removeEventListener("mouseup", onLayerDragEnd);
 			this.canvas.removeEventListener("mouseleave", onLayerDragEnd);
@@ -724,8 +747,6 @@ class CanvasEditor {
 		};
 
 		const onCanvasClick = (e) => {
-			// console.debug("Canvas mouse down:", e);
-
 			const position = this._getRelativeClientPosition(e);
 
 			const corner = this.selectDragHandle(position);
@@ -735,7 +756,7 @@ class CanvasEditor {
 			} else {
 				this.selectLayerAt(position);
 
-				this.redraw();
+				this._redraw();
 
 				if (this.selectedLayer) {
 					onLayerDragStart(this.selectedLayer, position);
@@ -763,8 +784,6 @@ class CanvasEditor {
 			dimensions,
 		};
 
-		// console.debug("Added layer:", id, layer.id);
-
 		this.layers.push(layer);
 
 		return layer.id;
@@ -789,10 +808,7 @@ class CanvasEditor {
 
 		if (deletedLayer) {
 			this.layers = this.layers.filter((layer) => layer.id !== layerId);
-			// console.debug(this.layers);
 		}
-
-		// console.debug(deletedLayer);
 
 		return deletedLayer;
 	}
@@ -848,19 +864,6 @@ class CanvasEditor {
 	}
 
 	/**
-	 * Draw background image.
-	 */
-	_drawBackground() {
-		this.context.drawImage(
-			this.background,
-			0,
-			0,
-			this.canvas.width,
-			this.canvas.height
-		);
-	}
-
-	/**
 	 *	Draw a single layer.
 	 *
 	 * @param {Layer} layer
@@ -887,8 +890,13 @@ class CanvasEditor {
 	/**
 	 * Redraw layers on the canvas.
 	 */
-	redraw() {
-		this._drawBackground();
+	_redraw() {
+		if (this.background) {
+			this._drawLayer(this.background);
+		}
+		else {
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		}
 
 		for (const layer of this.layers) {
 			this._drawLayer(layer);
@@ -898,13 +906,38 @@ class CanvasEditor {
 	}
 
 	/**
-	 * Export the background and layers as SVG.
+	 *	Export a layer as SVG image.
+	 *
+	 * @param {Layer} layer
+	 * @returns
+	 */
+	_exportLayer(layer) {
+		const image = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"image"
+		);
+
+		image.setAttribute("id", layer.id);
+		image.setAttribute("x", layer.position.x);
+		image.setAttribute("y", layer.position.y);
+		image.setAttribute("width", layer.dimensions.x);
+		image.setAttribute("height", layer.dimensions.y);
+		image.setAttributeNS(
+			"http://www.w3.org/1999/xlink",
+			"href",
+			layer.image.src
+		);
+
+		return image;
+	}
+
+	/**
+	 * Export the composition as SVG Blob.
 	 *
 	 * @returns {Blob}
 	 */
 	export() {
 		const svgNs = "http://www.w3.org/2000/svg";
-		const xLinkNs = "http://www.w3.org/1999/xlink";
 
 		const svg = document.createElementNS(svgNs, "svg");
 		svg.setAttribute("width", this.canvas.width);
@@ -912,28 +945,12 @@ class CanvasEditor {
 		svg.setAttribute("xmlns", svgNs);
 
 		if (this.background) {
-			const background = document.createElementNS(svgNs, "image");
-			background.setAttribute("id", "background");
-			background.setAttribute("x", 0);
-			background.setAttribute("y", 0);
-			background.setAttribute("width", this.canvas.width);
-			background.setAttribute("height", this.canvas.height);
-			background.setAttributeNS(xLinkNs, "href", this.background.src);
-
-			svg.appendChild(background);
+			svg.appendChild(this._exportLayer(this.background));
 		}
 
-		this.layers.forEach((layer) => {
-			const image = document.createElementNS(svgNs, "image");
-			image.setAttribute("id", layer.id);
-			image.setAttribute("x", layer.position.x);
-			image.setAttribute("y", layer.position.y);
-			image.setAttribute("width", layer.dimensions.x);
-			image.setAttribute("height", layer.dimensions.y);
-			image.setAttributeNS(xLinkNs, "href", layer.image.src);
-
-			svg.appendChild(image);
-		});
+		for (const layer of this.layers) {
+			svg.appendChild(this._exportLayer(layer));
+		}
 
 		const svgData = new XMLSerializer().serializeToString(svg);
 		const svgBlob = new Blob([svgData], {

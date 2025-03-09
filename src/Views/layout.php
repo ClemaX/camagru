@@ -7,6 +7,8 @@
 	<title>Camagru</title>
 	<link href="/css/main.min.css" rel="stylesheet">
 	<link rel="icon" href="/img/icon.svg" type="image/svg+xml">
+	<script src="/js/main.min.js" async></script>
+	<script src="/js/collapse.min.js" async></script>
 </head>
 <body class="overflow-hidden">
 	<nav class="navbar navbar-expand-sm fixed-top bg-body-tertiary">
@@ -48,8 +50,9 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ url('/') }}"
-							onclick="logout(); return false;">
+						<a class="nav-link" id="logout-button"
+							data-logout-url="{{ url('/auth/logout') }}"
+							href="{{ url('/') }}">
 							Log Out
 						</a>
 					</li>
@@ -58,19 +61,24 @@
 			</div>
 		</div>
 	</nav>
-	<main class="overflow-auto"
-		style="height: calc(100vh - 60px); margin-top: 60px;">
-		{{ $content }}
-	</main>
-
-	<script src="/js/main.min.js"></script>
-	<script src="/js/collapse.min.js" defer></script>
+	<main>{{ $content }}</main>
 
 	<script>
-		const logout = async () => {
-			await fetch("{{ url('/auth/logout') }}", { method: 'POST' });
-			window.location = "{{ url('/') }}";
-		}
+		(() => {
+			'use strict';
+
+			const logout = async (logoutUrl) => {
+				const response = await fetch(logoutUrl, { method: 'POST' });
+				window.location = response.headers['Location'];
+			};
+
+			const logoutButton = document.getElementById('logout-button');
+
+			logoutButton.addEventListener('click', () => {
+				logout(logoutButton.getAttribute('data-logout-url'));
+				return false;
+			});
+		})();
 	</script>
 
 	@env("development")
