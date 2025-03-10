@@ -67,7 +67,7 @@ class Renderer
 		string $content,
 		array $params
 	): string {
-		$pattern = '/@if\s*\((.*?)\)(.*?)(?:@else(.*?))?@endif/s';
+		$pattern = '/@if\s*(\((?:[^()]++|(?1))*\))(.*?)(?:@else(.*?))?@endif/s';
 		return preg_replace_callback($pattern, function ($matches) use ($params) {
 			$condition = $matches[1];
 			$ifBlock = $matches[2];

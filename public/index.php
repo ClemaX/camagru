@@ -97,6 +97,7 @@ $userService = new UserService(
 );
 $postService = new PostService(
 	$postRepository,
+	$config,
 );
 
 // Controllers
@@ -116,7 +117,7 @@ $router->addController(new UserController(
 
 // Request dispatch
 try {
-	$content = $router->dispatch(
+	echo $router->dispatch(
 		$_SERVER['REQUEST_URI'],
 		$_SERVER['REQUEST_METHOD'],
 	);
@@ -128,10 +129,10 @@ try {
 	]);
 
 	$e->sendHeaders();
+
+	echo $renderer->render('layout', [
+		"content" => $content,
+	]);
 }
 
 $pdo = null;
-
-echo $renderer->render('layout', [
-	"content" => $content,
-]);

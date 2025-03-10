@@ -1,9 +1,4 @@
 <div class="container">
-	@role("ADMIN")
-	<div class="alert alert-info mt-3" role="alert">
-		You're the administrator!
-	</div>
-	@endrole
 	<div class="card">
 		<div class="card-header d-flex justify-content-between">
 			<h1 class="card-title">{{ $username }}</h1>
@@ -23,6 +18,11 @@
 			</p>
 			</div>
 	</div>
+	@role("ADMIN")
+	<div class="alert alert-info mt-3" role="alert">
+		You're the administrator!
+	</div>
+	@endrole
 </div>
 
 <div class="modal fade" id="profileEditModal" tabindex="-1" aria-hidden="true"

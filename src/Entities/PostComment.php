@@ -19,32 +19,35 @@ require_once __DIR__ . '/../Attributes/Entity/ManyToOne.php';
 require_once __DIR__ . '/../Attributes/Validation/NotNull.php';
 require_once __DIR__ . '/../Attributes/Validation/MaxLength.php';
 
-#[Entity('post')]
-class Post
+#[Entity('post_comment')]
+class PostComment
 {
 	#[Id]
 	#[Column('id')]
 	public int $id = 0;
 
+	#[NotNull]
 	#[Column('created_at')]
 	public DateTime $createdAt;
 
+	#[NotNull]
 	#[Column('updated_at')]
 	public DateTime $updatedAt;
 
 	#[NotNull]
-	#[MaxLength(64)]
-	#[Column('title')]
-	public string $title;
-
-	#[NotNull]
-	#[MaxLength(512)]
-	#[Column('description')]
-	public string $description;
+	#[Column('post_id')]
+	public int $postId = 0;
 
 	#[ManyToOne]
 	#[JoinColumn("author_id")]
 	public User $author;
 
-	public string $pictureUrl;
+	#[NotNull]
+	#[Column('subject_id')]
+	public int $subjectId = 0;
+
+	#[NotNull]
+	#[MaxLength(512)]
+	#[Column('body')]
+	public string $body;
 }

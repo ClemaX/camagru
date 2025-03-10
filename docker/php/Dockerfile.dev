@@ -5,12 +5,15 @@ RUN apk update \
     build-base \
     postgresql-dev \
     autoconf \
-    msmtp
+    msmtp \
+    libpng-dev \
+&& ln -sf /usr/bin/msmtp /usr/bin/sendmail \
+&& ln -sf /usr/bin/msmtp /usr/sbin/sendmail
 
-RUN docker-php-ext-install pdo pdo_pgsql
+RUN docker-php-ext-install pdo pdo_pgsql gd
 
-RUN ln -sf /usr/bin/msmtp /usr/bin/sendmail \
-&&  ln -sf /usr/bin/msmtp /usr/sbin/sendmail
+RUN mkdir -m 0755 -p /var/lib/camagru \
+&& chown www-data:www-data /var/lib/camagru
 
 WORKDIR /var/www/html
 

@@ -11,6 +11,10 @@
 	const actionButton = document.getElementById("action-button");
 	const downloadButton = document.getElementById("download-button");
 	const deleteButton = document.getElementById("delete-button");
+	const postEditModal = getOrCreateModal(
+		document.getElementById("postEditModal")
+	);
+	const postEditForm = document.getElementById("postEditForm");
 
 	const dragStartHandler = (e) => {
 		const rect = e.target.getBoundingClientRect();
@@ -56,9 +60,33 @@
 			console.error("Error accessing the webcam:", err);
 		});
 
+	postEditModal.element.addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		const form = e.target;
+		const formData = new FormData(form);
+
+		const response = await fetch(form.action, {
+			method: form.method,
+			body: formData,
+			redirect: "manual",
+		});
+
+		if (response.ok) {
+			console.debug(response.headers);
+			window.location = response.headers.get('Location');
+		}
+	});
+
+	postEditForm.addEventListener("formdata", (e) => {
+		const formData = e.formData;
+
+		formData.set("picture", editor.export());
+	});
+
 	actionButton.addEventListener("click", () => {
 		if (editor.background) {
-			console.debug("TODO: Open modal for title and description");
+			postEditModal.show();
 			return;
 		}
 
@@ -82,9 +110,6 @@
 			}
 			video.srcObject = null;
 		}
-
-		// video.style.display = "none";
-		// canvas.style.display = "block";
 
 		stickerSheet.classList.add("show");
 
@@ -128,7 +153,6 @@
 			.catch((err) => {
 				console.error("Error accessing the webcam:", err);
 			});
-
 	});
 
 	downloadButton.addEventListener("click", () => {

@@ -6,6 +6,7 @@ services:
     volumes:
       - ./public:/var/www/html/public:ro
       - ./docker/nginx:/etc/nginx/conf.d:ro
+      - camagru_data:/var/www/html/media:ro
     depends_on:
       php:
         condition: service_healthy
@@ -33,6 +34,7 @@ services:
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./src:/var/www/html/src:ro
       - ./public:/var/www/html/public:ro
+      - camagru_data:/var/lib/camagru:rw
     depends_on:
       liquibase:
         condition: service_completed_successfully
@@ -147,6 +149,7 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+  camagru_data:
 
 networks:
   data-tier:

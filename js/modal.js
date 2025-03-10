@@ -112,6 +112,12 @@ class Modal {
 
 const _modals = {};
 
+/**
+ * Get or create a modal instance.
+ *
+ * @param {HTMLElement} target
+ * @returns {Modal}
+ */
 const getOrCreateModal = (target) => {
 	if (!(target.id in _modals)) {
 		_modals[target.id] = new Modal(target);

@@ -3,13 +3,22 @@
 	<article class="card mb-4" aria-hidden="true">
 		<div class="card-header">
 			<div class="d-flex flex-column">
-				<h6 class="card-title">{{ $post->author->username }}</h2>
-				<h6 class="card-title">{{ '$post->createdAt' }}</h2>
+				<h2 class="card-title">
+					{{ $post->author->username }}
+				</h2>
+				<h6 class="card-title">
+					{{ date_format($post->createdAt, 'd/m/Y H:i:s') }}
+				</h6>
 			</div>
 		</div>
 		<div class="ratio ratio-1x1">
-			<img src="https://picsum.photos/id/{{ $post->id }}/1024" class="placeholder"
+			<object
+				type="image/svg+xml"
+				data="{{ $post->pictureUrl }}"
 				alt="{{ $post->description }}">
+				<div class="placeholder w-100 h-100"></div>
+			</object>
+			<!-- <embed src="{{ $post->pictureUrl }}" class="w-100 h-100"> -->
 		</div>
 		<div class="card-body">
 			<h5 class="card-title">{{ $post->title }}</h5>
@@ -17,7 +26,7 @@
 			<div class="d-flex gap-3">
 				<button class="btn btn-danger d-flex gap-2">
 					<i class="bi-heart"></i>
-					1 Like
+					{{ $post->likes }}
 				</button>
 				<button class="btn btn-info d-flex gap-2">
 					<i class="bi-chat"></i>
@@ -27,14 +36,38 @@
 		</div>
 	</article>
 	@endforeach
+	@if(empty($posts))
+	<div class="card">
+		<div class="card-header">
+			<div class="d-flex flex-column">
+				<h1 class="card-title">
+					Welcome to Camagru
+				</h1>
+			</div>
+		</div>
+		<div class="card-body">
+			<p class="card-text">
+				Nobody has posted anything yet.
+			</p>
+			@role("USER", "ADMIN")
+			<a href="/post" class="btn btn-primary">
+				<div class="d-flex gap-2">
+					<i class="bi-send-fill"></i>
+					Post something
+				</div>
+			</a>
+			@endrole
+		</div>
+	</div>
+	@endif
 </div>
 
 <script>
 	const gallery = document.getElementById('gallery');
 
-	gallery.querySelectorAll('img.placeholder').forEach(img => {
-		img.addEventListener('load', (event) => {
-			event.target.classList.remove('placeholder');
-		});
-	});
+	// gallery.querySelectorAll('embed.placeholder').forEach(img => {
+	// 	img.addEventListener('load', (event) => {
+	// 		event.target.classList.remove('placeholder');
+	// 	});
+	// });
 </script>

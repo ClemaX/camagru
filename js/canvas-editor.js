@@ -233,6 +233,10 @@ const corners = [
 	{ x: 1, y: 1 },
 ];
 
+const xmlnsNs = "http://www.w3.org/2000/xmlns/";
+const svgNs = "http://www.w3.org/2000/svg";
+const xlinkNs = "http://www.w3.org/1999/xlink";
+
 class CanvasEditor {
 	/**
 	 * @param {HTMLCanvasElement} canvas
@@ -893,8 +897,7 @@ class CanvasEditor {
 	_redraw() {
 		if (this.background) {
 			this._drawLayer(this.background);
-		}
-		else {
+		} else {
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 
@@ -912,21 +915,14 @@ class CanvasEditor {
 	 * @returns
 	 */
 	_exportLayer(layer) {
-		const image = document.createElementNS(
-			"http://www.w3.org/2000/svg",
-			"image"
-		);
+		const image = document.createElementNS(svgNs, "image");
 
 		image.setAttribute("id", layer.id);
 		image.setAttribute("x", layer.position.x);
 		image.setAttribute("y", layer.position.y);
 		image.setAttribute("width", layer.dimensions.x);
 		image.setAttribute("height", layer.dimensions.y);
-		image.setAttributeNS(
-			"http://www.w3.org/1999/xlink",
-			"href",
-			layer.image.src
-		);
+		image.setAttributeNS(xlinkNs, "xlink:href", layer.image.src);
 
 		return image;
 	}
@@ -937,12 +933,15 @@ class CanvasEditor {
 	 * @returns {Blob}
 	 */
 	export() {
-		const svgNs = "http://www.w3.org/2000/svg";
-
 		const svg = document.createElementNS(svgNs, "svg");
 		svg.setAttribute("width", this.canvas.width);
 		svg.setAttribute("height", this.canvas.height);
-		svg.setAttribute("xmlns", svgNs);
+		svg.setAttribute(
+			"viewBox",
+			`0 0 ${this.canvas.width} ${this.canvas.height}`
+		);
+		svg.setAttribute("preserveAspectRatio", "xMidYMid");
+		svg.setAttributeNS(xmlnsNs, "xmlns:xlink", xlinkNs);
 
 		if (this.background) {
 			svg.appendChild(this._exportLayer(this.background));

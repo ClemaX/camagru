@@ -69,7 +69,7 @@
 
 			const logout = async (logoutUrl) => {
 				const response = await fetch(logoutUrl, { method: 'POST' });
-				window.location = response.headers['Location'];
+				window.location = response.headers.get('Location');
 			};
 
 			const logoutButton = document.getElementById('logout-button');

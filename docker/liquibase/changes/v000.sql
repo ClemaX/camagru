@@ -85,15 +85,44 @@ create table post
 (
     -- Base properties
     id                      bigint                  primary key generated always as identity,
-    created_at              timestamp               not null    default current_timestamp,
-    updated_at              timestamp               not null    default current_timestamp,
-
+    created_at              bigint                  not null,
+    updated_at              bigint                  not null,
     -- Post properties
     title                   varchar(64)             not null,
     description             varchar(512)            not null    default '',
     author_id               bigint                  not null,
     -- Constraints
     foreign key(author_id)  references "user"(id)   on delete   cascade
+);
+
+create table post_like
+(
+    -- Base properties
+    created_at              bigint                      not null,
+    -- Post Like properties
+    post_id                 bigint                      not null,
+    author_id               bigint                      not null,
+    -- Constraints
+    foreign key(post_id)    references post(id)         on delete   cascade,
+    foreign key(author_id)  references "user"(id)       on delete   cascade,
+    primary key(post_id, author_id)
+);
+
+create table post_comment
+(
+    -- Base properties
+    id                      bigint                      primary key generated always as identity,
+    created_at              bigint                      not null,
+    updated_at              bigint                      not null,
+    -- Post Comment properties
+    post_id                 bigint                      not null,
+    author_id               bigint                      not null,
+    subject_id              bigint                                  default null,
+    body                    varchar(512)                not null,
+    -- Constraints
+    foreign key(post_id)    references post(id)         on delete   cascade,
+    foreign key(author_id)  references "user"(id)       on delete   cascade,
+    foreign key(subject_id) references post_comment(id) on delete   cascade
 );
 
 ------------------------

@@ -9,4 +9,7 @@ return [
 	'USER_UNLOCK_TOKEN_LIFETIME' => '15 minutes',
 	'DEBUG' => 'false',
 	'APP_ENV' => 'production',
+	'STORAGE_DIRECTORY' => '/var/lib/camagru',
+	'STORAGE_EXTERNAL_URL' => 'http://media.camagru.localhost:8080',
+	'POST_PICTURE_BUCKET_ID' => 'post.picture',
 ];

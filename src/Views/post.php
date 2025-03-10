@@ -62,5 +62,47 @@
 	</div>
 </div>
 
+<div class="modal fade" id="postEditModal" tabindex="-1" aria-hidden="true"
+	aria-labelledby="postEditModalLabel">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="postEditModalLabel">Post</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"
+					aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body">
+				<form id="postEditForm" class="needs-validation d-flex flex-column gap-3" novalidate method="post">
+					@csrf
+					<div class="form-group">
+					<label for="title">Title</label>
+					<input type="text"
+						class="form-control"
+						id="title" name="title" required
+						minlength="3" maxlength="64" pattern="^\S(.*\S)?$">
+					<div class="invalid-feedback">
+						Title must be 3-64 characters long and contain at least one non-whitespace character.
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="description">Description</label>
+					<textarea class="form-control no-resize" id="description"
+						name="description" rows="3"></textarea>
+					<div class="invalid-feedback">
+						Description must be at most 140 characters long.
+					</div>
+				</div>
+					<button type="submit" class="btn btn-primary">Post</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 <script src="/js/canvas-editor.min.js" defer></script>
+<script src="/js/form.min.js" defer></script>
+<script src="/js/modal.min.js" defer></script>
 <script src="/js/post.min.js" defer></script>

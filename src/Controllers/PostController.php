@@ -8,7 +8,9 @@ use App\Attributes\RequestBody;
 use App\Attributes\Route;
 use App\Entities\User;
 use App\Entities\Post;
+use App\Exceptions\MappingException;
 use App\Exceptions\UnauthorizedException;
+use App\Exceptions\ValidationException;
 use App\Renderer;
 use App\Services\DTOs\PostCreationDTO;
 use App\Services\PostService;
@@ -17,7 +19,7 @@ use SensitiveParameter;
 
 require_once __DIR__ . '/AbstractController.php';
 require_once __DIR__ . '/../Entities/Post.php';
-require_once __DIR__ . '/../Entities/Post.php';
+require_once __DIR__ . '/../Services/DTOs/PostCreationDTO.php';
 require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
 
 #[Controller('/')]
@@ -31,30 +33,10 @@ class PostController extends AbstractController
 	}
 
 	#[Route('')]
-	public function getAll(#[SensitiveParameter] #[CurrentUser] ?User $user)
+	public function getAll()
 	{
-		$username = $user !== null ? $user->username : null;
-
-		$posts = array();
-
-		$author = new User();
-		$author->username = "Test author";
-
-		for ($i = 0; $i < 33; $i++) {
-			$post = new Post();
-			$post->id = 500 + $i;
-			$post->author = $author;
-			$post->title = 'The standard Lorem Ipsum passage, used since the 1500s';
-			$post->description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-			$post->createdAt = new DateTime();
-			$post->updatedAt = new DateTime();
-
-			$posts[] = $post;
-		}
-
 		return $this->render('gallery', [
-			'username' => $username,
-			'posts' => $posts,
+			'posts' => $this->postService->getAll(),
 		]);
 	}
 
@@ -78,6 +60,25 @@ class PostController extends AbstractController
 			throw new UnauthorizedException();
 		}
 
-		$this->postService->post($user, $dto);
+		if (!array_key_exists('picture', $_FILES)
+		|| empty($_FILES['picture']['tmp_name'])) {
+			throw new MappingException();
+		}
+
+		$picture = $_FILES['picture'];
+
+		header('Content-Type: application/json; charset=UTF-8');
+
+		try {
+			$post = $this->postService->post($user, $dto, $picture);
+		} catch (ValidationException $e) {
+			http_response_code($e->getStatusCode());
+			return json_encode($e->getErrors());
+		}
+
+		http_response_code(201);
+		header('Location: ./');
+
+		return json_encode($post);
 	}
 }

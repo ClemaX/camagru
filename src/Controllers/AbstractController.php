@@ -14,6 +14,8 @@ abstract class AbstractController
 
 	protected function render(string $templateName, array $params = []): string
 	{
-		return $this->renderer->render($templateName, $params);
+		$content = $this->renderer->render($templateName, $params);
+
+		return $this->renderer->render('layout', ['content' => $content]);
 	}
 }
