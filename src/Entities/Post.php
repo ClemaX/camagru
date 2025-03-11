@@ -47,4 +47,5 @@ class Post
 	public User $author;
 
 	public string $pictureUrl;
+	public int $likeCount = 0;
 }

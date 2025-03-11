@@ -26,17 +26,6 @@ abstract class AbstractRepository
 		return $this->entityManager->findBy($criteria, $this->getModelClass());
 	}
 
-	/**
-	 * @param array<string, string | array<string, string>> $criteria
-	 */
-	protected function deleteBy(array $criteria)
-	{
-		return $this->entityManager->deleteBy(
-			$criteria,
-			$this->getModelClass()
-		);
-	}
-
 	/** @return ?EntityT $model */
 	public function findById(int | object $id): ?object
 	{
@@ -56,6 +45,15 @@ abstract class AbstractRepository
 	}
 
 	/**
+	 * @template EntityT of object
+	 * @param array<string, string | array<string, string>> $criteria
+	 */
+	protected function countBy(array $criteria): int
+	{
+		return $this->entityManager->countBy($criteria, $this->getModelClass());
+	}
+
+	/**
 	 * @param EntityT $model
 	 * @return EntityT
 	 */
@@ -71,6 +69,17 @@ abstract class AbstractRepository
 	public function update(object $model): object
 	{
 		return $this->entityManager->merge($model, $this->getModelClass());
+	}
+
+	/**
+	 * @param array<string, string | array<string, string>> $criteria
+	 */
+	protected function deleteBy(array $criteria)
+	{
+		return $this->entityManager->deleteBy(
+			$criteria,
+			$this->getModelClass()
+		);
 	}
 
 	public function delete(int|object $id)

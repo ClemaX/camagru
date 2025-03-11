@@ -26,7 +26,8 @@
 			<div class="d-flex gap-3">
 				<button class="btn btn-danger d-flex gap-2">
 					<i class="bi-heart"></i>
-					{{ $post->likes }}
+					{{ $post->likeCount }}
+					Likes
 				</button>
 				<button class="btn btn-info d-flex gap-2">
 					<i class="bi-chat"></i>

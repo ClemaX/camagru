@@ -443,6 +443,10 @@ class EntityManager
 
 		self::bindParameters($stmt, $criteria);
 
+		if (!$stmt->execute()) {
+			throw new InternalException('Could not execute PDO statement');
+		}
+
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 
 		if (!$result) {
@@ -490,6 +494,10 @@ class EntityManager
 			throw new InternalException('Could not prepare PDO statement');
 		}
 
+		if (!$stmt->execute()) {
+			throw new InternalException('Could not execute PDO statement');
+		}
+
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		return array_map(fn ($data) => $this->load($data, $modelClass), $results);
@@ -497,10 +505,104 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
+	 * @param array<string, string | array<string, string>> $criteria
+	 * @param class-string<EntityT>
+	 */
+	public function countBy(array $criteria, string $modelClass): int
+	{
+		if (empty($criteria)) {
+			throw new InternalException('Criteria cannot be empty');
+		}
+
+		$conditions = self::formulateConditions($criteria);
+
+		$stmt = $this->pdo->prepare("SELECT COUNT(1) FROM "
+			. self::getTableName($modelClass) ." WHERE " . $conditions);
+
+		if ($stmt === false) {
+			throw new InternalException('Could not prepare PDO statement');
+		}
+
+		self::bindParameters($stmt, $criteria);
+
+		if (!$stmt->execute()) {
+			throw new InternalException('Could not execute PDO statement');
+		}
+
+		$count = $stmt->fetchColumn();
+
+		return $count;
+	}
+
+	/**
+	 * @template EntityT of object
+	 * @param class-string<EntityT>
+	 */
+	public function countAll(string $modelClass): int
+	{
+		$stmt = $this->pdo->prepare("SELECT COUNT(1) FROM "
+			. self::getTableName($modelClass));
+
+		if ($stmt === false) {
+			throw new InternalException('Could not prepare PDO statement');
+		}
+
+		$count = $stmt->fetchColumn();
+
+		return $count;
+	}
+
+
+	/**
+	 * @template EntityT of object
+	 * @param array<string, string | array<string, string>> $criteria
+	 * @param class-string<EntityT>
+	 */
+	public function existsBy(array $criteria, string $modelClass): bool
+	{
+		if (empty($criteria)) {
+			throw new InternalException('Criteria cannot be empty');
+		}
+
+		$conditions = self::formulateConditions($criteria);
+
+		$stmt = $this->pdo->prepare('SELECT EXISTS (SELECT COUNT(1) FROM '
+			. self::getTableName($modelClass) .' WHERE ' . $conditions . ')');
+
+		if ($stmt === false) {
+			throw new InternalException('Could not prepare PDO statement');
+		}
+
+		self::bindParameters($stmt, $criteria);
+
+		if (!$stmt->execute()) {
+			throw new InternalException('Could not execute PDO statement');
+		}
+
+		$exists = $stmt->fetchColumn();
+
+		return $exists;
+	}
+
+
+	/**
+	 * @template EntityT of object
+	 * @param EntityT $model
+	 * @param class-string<EntityT> $modelClass
+	 */
+	public function existsById(int|object $id, string $modelClass): bool
+	{
+		$criteria = $this->getIdCriteria($id, $modelClass);
+
+		return $this->existsBy($criteria, $modelClass);
+	}
+
+	/**
+	 * @template EntityT of object
 	 * @param EntityT $model
 	 * @param class-string<EntityT> $modelClass
 	 * @return EntityT
-	 * */
+	 */
 	public function save(
 		object $model,
 		string $modelClass,

@@ -8,6 +8,7 @@ use App\Controllers\UserController;
 use App\EntityManager;
 use App\Exceptions\HttpException;
 use App\Renderer;
+use App\Repositories\PostLikeRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\PostRepository;
 use App\Router;
@@ -18,6 +19,7 @@ use App\Services\UserService;
 require_once __DIR__ . '/../src/config.php';
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Renderer.php';
+require_once __DIR__ . '/../src/Repositories/PostLikeRepository.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Repositories/PostRepository.php';
 require_once __DIR__ . '/../src/Services/DatabaseSessionService.php';
@@ -54,6 +56,7 @@ $entityManager = new EntityManager($pdo);
 // Repositories
 $userRepository = new UserRepository($entityManager);
 $postRepository = new PostRepository($entityManager);
+$postLikeRepository = new PostLikeRepository($entityManager);
 
 // Session
 $sessionService = new DatabaseSessionService(
@@ -97,6 +100,7 @@ $userService = new UserService(
 );
 $postService = new PostService(
 	$postRepository,
+	$postLikeRepository,
 	$config,
 );
 

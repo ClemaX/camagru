@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Entities\Post;
+use App\Entities\PostLike;
 use App\Entities\User;
 use App\Exceptions\InternalException;
 use App\Exceptions\ValidationException;
+use App\Repositories\PostLikeRepository;
 use App\Repositories\PostRepository;
 use App\Services\DTOs\PostCreationDTO;
 use DateTime;
@@ -62,7 +64,8 @@ class PostService
 	private readonly ?XMLParser $xmlParser;
 
 	public function __construct(
-		private PostRepository $postRepository,
+		private readonly PostRepository $postRepository,
+		private readonly PostLikeRepository $likeRepository,
 		array $config,
 		?XMLParser $xmlParser = null,
 	) {
@@ -87,6 +90,7 @@ class PostService
 			$post->pictureUrl = $this->externalStorageUrl . '/'
 				. $this->bucketId . '/'
 				. $post->id . '/';
+			$post->likeCount = $this->likeRepository->countByPostId($post->id);
 
 			return $post;
 		}, $this->postRepository->findAll('created_at', 'DESC'));
