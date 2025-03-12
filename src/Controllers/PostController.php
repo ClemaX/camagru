@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Attributes\Controller;
 use App\Attributes\CurrentUser;
+use App\Attributes\PathVariable;
 use App\Attributes\RequestBody;
 use App\Attributes\Route;
 use App\Entities\User;
@@ -81,5 +82,15 @@ class PostController extends AbstractController
 		header('Location: ./');
 
 		return json_encode($post);
+	}
+
+	#[Route('/post/{id}/like', 'PUT')]
+	public function like(#[CurrentUser] ?User $user, #[PathVariable] string $id)
+	{
+		if ($user === null) {
+			throw new UnauthorizedException();
+		}
+
+		$this->postService->like($user, (int)$id);
 	}
 }

@@ -53,6 +53,16 @@ abstract class AbstractRepository
 		return $this->entityManager->countBy($criteria, $this->getModelClass());
 	}
 
+	protected function existsBy(array $criteria): int
+	{
+		return $this->entityManager->existsBy($criteria, $this->getModelClass());
+	}
+
+	public function existsById(int | object $id): bool
+	{
+		return $this->entityManager->existsById($id, $this->getModelClass());
+	}
+
 	/**
 	 * @param EntityT $model
 	 * @return EntityT

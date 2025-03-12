@@ -18,17 +18,27 @@
 				alt="{{ $post->description }}">
 				<div class="placeholder w-100 h-100"></div>
 			</object>
-			<!-- <embed src="{{ $post->pictureUrl }}" class="w-100 h-100"> -->
 		</div>
 		<div class="card-body">
 			<h5 class="card-title">{{ $post->title }}</h5>
 			<p class="card-text">{{ $post->description }}</p>
 			<div class="d-flex gap-3">
-				<button class="btn btn-danger d-flex gap-2">
+				<!-- <button class="btn btn-danger d-flex gap-2"
+					data-app-post-action="like" data-app-target="{{ $post->id }}">
 					<i class="bi-heart"></i>
 					{{ $post->likeCount }}
 					Likes
-				</button>
+				</button> -->
+				<div>
+					<input type="checkbox" class="btn-check" id="btn-check"
+						autocomplete="off" data-app-post-action="like"
+						data-app-target="{{ $post->id }}">
+					<label class="btn btn-danger d-flex gap-2" for="btn-check">
+						<i class="bi-heart"></i>
+						{{ $post->likeCount }} Likes
+					</label>
+				</div>
+
 				<button class="btn btn-info d-flex gap-2">
 					<i class="bi-chat"></i>
 					Comment
@@ -63,12 +73,5 @@
 	@endif
 </div>
 
-<script>
-	const gallery = document.getElementById('gallery');
+<script src="/js/gallery.min.js"></script>
 
-	// gallery.querySelectorAll('embed.placeholder').forEach(img => {
-	// 	img.addEventListener('load', (event) => {
-	// 		event.target.classList.remove('placeholder');
-	// 	});
-	// });
-</script>

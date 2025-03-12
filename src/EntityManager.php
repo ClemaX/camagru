@@ -747,8 +747,9 @@ class EntityManager
 	 * @template EntityT of object
 	 * @param array<string, string | array<string, string>> $criteria
 	 * @param class-string<EntityT> $modelClass
+	 * @return int Number of rows affected
 	 */
-	public function deleteBy(array $criteria, string $modelClass)
+	public function deleteBy(array $criteria, string $modelClass): int
 	{
 		$conditions = self::formulateConditions($criteria);
 
@@ -766,16 +767,19 @@ class EntityManager
 		if (!$result) {
 			throw new InternalException("Could not execute PDO statement");
 		}
+
+		return $stmt->rowCount();
 	}
 
 	/**
 	 * @template EntityT of object
 	 * @param class-string<EntityT> $modelClass
+	 * @return int Number of rows affected
 	 */
-	public function delete(int|object $id, string $modelClass)
+	public function delete(int|object $id, string $modelClass): int
 	{
 		$criteria = $this->getIdCriteria($id, $modelClass);
 
-		$this->deleteBy($criteria, $modelClass);
+		return $this->deleteBy($criteria, $modelClass);
 	}
 }

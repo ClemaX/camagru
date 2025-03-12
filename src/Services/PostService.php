@@ -5,14 +5,16 @@ namespace App\Services;
 use App\Entities\Post;
 use App\Entities\PostLike;
 use App\Entities\User;
+use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
-use App\Exceptions\ValidationException;
+use App\Exceptions\NotFoundException;
 use App\Repositories\PostLikeRepository;
 use App\Repositories\PostRepository;
 use App\Services\DTOs\PostCreationDTO;
 use App\SvgSanitizer;
 use DateTime;
 use Exception;
+use PostLikeId;
 use SensitiveParameter;
 
 require_once __DIR__ . '/../Entities/Post.php';
@@ -64,7 +66,7 @@ class PostService
 		$temporaryDirectory = tempnam(sys_get_temp_dir(), '');
 		if ($temporaryDirectory === false || !unlink($temporaryDirectory)
 		|| !mkdir($temporaryDirectory, permissions: 0700)) {
-			throw new InternalException("Could not create temporary directory");
+			throw new InternalException('Could not create temporary directory');
 		}
 
 		try {
@@ -125,4 +127,36 @@ class PostService
 	// {
 	// 	throw new InternalException("Not implemented yet");
 	// }
+
+	public function like(
+		#[SensitiveParameter] User $author,
+		int $postId
+	) {
+		if (!$this->postRepository->existsById($postId)) {
+			throw new NotFoundException();
+		}
+
+		$likeId = new PostLikeId(authorId: $author->id, postId: $postId);
+
+		if ($this->likeRepository->existsById($likeId)) {
+			throw new ConflictException('id');
+		}
+
+		$like = new PostLike();
+		$like->id = $likeId;
+		$like->createdAt = new DateTime();
+
+		$this->likeRepository->save($like);
+	}
+
+	public function dislike(
+		#[SensitiveParameter] User $author,
+		int $postId,
+	) {
+		$likeId = new PostLikeId(authorId: $author->id, postId: $postId);
+
+		if ($this->likeRepository->delete($likeId) !== 1) {
+			throw new NotFoundException();
+		}
+	}
 }

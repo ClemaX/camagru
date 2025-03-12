@@ -7,11 +7,13 @@ require_once __DIR__ . '/../Attributes/Entity/Column.php';
 
 class PostLikeId
 {
-	#[NotNull]
-	#[Column('author_id')]
-	public int $authorId;
-
-	#[NotNull]
-	#[Column('post_id')]
-	public int $postId;
+	public function __construct(
+		#[NotNull]
+		#[Column('author_id')]
+		public int $authorId,
+		#[NotNull]
+		#[Column('post_id')]
+		public int $postId,
+	) {
+	}
 }
