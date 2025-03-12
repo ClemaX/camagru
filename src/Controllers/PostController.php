@@ -61,6 +61,7 @@ class PostController extends AbstractController
 		}
 
 		if (!array_key_exists('picture', $_FILES)
+		|| $_FILES['picture']['error']
 		|| empty($_FILES['picture']['tmp_name'])) {
 			throw new MappingException();
 		}
