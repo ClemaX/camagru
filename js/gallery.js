@@ -37,10 +37,53 @@
 
 		trigger.disabled = false;
 	};
+
+	/**
+	 * @param {FormDataEvent} e
+	 */
+	const handleCommentFormData = (e) => {
+		// const formData = e.formData;
+
+		// formData.set("subjectId", null);
+	};
+
+	/**
+	 * @param {FormDataEvent} e
+	 */
+	const handleCommentSubmit = async (e) => {
+		e.preventDefault();
+
+		const form = e.target;
+		const formData = new FormData(form);
+
+		const response = await fetch(form.action, {
+			method: form.method,
+			body: formData,
+		});
+
+		if (response.ok) {
+			console.debug(await response.json());
+		}
+	};
+
 	document.addEventListener("DOMContentLoaded", () => {
-		const likeTriggers = document.querySelectorAll(
+		const gallery = document.getElementById('gallery');
+		const likeTriggers = gallery.querySelectorAll(
 			'input[type="checkbox"][data-app-post-action="like"]'
 		);
+
+		const postCommentForms =
+		gallery.getElementsByClassName('post-comment-form');
+
+		const posts = gallery.getElementsByTagName('article');
+
+		for (const form of postCommentForms) {
+			form.addEventListener("formdata", handleCommentFormData);
+		}
+
+		for (const post of posts) {
+			post.addEventListener('submit', handleCommentSubmit);
+		}
 
 		likeTriggers.forEach((trigger) => {
 			trigger.addEventListener("click", handleLike);

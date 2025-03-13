@@ -8,6 +8,7 @@ use App\Controllers\UserController;
 use App\EntityManager;
 use App\Exceptions\HttpException;
 use App\Renderer;
+use App\Repositories\PostCommentRepository;
 use App\Repositories\PostLikeRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\PostRepository;
@@ -21,6 +22,7 @@ mb_internal_encoding('UTF-8');
 require_once __DIR__ . '/../src/config.php';
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Renderer.php';
+require_once __DIR__ . '/../src/Repositories/PostCommentRepository.php';
 require_once __DIR__ . '/../src/Repositories/PostLikeRepository.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Repositories/PostRepository.php';
@@ -59,6 +61,7 @@ $entityManager = new EntityManager($pdo);
 $userRepository = new UserRepository($entityManager);
 $postRepository = new PostRepository($entityManager);
 $postLikeRepository = new PostLikeRepository($entityManager);
+$postCommentRepository = new PostCommentRepository($entityManager);
 
 // Session
 $sessionService = new DatabaseSessionService(
@@ -103,6 +106,7 @@ $userService = new UserService(
 $postService = new PostService(
 	$postRepository,
 	$postLikeRepository,
+	$postCommentRepository,
 	$config,
 );
 

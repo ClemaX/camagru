@@ -42,9 +42,8 @@ class PostComment
 	#[JoinColumn("author_id")]
 	public User $author;
 
-	#[NotNull]
 	#[Column('subject_id')]
-	public int $subjectId = 0;
+	public ?int $subjectId;
 
 	#[NotNull]
 	#[MaxLength(512)]

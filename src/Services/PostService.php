@@ -3,13 +3,16 @@
 namespace App\Services;
 
 use App\Entities\Post;
+use App\Entities\PostComment;
 use App\Entities\PostLike;
 use App\Entities\User;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
 use App\Exceptions\NotFoundException;
+use App\Repositories\PostCommentRepository;
 use App\Repositories\PostLikeRepository;
 use App\Repositories\PostRepository;
+use App\Services\DTOs\PostCommentDTO;
 use App\Services\DTOs\PostCreationDTO;
 use App\SvgSanitizer;
 use DateTime;
@@ -31,6 +34,7 @@ class PostService
 	public function __construct(
 		private readonly PostRepository $postRepository,
 		private readonly PostLikeRepository $likeRepository,
+		private readonly PostCommentRepository $commentRepository,
 		array $config,
 	) {
 		$this->svgSanitizer = new SvgSanitizer([
@@ -172,5 +176,24 @@ class PostService
 	public function countLikes(int $postId)
 	{
 		return $this->likeRepository->countByPostId($postId);
+	}
+
+	public function postComment(
+		#[SensitiveParameter] User $author,
+		int $postId,
+		PostCommentDTO $dto,
+	): PostComment {
+		$now = new DateTime();
+
+		$comment = new PostComment();
+
+		$comment->author = $author;
+		$comment->postId = $postId;
+		$comment->subjectId = $dto->subjectId;
+		$comment->body = $dto->body;
+		$comment->createdAt = $now;
+		$comment->updatedAt = $now;
+
+		return $this->commentRepository->save($comment);
 	}
 }

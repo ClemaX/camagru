@@ -8,19 +8,19 @@ use App\Attributes\PathVariable;
 use App\Attributes\RequestBody;
 use App\Attributes\Route;
 use App\Entities\User;
-use App\Entities\Post;
 use App\Exceptions\MappingException;
 use App\Exceptions\UnauthorizedException;
 use App\Exceptions\ValidationException;
 use App\Renderer;
+use App\Services\DTOs\PostCommentDTO;
 use App\Services\DTOs\PostCreationDTO;
 use App\Services\PostService;
-use DateTime;
 use SensitiveParameter;
 
 require_once __DIR__ . '/AbstractController.php';
 require_once __DIR__ . '/../Entities/Post.php';
 require_once __DIR__ . '/../Services/DTOs/PostCreationDTO.php';
+require_once __DIR__ . '/../Services/DTOs/PostCommentDTO.php';
 require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
 
 #[Controller('/')]
@@ -34,8 +34,9 @@ class PostController extends AbstractController
 	}
 
 	#[Route('')]
-	public function getAll(#[CurrentUser] ?User $user)
-	{
+	public function getAll(
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
+	) {
 		return $this->render('gallery', [
 			'posts' => $this->postService->getAll($user),
 		]);
@@ -55,7 +56,7 @@ class PostController extends AbstractController
 	#[Route('/post', 'POST')]
 	public function postSubmit(
 		#[SensitiveParameter] #[CurrentUser] ?User $user,
-		#[RequestBody] PostCreationDTO $dto
+		#[RequestBody] PostCreationDTO $dto,
 	) {
 		if ($user === null) {
 			throw new UnauthorizedException();
@@ -85,8 +86,10 @@ class PostController extends AbstractController
 	}
 
 	#[Route('/post/{id}/like', 'PUT')]
-	public function like(#[CurrentUser] ?User $user, #[PathVariable] string $id)
-	{
+	public function like(
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[PathVariable] string $id,
+	) {
 		if ($user === null) {
 			throw new UnauthorizedException();
 		}
@@ -101,8 +104,8 @@ class PostController extends AbstractController
 
 	#[Route('/post/{id}/like', 'DELETE')]
 	public function unlike(
-		#[CurrentUser] ?User $user,
-		#[PathVariable] string $id
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[PathVariable] string $id,
 	) {
 		if ($user === null) {
 			throw new UnauthorizedException();
@@ -114,5 +117,20 @@ class PostController extends AbstractController
 		http_response_code(200);
 
 		return json_encode($this->postService->countLikes((int)$id));
+	}
+
+	#[Route('/post/{id}/comments', 'POST')]
+	public function postComment(
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[PathVariable] string $id,
+		#[RequestBody] PostCommentDTO $dto,
+	) {
+		if ($user === null) {
+			throw new UnauthorizedException();
+		}
+
+		$comment = $this->postService->postComment($user, (int)$id, $dto);
+
+		return json_encode($comment);
 	}
 }

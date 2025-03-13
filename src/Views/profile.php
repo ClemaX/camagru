@@ -40,29 +40,29 @@
 					@csrf
 					@method('PATCH')
 					<div class="form-group">
-					<label for="username">Username</label>
-					<input type="text"
-						class="form-control @if($conflict === 'username') is-invalid @endif"
-						id="username" name="username" required
-						pattern="^[a-zA-Z0-9_\-]{3,16}$" maxlength="16"
-						value="{{ $formUsername }}">
-					<div class="invalid-feedback">
-						@if($conflict === 'username')
-							This username is already taken. Please choose another.
-						@else
-							Username must be 3-16 characters long and contain only letters, numbers, underscores, and hyphens.
-						@endif
+						<label for="username">Username</label>
+						<input type="text"
+							class="form-control @if($conflict === 'username') is-invalid @endif"
+							id="username" name="username" required
+							pattern="^[a-zA-Z0-9_\-]{3,16}$" maxlength="16"
+							value="{{ $formUsername }}">
+						<div class="invalid-feedback">
+							@if($conflict === 'username')
+								This username is already taken. Please choose another.
+							@else
+								Username must be 3-16 characters long and contain only letters, numbers, underscores, and hyphens.
+							@endif
+						</div>
 					</div>
-				</div>
 
-				<div class="form-group">
-					<label for="description">Description</label>
-					<textarea class="form-control no-resize" id="description"
-						name="description" rows="3" maxlength="140">{{ $formDescription }}</textarea>
-					<div class="invalid-feedback">
-						Description must be at most 140 characters long.
+					<div class="form-group">
+						<label for="description">Description</label>
+						<textarea class="form-control no-resize" id="description"
+							name="description" rows="3" maxlength="140">{{ $formDescription }}</textarea>
+						<div class="invalid-feedback">
+							Description must be at most 140 characters long.
+						</div>
 					</div>
-				</div>
 					<button type="submit" class="btn btn-primary">Update Profile</button>
 				</form>
 			</div>

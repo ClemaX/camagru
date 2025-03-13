@@ -30,6 +30,8 @@ class Mapper
 				$property->setValue($dto, array_key_exists($key, $data));
 			} elseif (array_key_exists($key, $data)) {
 				$property->setValue($dto, $data[$key]);
+			} elseif ($property->getType()->allowsNull()) {
+				$property->setValue($dto, null);
 			} else {
 				throw new MappingException();
 			}
