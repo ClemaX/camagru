@@ -40,6 +40,10 @@ define('SVG_IMAGE_ATTRIBUTES', [
 		'required' => true,
 		'numeric' => true,
 	],
+	'preserveAspectRatio' => [
+		'required' => false,
+		'pattern' => '/^none$/',
+	],
 	'href' => [
 		'required' => true,
 		'namespace' => XML_NS_XLINK,

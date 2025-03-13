@@ -922,6 +922,7 @@ class CanvasEditor {
 		image.setAttribute("y", layer.position.y);
 		image.setAttribute("width", layer.dimensions.x);
 		image.setAttribute("height", layer.dimensions.y);
+		image.setAttribute("preserveAspectRatio", "none");
 		image.setAttributeNS(xlinkNs, "xlink:href", layer.image.src);
 
 		return image;
