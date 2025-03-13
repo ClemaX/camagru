@@ -566,7 +566,7 @@ class EntityManager
 
 		$conditions = self::formulateConditions($criteria);
 
-		$stmt = $this->pdo->prepare('SELECT EXISTS (SELECT COUNT(1) FROM '
+		$stmt = $this->pdo->prepare('SELECT EXISTS (SELECT 1 FROM '
 			. self::getTableName($modelClass) .' WHERE ' . $conditions . ')');
 
 		if ($stmt === false) {
@@ -624,6 +624,10 @@ class EntityManager
 				}
 			}
 		} else {
+
+			$idProperty = self::getIdProperty($modelClass);
+			$data = array_merge($data, self::dump($idProperty->getValue($model), $idProperty->getType()->getName()));
+
 			foreach ($idColumnProperties as $idProperty) {
 				$idColumn = $idColumnProperties[0]->getAttributes(Column::class)[0];
 				$idColumnName = $idColumn->newInstance()->name;
@@ -753,7 +757,7 @@ class EntityManager
 	{
 		$conditions = self::formulateConditions($criteria);
 
-		$stmt = $this->pdo->prepare("SELECT * FROM "
+		$stmt = $this->pdo->prepare("DELETE FROM "
 			. self::getTableName($modelClass) ." WHERE " . $conditions);
 
 		if ($stmt === false) {

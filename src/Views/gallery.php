@@ -30,19 +30,19 @@
 					Likes
 				</button> -->
 				<div>
-					<input type="checkbox" class="btn-check" id="btn-check"
-						autocomplete="off" data-app-post-action="like"
-						data-app-target="{{ $post->id }}">
-					<label class="btn btn-danger d-flex gap-2" for="btn-check">
+					<input type="checkbox" class="btn-check" id="btn-check-{{ $post->id }}"
+						autocomplete="off" data-app-post-action="like" data-app-post-liked="{{ $post->isLiked ? 'true' : 'false' }}"
+						data-app-post-id="{{ $post->id }}">
+					<label class="btn btn-danger d-flex gap-2" for="btn-check-{{ $post->id }}">
 						<i class="bi-heart"></i>
-						{{ $post->likeCount }} Likes
+						<span>{{ $post->likeCount }} {{ $post->likeCount === 1 ? 'Like' : 'Likes' }}<span>
 					</label>
 				</div>
-
+<!--
 				<button class="btn btn-info d-flex gap-2">
 					<i class="bi-chat"></i>
 					Comment
-				</button>
+				</button> -->
 			</div>
 		</div>
 	</article>

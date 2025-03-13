@@ -92,8 +92,8 @@ abstract class AbstractRepository
 		);
 	}
 
-	public function delete(int|object $id)
+	public function delete(int|object $id): int
 	{
-		$this->entityManager->delete($id, $this->getModelClass());
+		return $this->entityManager->delete($id, $this->getModelClass());
 	}
 }

@@ -34,10 +34,10 @@ class PostController extends AbstractController
 	}
 
 	#[Route('')]
-	public function getAll()
+	public function getAll(#[CurrentUser] ?User $user)
 	{
 		return $this->render('gallery', [
-			'posts' => $this->postService->getAll(),
+			'posts' => $this->postService->getAll($user),
 		]);
 	}
 
@@ -92,5 +92,27 @@ class PostController extends AbstractController
 		}
 
 		$this->postService->like($user, (int)$id);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		http_response_code(200);
+
+		return json_encode($this->postService->countLikes((int)$id));
+	}
+
+	#[Route('/post/{id}/like', 'DELETE')]
+	public function unlike(
+		#[CurrentUser] ?User $user,
+		#[PathVariable] string $id
+	) {
+		if ($user === null) {
+			throw new UnauthorizedException();
+		}
+
+		$this->postService->unlike($user, (int)$id);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		http_response_code(200);
+
+		return json_encode($this->postService->countLikes((int)$id));
 	}
 }

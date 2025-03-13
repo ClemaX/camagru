@@ -46,13 +46,22 @@ class PostService
 	}
 
 	/** @return Post[] */
-	public function getAll(): array
+	public function getAll(?User $viewer): array
 	{
-		return array_map(function ($post) {
+		return array_map(function ($post) use ($viewer) {
 			$post->pictureUrl = $this->externalStorageUrl . '/'
 				. $this->bucketId . '/'
 				. $post->id . '/';
-			$post->likeCount = $this->likeRepository->countByPostId($post->id);
+			$post->likeCount = $this->countLikes($post->id);
+
+			if ($viewer !== null) {
+				$viewerLikeId = new PostLikeId(
+					authorId: $viewer->id,
+					postId: $post->id
+				);
+
+				$post->isLiked = $this->likeRepository->existsById($viewerLikeId);
+			}
 
 			return $post;
 		}, $this->postRepository->findAll('created_at', 'DESC'));
@@ -149,7 +158,7 @@ class PostService
 		$this->likeRepository->save($like);
 	}
 
-	public function dislike(
+	public function unlike(
 		#[SensitiveParameter] User $author,
 		int $postId,
 	) {
@@ -158,5 +167,10 @@ class PostService
 		if ($this->likeRepository->delete($likeId) !== 1) {
 			throw new NotFoundException();
 		}
+	}
+
+	public function countLikes(int $postId)
+	{
+		return $this->likeRepository->countByPostId($postId);
 	}
 }
