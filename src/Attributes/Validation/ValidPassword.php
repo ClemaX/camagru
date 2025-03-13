@@ -6,6 +6,28 @@ use Attribute;
 
 require_once __DIR__ . '/MinLength.php';
 
+function mb_nextchar($string, &$pointer)
+{
+	if (!isset($string[$pointer])) {
+		return false;
+	}
+	$char = ord($string[$pointer]);
+	if ($char < 128) {
+		return $string[$pointer++];
+	} else {
+		if ($char < 224) {
+			$bytes = 2;
+		} elseif ($char < 240) {
+			$bytes = 3;
+		} else {
+			$bytes = 4;
+		}
+		$str =  substr($string, $pointer, $bytes);
+		$pointer += $bytes;
+		return $str;
+	}
+}
+
 #[Attribute()]
 class ValidPassword extends MinLength
 {
@@ -28,9 +50,8 @@ class ValidPassword extends MinLength
 		}
 
 		$lowercase = $uppercase = $numeric = $special = 0;
-
-		for ($i = 0; $i < strlen($value); $i++) {
-			$char = $value[$i];
+		$pointer = 0;
+		while (($char = mb_nextchar($value, $pointer)) !== false) {
 			if (ctype_lower($char)) {
 				$lowercase++;
 			} elseif (ctype_upper($char)) {

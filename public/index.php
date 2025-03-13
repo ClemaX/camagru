@@ -16,6 +16,8 @@ use App\Services\MailService;
 use App\Services\PostService;
 use App\Services\UserService;
 
+mb_internal_encoding('UTF-8');
+
 require_once __DIR__ . '/../src/config.php';
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Renderer.php';
