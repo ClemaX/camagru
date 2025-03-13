@@ -34,15 +34,10 @@
 						autocomplete="off" data-app-post-action="like" data-app-post-liked="{{ $post->isLiked ? 'true' : 'false' }}"
 						data-app-post-id="{{ $post->id }}">
 					<label class="btn btn-danger d-flex gap-2" for="btn-check-{{ $post->id }}">
-						<i class="bi-heart"></i>
+						<i class="{{ $post->isLiked ? 'bi-heart-fill' : 'bi-heart'}}"></i>
 						<span>{{ $post->likeCount }} {{ $post->likeCount === 1 ? 'Like' : 'Likes' }}<span>
 					</label>
 				</div>
-<!--
-				<button class="btn btn-info d-flex gap-2">
-					<i class="bi-chat"></i>
-					Comment
-				</button> -->
 			</div>
 		</div>
 	</article>
