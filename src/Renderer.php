@@ -85,12 +85,14 @@ class Renderer
 		string $content,
 		array $params
 	): string {
-		$pattern = '/@foreach\s*\((.*?)\)(.*?)@endforeach/s';
+		$pattern = '/@foreach\s*\((.*?)\)((?:(?!@foreach|@endforeach).|(?R))*)@endforeach/s';
 		return preg_replace_callback(
 			$pattern,
 			function ($matches) use ($params) {
 				$loopDefinition = $matches[1];
 				$loopContent = $matches[2];
+
+				$output = '';
 
 				if (preg_match(
 					'/^\$(\w+)\s+as\s+\$(\w+)$/',
@@ -105,7 +107,6 @@ class Renderer
 						return '';
 					}
 
-					$output = '';
 					foreach ($params[$arrayName] as $item) {
 						$iterationParams = $params;
 						$iterationParams[$itemName] = $item;
@@ -117,25 +118,31 @@ class Renderer
 
 						$output .= $iterationContent;
 					}
-					return $output;
+				} else {
+					list($variable, $start, $end) = sscanf(
+						$loopDefinition,
+						'$%s = %s to %s'
+					);
+					// echo '<br><br><br><br><br><br><br><br><br><br>';
+					// var_dump($params);
+					extract($params, EXTR_SKIP);
+
+					$start = eval("return $start;");
+					$end = eval("return $end;");
+
+					for ($i = $start; $i <= $end; $i++) {
+						$iterationParams = $params;
+						$iterationParams[$variable] = $i;
+						$iterationContent = $loopContent;
+						$iterationContent = self::processParameters(
+							$iterationContent,
+							$iterationParams
+						);
+						$output .= $iterationContent;
+					}
 				}
 
-				list($variable, $start, $end) = sscanf(
-					$loopDefinition,
-					'$%s = %d to %d'
-				);
-				$output = '';
-				for ($i = $start; $i <= $end; $i++) {
-					$iterationParams = $params;
-					$iterationParams[$variable] = $i;
-					$iterationContent = $loopContent;
-					$iterationContent = self::processParameters(
-						$iterationContent,
-						$iterationParams
-					);
-					$output .= $iterationContent;
-				}
-				return $output;
+				return self::processForLoops($output, $params);
 			},
 			$content
 		);
