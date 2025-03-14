@@ -48,5 +48,6 @@ class Post
 
 	public string $pictureUrl;
 	public int $likeCount = 0;
+	public int $commentCount = 0;
 	public bool $isLiked = false;
 }

@@ -500,8 +500,61 @@ class EntityManager
 
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-		return array_map(fn ($data) => $this->load($data, $modelClass), $results);
+		return array_map(
+			fn ($data) => $this->load($data, $modelClass),
+			$results
+		);
 	}
+
+	/**
+	 * @template EntityT of object
+	 * @param array<string, string | array<string, string>> $criteria
+	 * @param class-string<EntityT>
+	 * @return EntityT[]
+	 */
+	public function findAllBy(
+		array $criteria,
+		string $modelClass,
+		?string $orderBy = null,
+		?string $orderDirection = null
+	): array {
+		if (empty($criteria)) {
+			throw new InternalException("Criteria cannot be empty");
+		}
+
+		$conditions = self::formulateConditions($criteria);
+
+		$query = 'SELECT * FROM ' . self::getTableName($modelClass)
+			. ' WHERE ' . $conditions;
+
+		if ($orderBy !== null) {
+			$query .= ' ORDER BY ' . $orderBy;
+
+			if ($orderDirection !== null) {
+				$query .= ' ' . $orderDirection;
+			}
+		}
+
+		$stmt = $this->pdo->prepare($query);
+
+		if ($stmt === false) {
+			throw new InternalException('Could not prepare PDO statement');
+		}
+
+		self::bindParameters($stmt, $criteria);
+
+		if (!$stmt->execute()) {
+			throw new InternalException('Could not execute PDO statement');
+		}
+
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		return array_map(
+			fn ($data) => $this->load($data, $modelClass),
+			$results
+		);
+	}
+
 
 	/**
 	 * @template EntityT of object

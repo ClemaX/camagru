@@ -57,6 +57,7 @@ class PostService
 				. $this->bucketId . '/'
 				. $post->id . '/';
 			$post->likeCount = $this->countLikes($post->id);
+			$post->commentCount = $this->countComments($post->id);
 
 			if ($viewer !== null) {
 				$viewerLikeId = new PostLikeId(
@@ -195,5 +196,15 @@ class PostService
 		$comment->updatedAt = $now;
 
 		return $this->commentRepository->save($comment);
+	}
+
+	public function countComments(int $postId)
+	{
+		return $this->commentRepository->countByPostId($postId);
+	}
+
+	public function getComments(int $postId, ?int $subjectId = null)
+	{
+		return $this->commentRepository->findAllByPostId($postId, $subjectId);
 	}
 }

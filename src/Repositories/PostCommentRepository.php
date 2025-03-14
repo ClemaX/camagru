@@ -21,4 +21,20 @@ class PostCommentRepository extends AbstractRepository
 	{
 		return PostComment::class;
 	}
+
+	public function countByPostId(int $postId)
+	{
+		return $this->countBy(['post_id' => $postId]);
+	}
+
+	/**
+	 * @return PostComment[]
+	 */
+	public function findAllByPostId(int $postId, ?int $subjectId = null): array
+	{
+		return $this->findAllBy([
+			'post_id' => $postId,
+			'subjectId' => $subjectId
+		]);
+	}
 }
