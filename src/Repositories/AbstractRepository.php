@@ -44,6 +44,21 @@ abstract class AbstractRepository
 		);
 	}
 
+	/** @return EntityT[] $model */
+	public function findAllBy(
+		array $criteria,
+		?string $orderBy = null,
+		?string $orderDirection = null
+	): array {
+		return $this->entityManager->findAllBy(
+			$criteria,
+			$this->getModelClass(),
+			$orderBy,
+			$orderDirection
+		);
+	}
+
+
 	/**
 	 * @template EntityT of object
 	 * @param array<string, string | array<string, string>> $criteria

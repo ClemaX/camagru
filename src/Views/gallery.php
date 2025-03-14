@@ -1,5 +1,5 @@
 <div id="gallery" class="gallery-container">
-	@foreach ($posts as $post)
+	@foreach($posts as $post)
 	<article class="card mb-4" aria-hidden="true">
 		<div class="card-header">
 			<div class="d-flex flex-column">
@@ -12,10 +12,7 @@
 			</div>
 		</div>
 		<div class="ratio ratio-1x1">
-			<object
-				type="image/svg+xml"
-				data="{{ $post->pictureUrl }}"
-				alt="{{ $post->description }}">
+			<object type="image/svg+xml" data="{{ $post->pictureUrl }}" alt="{{ $post->description }}">
 				<div class="placeholder w-100 h-100"></div>
 			</object>
 		</div>
@@ -24,21 +21,21 @@
 			<p class="card-text">{{ $post->description }}</p>
 			<div class="d-flex gap-3">
 				<div>
-					<input type="checkbox" class="btn-check" id="btn-check-{{ $post->id }}"
-						autocomplete="off" data-app-post-action="like" data-app-post-liked="{{ $post->isLiked ? 'true' : 'false' }}"
+					<input type="checkbox" class="btn-check" id="btn-check-{{ $post->id }}" autocomplete="off"
+						data-app-post-action="like" data-app-post-liked="{{ $post->isLiked ? 'true' : 'false' }}"
 						data-app-post-id="{{ $post->id }}">
-					<label class="btn btn-danger d-flex gap-2 justify-content-center" for="btn-check-{{ $post->id }}" style="min-width: 7em;">
+					<label class="btn btn-danger d-flex gap-2 justify-content-center" for="btn-check-{{ $post->id }}"
+						style="min-width: 7em;">
 						<i class="bi {{ $post->isLiked ? 'bi-heart-fill' : 'bi-heart'}}"></i>
 						<span>{{ $post->likeCount }} {{ $post->likeCount === 1 ? 'Like' : 'Likes' }}<span>
 					</label>
 				</div>
-				<form class="post-comment-form needs-validation flex-grow-1 d-flex gap-2"
-					method="post" action="/post/{{ $post->id }}/comments">
+				<form class="post-comment-form needs-validation flex-grow-1 d-flex gap-2" method="post"
+					action="/post/{{ $post->id }}/comments">
 					@csrf
 					<div class="form-group flex-grow-1">
-						<input type="text" class="form-control"
-							id="body" name="body" aria-label="Comment body"
-							minlength="1" maxlength="512" required>
+						<input type="text" class="form-control" id="body" name="body" aria-label="Comment body" minlength="1"
+							maxlength="512" required>
 						<div class="invalid-feedback">
 							Comment is required.
 						</div>
@@ -47,7 +44,39 @@
 						<i class="bi-send"></i><span>Post</span>
 					</button>
 				</form>
-			</input>
+			</div>
+
+		</div>
+		<div class="accordion accordion-flush" id="accordionFlushExample">
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+						data-bs-target="#commentsCollapse" aria-expanded="false" aria-controls="commentsCollapse">
+						<span>{{ $post->commentCount }} {{ $post->commentCount === 1 ? 'Comment' : 'Comments' }}<span>
+					</button>
+				</h2>
+				<div id="commentsCollapse" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+					<div class="accordion-body">
+						<ul class="list-group list-group-flush">
+							@foreach($i = 1 to {{ $post->commentCount }})
+							<li class="list-group-item">
+								<div class="ms-2 me-auto">
+									<h6 class="placeholder-glow">
+										<span class="placeholder col-3"></span>
+									</h6>
+									<p class="placeholder-glow">
+										<span class="placeholder col-2"></span>
+										<span class="placeholder col-4"></span>
+										<span class="placeholder col-2"></span>
+										<span class="placeholder col-3"></span>
+										<span class="placeholder col-4"></span>
+									</p>
+								</div>
+							</li>
+							@endforeach
+						</ul>
+					</div>
+				</div>
 			</div>
 		</div>
 	</article>
