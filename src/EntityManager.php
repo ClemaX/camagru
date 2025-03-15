@@ -190,14 +190,14 @@ class EntityManager
 	}
 
 	/**
-	 * @param array<string, string | array<string, string>> $criteria
+	 * @param array<string, string | array<string, string> | null> $criteria
 	 */
 	private static function formulateConditions(array $criteria): string
 	{
 		$conditions = implode(
 			' AND ',
 			array_map(
-				function (string $column, string | array $value) {
+				function (string $column, string | array | null $value) {
 					if (is_array($value)) {
 						if (empty($value)) {
 							throw new InternalException('Criteria array cannot be empty');
@@ -207,8 +207,10 @@ class EntityManager
 
 						return '(' . implode(', ', $columns) . ')'
 							. ' = (:' . implode(', :', $columns) . ')';
-					} else {
+					} elseif ($value !== null) {
 						return $column . ' = :' . $column;
+					} else {
+						return $column . ' is NULL';
 					}
 				},
 				array_keys($criteria),
@@ -222,7 +224,7 @@ class EntityManager
 	/**
 	 * @template EntityT of object
 	 * @param class-string<EntityT>
-	 * @return array<string, string | array<string, string>>
+	 * @return array<string, string | array<string, string> | null>
 	 */
 	private static function getIdCriteria(int|object $id, string $modelClass): array
 	{
@@ -422,7 +424,7 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string>> $criteria
+	 * @param array<string, string | array<string, string> | null> $criteria
 	 * @param class-string<EntityT>
 	 * @return ?EntityT
 	 */
@@ -441,7 +443,10 @@ class EntityManager
 			throw new InternalException('Could not prepare PDO statement');
 		}
 
-		self::bindParameters($stmt, $criteria);
+		self::bindParameters($stmt, array_filter(
+			$criteria,
+			static fn ($value) => $value !== null
+		));
 
 		if (!$stmt->execute()) {
 			throw new InternalException('Could not execute PDO statement');
@@ -508,7 +513,7 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string>> $criteria
+	 * @param array<string, string | array<string, string> | null> $criteria
 	 * @param class-string<EntityT>
 	 * @return EntityT[]
 	 */
@@ -541,7 +546,10 @@ class EntityManager
 			throw new InternalException('Could not prepare PDO statement');
 		}
 
-		self::bindParameters($stmt, $criteria);
+		self::bindParameters($stmt, array_filter(
+			$criteria,
+			static fn ($value) => $value !== null
+		));
 
 		if (!$stmt->execute()) {
 			throw new InternalException('Could not execute PDO statement');
@@ -558,7 +566,7 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string>> $criteria
+	 * @param array<string, string | array<string, string> | null> $criteria
 	 * @param class-string<EntityT>
 	 */
 	public function countBy(array $criteria, string $modelClass): int
@@ -576,7 +584,10 @@ class EntityManager
 			throw new InternalException('Could not prepare PDO statement');
 		}
 
-		self::bindParameters($stmt, $criteria);
+		self::bindParameters($stmt, array_filter(
+			$criteria,
+			static fn ($value) => $value !== null
+		));
 
 		if (!$stmt->execute()) {
 			throw new InternalException('Could not execute PDO statement');
@@ -608,7 +619,7 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string>> $criteria
+	 * @param array<string, string | array<string, string> | null> $criteria
 	 * @param class-string<EntityT>
 	 */
 	public function existsBy(array $criteria, string $modelClass): bool
@@ -626,7 +637,10 @@ class EntityManager
 			throw new InternalException('Could not prepare PDO statement');
 		}
 
-		self::bindParameters($stmt, $criteria);
+		self::bindParameters($stmt, array_filter(
+			$criteria,
+			static fn ($value) => $value !== null
+		));
 
 		if (!$stmt->execute()) {
 			throw new InternalException('Could not execute PDO statement');
@@ -802,7 +816,7 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string>> $criteria
+	 * @param array<string, string | array<string, string> | null> $criteria
 	 * @param class-string<EntityT> $modelClass
 	 * @return int Number of rows affected
 	 */
@@ -817,7 +831,10 @@ class EntityManager
 			throw new InternalException('Could not prepare PDO statement');
 		}
 
-		self::bindParameters($stmt, $criteria);
+		self::bindParameters($stmt, array_filter(
+			$criteria,
+			static fn ($value) => $value !== null
+		));
 
 		$result = $stmt->execute();
 
