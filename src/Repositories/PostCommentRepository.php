@@ -34,7 +34,7 @@ class PostCommentRepository extends AbstractRepository
 	{
 		return $this->findAllBy([
 			'post_id' => $postId,
-			'subjectId' => $subjectId
+			'subject_id' => $subjectId
 		]);
 	}
 }
