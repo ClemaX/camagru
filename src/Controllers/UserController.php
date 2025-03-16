@@ -9,7 +9,6 @@ use App\Attributes\RequestParam;
 use App\Attributes\Route;
 use App\Entities\User;
 use App\Exceptions\ConflictException;
-use App\Exceptions\UnauthorizedException;
 use App\Renderer;
 use App\Services\AuthService;
 use App\Services\DTOs\EmailChangeDTO;

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Entities\User;
 use App\Exceptions\ConflictException;
-use App\Exceptions\InternalException;
 use App\Repositories\UserRepository;
 use App\Services\DTOs\ProfileUpdateDTO;
 use App\Services\DTOs\SettingsUpdateDTO;
