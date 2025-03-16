@@ -6,6 +6,7 @@ use App\Attributes\Controller;
 use App\Attributes\CurrentUser;
 use App\Attributes\PathVariable;
 use App\Attributes\RequestBody;
+use App\Attributes\RequestParam;
 use App\Attributes\Route;
 use App\Entities\User;
 use App\Exceptions\MappingException;
@@ -132,5 +133,15 @@ class PostController extends AbstractController
 		$comment = $this->postService->postComment($user, (int)$id, $dto);
 
 		return json_encode($comment);
+	}
+
+	#[Route('/post/{id}/comments')]
+	public function getComments(
+		#[PathVariable] string $id,
+		#[RequestParam] ?int $subjectId,
+	) {
+		$comments = $this->postService->getComments((int)$id, $subjectId);
+
+		return json_encode($comments);
 	}
 }

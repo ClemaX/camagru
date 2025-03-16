@@ -3,8 +3,10 @@
 namespace App\Entities;
 
 use App\Attributes\Serialization\JsonIgnore;
+use DateTime;
 use JsonSerializable;
 use ReflectionClass;
+use ReflectionNamedType;
 
 abstract class AbstractJsonSerializableEntity implements JsonSerializable
 {
@@ -19,7 +21,16 @@ abstract class AbstractJsonSerializableEntity implements JsonSerializable
 			$attributes = $property->getAttributes(JsonIgnore::class);
 
 			if (empty($attributes)) {
-				$result[$property->getName()] = $property->getValue($this);
+				$propertyType = $property->getType();
+
+				if ($propertyType instanceof ReflectionNamedType
+				&& $propertyType->getName() === DateTime::class) {
+					/** @var DateTime */
+					$dateTime = $property->getValue($this);
+					$result[$property->getName()] = $dateTime->getTimestamp();
+				} else {
+					$result[$property->getName()] = $property->getValue($this);
+				}
 			}
 		}
 
