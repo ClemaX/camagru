@@ -6,9 +6,6 @@ use App\Enumerations\Role;
 use App\Services\UserSessionServiceInterface;
 use Exception;
 
-require_once __DIR__ . '/Enumerations/Role.php';
-require_once __DIR__ . '/Services/UserSessionServiceInterface.php';
-
 class Renderer
 {
 	private readonly string $appEnvironment;

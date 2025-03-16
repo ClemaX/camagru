@@ -6,10 +6,6 @@ use App\Entities\User;
 use App\EntityManager;
 use PDO;
 
-require_once __DIR__ . '/AbstractRepository.php';
-
-require_once __DIR__ . '/../Entities/User.php';
-
 /** @extends AbstractRepository<User> */
 class UserRepository extends AbstractRepository
 {

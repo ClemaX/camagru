@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/AuthException.php';
-
 class AuthLockedException extends AuthException
 {
 	public function __construct(

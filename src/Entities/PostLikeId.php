@@ -1,9 +1,9 @@
 <?php
 
+namespace App\Entities;
+
 use App\Attributes\Entity\Column;
 use App\Attributes\Validation\NotNull;
-
-require_once __DIR__ . '/../Attributes/Entity/Column.php';
 
 class PostLikeId
 {

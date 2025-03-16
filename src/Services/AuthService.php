@@ -21,19 +21,6 @@ use DateInterval;
 use DateTime;
 use SensitiveParameter;
 
-require_once __DIR__ . '/../Enumerations/Role.php';
-require_once __DIR__ . '/../Exceptions/AuthLockedException.php';
-require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
-require_once __DIR__ . '/../Repositories/UserRepository.php';
-require_once __DIR__ . '/../Services/MailService.php';
-require_once __DIR__ . '/../Services/UserSessionServiceInterface.php';
-require_once __DIR__ . '/DTOs/EmailChangeDTO.php';
-require_once __DIR__ . '/DTOs/LoginDTO.php';
-require_once __DIR__ . '/DTOs/SignupDTO.php';
-require_once __DIR__ . '/DTOs/PasswordChangeDTO.php';
-require_once __DIR__ . '/DTOs/PasswordResetDTO.php';
-require_once __DIR__ . '/DTOs/PasswordResetRequestDTO.php';
-
 class AuthService
 {
 	private readonly string $unlockPath;

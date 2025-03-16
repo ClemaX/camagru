@@ -15,17 +15,6 @@ use ReflectionClass;
 use ReflectionMethod;
 use SensitiveParameter;
 
-require_once __DIR__ . '/Attributes/Controller.php';
-require_once __DIR__ . '/Attributes/CurrentUser.php';
-require_once __DIR__ . '/Attributes/PathVariable.php';
-require_once __DIR__ . '/Attributes/RequestBody.php';
-require_once __DIR__ . '/Attributes/RequestParam.php';
-require_once __DIR__ . '/Attributes/Route.php';
-require_once __DIR__ . '/Exceptions/InvalidCsrfTokenException.php';
-require_once __DIR__ . '/Exceptions/NotFoundException.php';
-require_once __DIR__ . '/Services/UserSessionServiceInterface.php';
-require_once __DIR__ . '/Mapper.php';
-
 class Router
 {
 	private array $routes = [];

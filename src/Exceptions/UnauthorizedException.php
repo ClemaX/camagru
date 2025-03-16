@@ -2,8 +2,6 @@
 
 namespace App\Exceptions;
 
-require_once __DIR__ . '/AuthException.php';
-
 use AuthException;
 
 class UnauthorizedException extends AuthException

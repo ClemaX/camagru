@@ -17,10 +17,6 @@ use App\Services\DTOs\SignupDTO;
 use AuthException;
 use SensitiveParameter;
 
-require_once __DIR__ . '/AbstractController.php';
-
-require_once __DIR__ . '/../Exceptions/ConflictException.php';
-
 #[Controller('/auth')]
 class AuthController extends AbstractController
 {

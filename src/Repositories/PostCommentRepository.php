@@ -5,10 +5,6 @@ namespace App\Repositories;
 use App\Entities\PostComment;
 use App\EntityManager;
 
-require_once __DIR__ . '/AbstractRepository.php';
-
-require_once __DIR__ . '/../Entities/PostComment.php';
-
 /** @extends AbstractRepository<PostComment> */
 class PostCommentRepository extends AbstractRepository
 {

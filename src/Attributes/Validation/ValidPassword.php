@@ -4,8 +4,6 @@ namespace App\Attributes\Validation;
 
 use Attribute;
 
-require_once __DIR__ . '/MinLength.php';
-
 function mb_nextchar($string, &$pointer)
 {
 	if (!isset($string[$pointer])) {

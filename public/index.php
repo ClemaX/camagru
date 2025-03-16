@@ -1,5 +1,10 @@
 <?php
 
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'src'
+	. DIRECTORY_SEPARATOR . 'autoload.php';
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'src'
+	. DIRECTORY_SEPARATOR . 'config.php';
+
 use App\Services\DatabaseSessionService;
 use App\Services\AuthService;
 use App\Controllers\PostController;
@@ -19,24 +24,8 @@ use App\Services\UserService;
 
 mb_internal_encoding('UTF-8');
 
-require_once __DIR__ . '/../src/config.php';
-require_once __DIR__ . '/../src/Router.php';
-require_once __DIR__ . '/../src/Renderer.php';
-require_once __DIR__ . '/../src/Repositories/PostCommentRepository.php';
-require_once __DIR__ . '/../src/Repositories/PostLikeRepository.php';
-require_once __DIR__ . '/../src/Repositories/UserRepository.php';
-require_once __DIR__ . '/../src/Repositories/PostRepository.php';
-require_once __DIR__ . '/../src/Services/DatabaseSessionService.php';
-require_once __DIR__ . '/../src/Services/AuthService.php';
-require_once __DIR__ . '/../src/Services/UserService.php';
-require_once __DIR__ . '/../src/Services/PostService.php';
-require_once __DIR__ . '/../src/Controllers/AuthController.php';
-require_once __DIR__ . '/../src/Controllers/UserController.php';
-require_once __DIR__ . '/../src/Controllers/PostController.php';
-require_once __DIR__ . '/../src/EntityManager.php';
-
 // Debug
-if (strcmp($config['DEBUG'], 'true') === 0) {
+if ($config['DEBUG'] === 'true') {
 	ini_set('display_errors', 1);
 	ini_set('display_startup_errors', 1);
 	error_reporting(E_ALL);

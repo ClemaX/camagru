@@ -13,19 +13,6 @@ use App\Attributes\Validation\ValidEmailAddress;
 use App\Attributes\Validation\ValidUsername;
 use App\Enumerations\Role;
 
-require_once __DIR__ . '/../Attributes/Entity/Column.php';
-require_once __DIR__ . '/../Attributes/Entity/Entity.php';
-require_once __DIR__ . '/../Attributes/Entity/Id.php';
-require_once __DIR__ . '/../Attributes/Entity/OneToOne.php';
-require_once __DIR__ . '/../Attributes/Serialization/JsonIgnore.php';
-require_once __DIR__ . '/../Attributes/Validation/NotNull.php';
-require_once __DIR__ . '/../Attributes/Validation/ValidEmailAddress.php';
-require_once __DIR__ . '/../Attributes/Validation/ValidUsername.php';
-require_once __DIR__ . '/../Enumerations/Role.php';
-require_once __DIR__ . '/AbstractJsonSerializableEntity.php';
-require_once __DIR__ . '/UserProfile.php';
-require_once __DIR__ . '/UserSettings.php';
-
 #[Entity('"user"')]
 class User extends AbstractJsonSerializableEntity
 {

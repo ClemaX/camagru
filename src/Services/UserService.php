@@ -9,9 +9,6 @@ use App\Repositories\UserRepository;
 use App\Services\DTOs\ProfileUpdateDTO;
 use App\Services\DTOs\SettingsUpdateDTO;
 
-require_once __DIR__ . '/../Entities/User.php';
-require_once __DIR__ . '/../Repositories/UserRepository.php';
-
 class UserService
 {
 	public function __construct(private UserRepository $userRepository)

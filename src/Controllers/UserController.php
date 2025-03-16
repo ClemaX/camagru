@@ -19,10 +19,6 @@ use App\Services\DTOs\SettingsUpdateDTO;
 use App\Services\UserService;
 use SensitiveParameter;
 
-require_once __DIR__ . '/AbstractController.php';
-require_once __DIR__ . '/../Services/DTOs/ProfileUpdateDTO.php';
-require_once __DIR__ . '/../Services/DTOs/SettingsUpdateDTO.php';
-
 #[Controller('/user')]
 class UserController extends AbstractController
 {

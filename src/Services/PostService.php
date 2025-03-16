@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Entities\Post;
 use App\Entities\PostComment;
 use App\Entities\PostLike;
+use App\Entities\PostLikeId;
 use App\Entities\User;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
@@ -17,12 +18,7 @@ use App\Services\DTOs\PostCreationDTO;
 use App\SvgSanitizer;
 use DateTime;
 use Exception;
-use PostLikeId;
 use SensitiveParameter;
-
-require_once __DIR__ . '/../Entities/Post.php';
-require_once __DIR__ . '/../Repositories/PostRepository.php';
-require_once __DIR__ . '/../SvgSanitizer.php';
 
 class PostService
 {

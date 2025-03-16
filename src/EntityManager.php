@@ -12,21 +12,11 @@ use App\Attributes\Entity\PrimaryKeyJoinColumn;
 use App\Exceptions\InternalException;
 use BackedEnum;
 use DateTime;
-use InternalIterator;
 use PDO;
 use PDOStatement;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
-
-require_once __DIR__ . '/Attributes/Entity/Column.php';
-require_once __DIR__ . '/Attributes/Entity/Entity.php';
-require_once __DIR__ . '/Attributes/Entity/Id.php';
-require_once __DIR__ . '/Attributes/Entity/OneToOne.php';
-require_once __DIR__ . '/Attributes/Entity/JoinColumn.php';
-require_once __DIR__ . '/Attributes/Entity/ManyToOne.php';
-require_once __DIR__ . '/Attributes/Entity/PrimaryKeyJoinColumn.php';
-require_once __DIR__ . '/Exceptions/InternalException.php';
 
 class EntityManager
 {

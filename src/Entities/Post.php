@@ -11,14 +11,6 @@ use App\Attributes\Validation\MaxLength;
 use App\Attributes\Validation\NotNull;
 use DateTime;
 
-require_once __DIR__ . '/../Attributes/Entity/Column.php';
-require_once __DIR__ . '/../Attributes/Entity/Entity.php';
-require_once __DIR__ . '/../Attributes/Entity/Id.php';
-require_once __DIR__ . '/../Attributes/Entity/JoinColumn.php';
-require_once __DIR__ . '/../Attributes/Entity/ManyToOne.php';
-require_once __DIR__ . '/../Attributes/Validation/NotNull.php';
-require_once __DIR__ . '/../Attributes/Validation/MaxLength.php';
-
 #[Entity('post')]
 class Post
 {

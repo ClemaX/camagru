@@ -7,10 +7,6 @@ use App\Attributes\Validation\MinLength;
 use App\Attributes\Validation\NotBlank;
 use App\Attributes\Validation\NotNull;
 
-require_once __DIR__ . '/../../Attributes/Validation/MaxLength.php';
-require_once __DIR__ . '/../../Attributes/Validation/NotBlank.php';
-require_once __DIR__ . '/../../Attributes/Validation/NotNull.php';
-
 class PostCreationDTO
 {
 	#[NotNull]

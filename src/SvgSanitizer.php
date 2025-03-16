@@ -6,9 +6,6 @@ use App\Exceptions\InternalException;
 use App\Exceptions\ValidationException;
 use Exception;
 
-require_once __DIR__ . '/Exceptions/InternalException.php';
-require_once __DIR__ . '/Exceptions/ValidationException.php';
-
 define('XML_NS_SVG', 'http://www.w3.org/2000/svg');
 define('XML_NS_XLINK', 'http://www.w3.org/1999/xlink');
 define('XML_NS_XLINK_PREFIX', 'xlink');

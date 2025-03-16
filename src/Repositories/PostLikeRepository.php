@@ -5,10 +5,6 @@ namespace App\Repositories;
 use App\Entities\PostLike;
 use App\EntityManager;
 
-require_once __DIR__ . '/AbstractRepository.php';
-
-require_once __DIR__ . '/../Entities/PostLike.php';
-
 /** @extends AbstractRepository<PostLike> */
 class PostLikeRepository extends AbstractRepository
 {

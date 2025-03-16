@@ -2,8 +2,6 @@
 
 namespace App\Exceptions;
 
-require_once __DIR__ . '/HttpException.php';
-
 class ForbiddenException extends HttpException
 {
 	public function __construct()

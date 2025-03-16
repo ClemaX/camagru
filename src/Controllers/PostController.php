@@ -18,12 +18,6 @@ use App\Services\DTOs\PostCreationDTO;
 use App\Services\PostService;
 use SensitiveParameter;
 
-require_once __DIR__ . '/AbstractController.php';
-require_once __DIR__ . '/../Entities/Post.php';
-require_once __DIR__ . '/../Services/DTOs/PostCreationDTO.php';
-require_once __DIR__ . '/../Services/DTOs/PostCommentDTO.php';
-require_once __DIR__ . '/../Exceptions/UnauthorizedException.php';
-
 #[Controller('/')]
 class PostController extends AbstractController
 {

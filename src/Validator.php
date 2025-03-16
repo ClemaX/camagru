@@ -6,9 +6,6 @@ use App\Attributes\Validation\ValidationInterface;
 use ReflectionAttribute;
 use ReflectionObject;
 
-require_once __DIR__ . '/Attributes/Validation/ValidationInterface.php';
-require_once __DIR__ . '/Exceptions/ValidationException.php';
-
 class Validator
 {
 	public function validate(object $object): array

@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Renderer;
 
-require_once __DIR__ . '/../Renderer.php';
-
 class MailService
 {
 	public function __construct(private readonly Renderer $renderer)

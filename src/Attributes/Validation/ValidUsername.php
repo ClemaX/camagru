@@ -4,8 +4,6 @@ namespace App\Attributes\Validation;
 
 use Attribute;
 
-require_once __DIR__ . '/Pattern.php';
-
 #[Attribute()]
 class ValidUsername extends Pattern
 {

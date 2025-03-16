@@ -9,10 +9,6 @@ use App\Enumerations\Role;
 use App\Exceptions\InternalException;
 use App\Repositories\UserRepository;
 
-require_once __DIR__ . '/UserSessionServiceInterface.php';
-
-require_once __DIR__ . '/../Exceptions/InternalException.php';
-
 define('SESSION_USER_ID_KEY', 'user_id');
 define('SESSION_USER_ROLE_KEY', 'user_role');
 define('SESSION_CSRF_TOKEN_KEY', 'csrf_token');
