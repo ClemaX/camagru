@@ -29,6 +29,9 @@ class AuthService
 	private readonly string $adminEmailAddress;
 	private readonly DateInterval $unlockTokenLifetime;
 
+	/**
+	 * @param array<string, string> $config
+	 */
 	public function __construct(
 		private readonly UserRepository $userRepository,
 		private readonly UserSessionServiceInterface $sessionService,
@@ -44,7 +47,7 @@ class AuthService
 		$this->adminEmailAddress = $config['ADMIN_EMAIL'];
 	}
 
-	public function signup(#[SensitiveParameter] SignupDTO $dto)
+	public function signup(#[SensitiveParameter] SignupDTO $dto): void
 	{
 		if ($this->userRepository->findByUsername($dto->username) != null) {
 			throw new ConflictException('username');
@@ -55,10 +58,6 @@ class AuthService
 		}
 
 		$passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
-
-		if ($passwordHash === false) {
-			throw new InternalException();
-		}
 
 		$unlockToken = bin2hex(random_bytes(32));
 
@@ -113,7 +112,9 @@ class AuthService
 			return false;
 		}
 
-		$lockedAt = DateTime::createFromFormat('U', $user->lockedAt);
+		$lockedAt = new DateTime();
+		$lockedAt->setTimestamp($user->lockedAt);
+
 		$tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
 
 		if ($now >= $tokenExpiredAt
@@ -132,7 +133,7 @@ class AuthService
 
 	public function requestPasswordReset(
 		#[SensitiveParameter] PasswordResetRequestDTO $dto
-	) {
+	): void {
 		$user = $this->userRepository->findByEmailAddress($dto->email);
 
 		if ($user === null) {
@@ -178,7 +179,9 @@ class AuthService
 			return false;
 		}
 
-		$lockedAt = DateTime::createFromFormat('U', $user->lockedAt);
+		$lockedAt = new DateTime();
+		$lockedAt->setTimestamp($user->lockedAt);
+
 		$tokenExpiredAt = $lockedAt->add($this->unlockTokenLifetime);
 
 		if ($now >= $tokenExpiredAt
@@ -187,10 +190,6 @@ class AuthService
 		}
 
 		$passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
-
-		if ($passwordHash === false) {
-			throw new InternalException();
-		}
 
 		$user->passwordHash = $passwordHash;
 		$user->isLocked = false;
@@ -207,12 +206,8 @@ class AuthService
 	public function changePassword(
 		User $user,
 		#[SensitiveParameter] PasswordChangeDTO $dto,
-	) {
+	): void {
 		$passwordHash = password_hash($dto->password, PASSWORD_BCRYPT);
-
-		if ($passwordHash === false) {
-			throw new InternalException();
-		}
 
 		$user->passwordHash = $passwordHash;
 
@@ -222,7 +217,7 @@ class AuthService
 	public function requestEmailChange(
 		User $user,
 		#[SensitiveParameter] EmailChangeDTO $dto,
-	) {
+	): void {
 		if ($this->userRepository->findByEmailAddress($dto->email) != null) {
 			throw new ConflictException('email');
 		}
@@ -231,9 +226,7 @@ class AuthService
 		$user->emailChangeRequestedAt = time();
 		$user->emailChangeToken = bin2hex(random_bytes(32));
 
-		if (!$this->userRepository->update($user)) {
-			throw new InternalException();
-		}
+		$this->userRepository->update($user);
 
 		$verifyQueryParams = [
 			'id' => $user->id,
@@ -268,7 +261,9 @@ class AuthService
 			return false;
 		}
 
-		$emailChangeRequestedAt = DateTime::createFromFormat('U', $user->emailChangeRequestedAt);
+		$emailChangeRequestedAt = new DateTime();
+		$emailChangeRequestedAt->setTimestamp($user->emailChangeRequestedAt);
+
 		$tokenExpiredAt = $emailChangeRequestedAt->add($this->unlockTokenLifetime);
 
 		if ($now >= $tokenExpiredAt
@@ -286,7 +281,7 @@ class AuthService
 		return true;
 	}
 
-	public function login(#[SensitiveParameter] LoginDTO $dto)
+	public function login(#[SensitiveParameter] LoginDTO $dto): User
 	{
 		$user = $this->userRepository->findByUsername($dto->username);
 
@@ -304,7 +299,7 @@ class AuthService
 		return $user;
 	}
 
-	public function logout()
+	public function logout(): void
 	{
 		$this->sessionService->logout();
 	}

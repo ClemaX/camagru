@@ -10,13 +10,16 @@ class MailService
 	{
 	}
 
+	/**
+	 * @param array<string, mixed> $params
+	 */
 	public function send(
 		string $to,
 		string $subject,
 		string $templateName,
 		array $params = [],
 		string $contentType = 'text/html'
-	) {
+	): void {
 		$message = $this->renderer->render($templateName, $params);
 
 		$headers = "MIME-Version: 1.0\r\n";

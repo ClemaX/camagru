@@ -105,7 +105,7 @@ class UserController extends AbstractController
 	public function requestEmailChangeSubmit(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[SensitiveParameter] #[RequestBody] EmailChangeDTO $dto
-	) {
+	): string {
 		try {
 			$this->authService->requestEmailChange($user, $dto);
 		} catch (ConflictException $e) {
@@ -129,7 +129,7 @@ class UserController extends AbstractController
 	public function changePasswordSubmit(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[SensitiveParameter] #[RequestBody] PasswordChangeDTO $dto
-	) {
+	): string {
 		$this->authService->changePassword($user, $dto);
 
 		header('Location: ./settings');

@@ -10,6 +10,9 @@ abstract class AbstractController
 	{
 	}
 
+	/**
+	 * @param array<string, mixed> $params
+	 */
 	protected function render(string $templateName, array $params = []): string
 	{
 		$content = $this->renderer->render($templateName, $params);

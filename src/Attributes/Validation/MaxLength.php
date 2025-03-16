@@ -11,9 +11,9 @@ class MaxLength implements ValidationInterface
 	{
 	}
 
-	public function validate($value): ?string
+	public function validate(mixed $value): ?string
 	{
-		if (mb_strlen($value) > $this->maxLength) {
+		if (!is_string($value) || mb_strlen($value) > $this->maxLength) {
 			return "MAX_LENGTH_ERROR";
 		}
 		return null;

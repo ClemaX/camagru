@@ -4,7 +4,8 @@ namespace App\Repositories;
 
 use App\Entities\UserProfile as UserProfile;
 
-class UserProfileRepository implements AbstractRepository
+/** @extends AbstractRepository<UserProfile> */
+class UserProfileRepository extends AbstractRepository
 {
 	protected function getModelClass(): string
 	{

@@ -6,10 +6,10 @@ use App\Entities\User;
 
 interface UserSessionServiceInterface
 {
-	public function start();
+	public function start(): void;
 
-	public function login(User $user);
-	public function logout();
+	public function login(User $user): void;
+	public function logout(): void;
 
 	public function getUser(): ?User;
 

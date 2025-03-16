@@ -56,10 +56,15 @@ class DatabaseSessionService implements SessionHandlerInterface, UserSessionServ
 	public function gc(int $maxlifetime): int|false
 	{
 		$stmt = $this->pdo->prepare("DELETE FROM session WHERE last_access < ?");
-		return $stmt->execute([time() - $maxlifetime]);
+
+		if (!$stmt->execute([time() - $maxlifetime])) {
+			return false;
+		}
+
+		return $stmt->rowCount();
 	}
 
-	public function start()
+	public function start(): void
 	{
 		if (!session_start()) {
 			throw new InternalException();
@@ -70,7 +75,7 @@ class DatabaseSessionService implements SessionHandlerInterface, UserSessionServ
 		}
 	}
 
-	public function login(User $user)
+	public function login(User $user): void
 	{
 		session_regenerate_id();
 
@@ -78,7 +83,7 @@ class DatabaseSessionService implements SessionHandlerInterface, UserSessionServ
 		$_SESSION[SESSION_USER_ROLE_KEY] = Role::USER;
 	}
 
-	public function logout()
+	public function logout(): void
 	{
 		// Unset all of the session variables.
 		/** @disregard P1003 because we want to unset the $_SESSION */

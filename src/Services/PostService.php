@@ -27,6 +27,9 @@ class PostService
 	private readonly string $externalStorageUrl;
 	private readonly string $bucketId;
 
+	/**
+	 * @param array<string, string> $config
+	 */
 	public function __construct(
 		private readonly PostRepository $postRepository,
 		private readonly PostLikeRepository $likeRepository,
@@ -68,6 +71,9 @@ class PostService
 		}, $this->postRepository->findAll('created_at', 'DESC'));
 	}
 
+	/**
+	 * @param array<string, string | int> $pictureFile
+	 */
 	public function post(
 		#[SensitiveParameter] User $author,
 		PostCreationDTO $dto,
@@ -141,7 +147,7 @@ class PostService
 	public function like(
 		#[SensitiveParameter] User $author,
 		int $postId
-	) {
+	): void {
 		if (!$this->postRepository->existsById($postId)) {
 			throw new NotFoundException();
 		}
@@ -162,7 +168,7 @@ class PostService
 	public function unlike(
 		#[SensitiveParameter] User $author,
 		int $postId,
-	) {
+	): void {
 		$likeId = new PostLikeId(authorId: $author->id, postId: $postId);
 
 		if ($this->likeRepository->delete($likeId) !== 1) {
@@ -170,7 +176,7 @@ class PostService
 		}
 	}
 
-	public function countLikes(int $postId)
+	public function countLikes(int $postId): int
 	{
 		return $this->likeRepository->countByPostId($postId);
 	}
@@ -194,12 +200,15 @@ class PostService
 		return $this->commentRepository->save($comment);
 	}
 
-	public function countComments(int $postId)
+	public function countComments(int $postId): int
 	{
 		return $this->commentRepository->countByPostId($postId);
 	}
 
-	public function getComments(int $postId, ?int $subjectId = null)
+	/**
+	 * @return PostComment[]
+	 */
+	public function getComments(int $postId, ?int $subjectId = null): array
 	{
 		return $this->commentRepository->findAllByPostId($postId, $subjectId);
 	}

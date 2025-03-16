@@ -56,7 +56,7 @@ class AuthController extends AbstractController
 	}
 
 	#[Route('/verify-email')]
-	public function verifyEmail()
+	public function verifyEmail(): string
 	{
 		return $this->render("activate-account");
 	}
@@ -65,7 +65,7 @@ class AuthController extends AbstractController
 	public function activate(
 		#[RequestParam] int $id,
 		#[SensitiveParameter] #[RequestParam] string $token,
-	) {
+	): string {
 		$isActivated = $this->authService->activate($id, $token);
 
 		return $this->render("activated-account", [
@@ -74,7 +74,7 @@ class AuthController extends AbstractController
 	}
 
 	#[Route('/reset-password')]
-	public function requestPasswordReset()
+	public function requestPasswordReset(): string
 	{
 		return $this->render('reset-password', [
 			'isEmailSent' => false,
@@ -85,7 +85,7 @@ class AuthController extends AbstractController
 	#[Route('/reset-password', 'POST')]
 	public function requestPasswordResetSubmit(
 		#[RequestBody] PasswordResetRequestDTO $dto
-	) {
+	): string {
 		$this->authService->requestPasswordReset($dto);
 
 		return $this->render('reset-password', [
@@ -98,7 +98,7 @@ class AuthController extends AbstractController
 	public function choosePassword(
 		#[RequestParam] int $id,
 		#[SensitiveParameter] #[RequestParam] string $token,
-	) {
+	): string {
 		return $this->render('choose-password', [
 			'isUrlInvalid' => false,
 			'userId' => $id,
@@ -109,7 +109,7 @@ class AuthController extends AbstractController
 	#[Route('/choose-password', 'POST')]
 	public function choosePasswordSubmit(
 		#[RequestBody] PasswordResetDTO $dto
-	) {
+	): string {
 		$isReset = $this->authService->resetPassword($dto);
 
 		if (!$isReset) {
@@ -129,7 +129,7 @@ class AuthController extends AbstractController
 	public function changeEmail(
 		#[RequestParam] int $id,
 		#[SensitiveParameter] #[RequestParam] string $token,
-	) {
+	): string {
 		$isChanged = $this->authService->changeEmail($id, $token);
 
 		return $this->render("changed-email", [
@@ -138,7 +138,7 @@ class AuthController extends AbstractController
 	}
 
 	#[Route('/login')]
-	public function login()
+	public function login(): string
 	{
 		return $this->render('login', [
 			'errorMessage' => null,

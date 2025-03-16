@@ -11,9 +11,9 @@ class Pattern implements ValidationInterface
 	{
 	}
 
-	public function validate($value): ?string
+	public function validate(mixed $value): ?string
 	{
-		if (!preg_match($this->pattern, $value)) {
+		if (!is_string($value) || !preg_match($this->pattern, $value)) {
 			return "PATTERN_ERROR";
 		}
 		return null;

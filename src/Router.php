@@ -9,15 +9,18 @@ use App\Attributes\Route;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Exceptions\InvalidCsrfTokenException;
+use App\Exceptions\MappingException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\UnauthorizedException;
 use App\Services\UserSessionServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
 use SensitiveParameter;
 
 class Router
 {
+	/** @var array<string, mixed> $routes */
 	private array $routes = [];
 	public readonly string $basePath;
 
@@ -31,18 +34,25 @@ class Router
 			: dirname($_SERVER['SCRIPT_NAME']);
 	}
 
+	/**
+	 * @return array<string, class-string | string | bool>[]
+	 */
 	private function getMethodParameters(ReflectionMethod $method): array
 	{
 		$parameters = [];
 		foreach ($method->getParameters() as $param) {
+			$type = $param->getType();
+			assert($type instanceof ReflectionNamedType);
+
 			$attrs = $param->getAttributes(PathVariable::class);
+
 			if (!empty($attrs)) {
 				$attribute = $attrs[0]->newInstance();
 
 				$parameters[] = [
 					'name' => $attribute->getName()
 						?? $param->getName(),
-					'type' => $param->getType()->getName(),
+					'type' => $type->getName(),
 					'kind' => $attribute::class,
 				];
 			}
@@ -53,7 +63,7 @@ class Router
 
 				$parameters[] = [
 					'name' => $param->getName(),
-					'type' => $param->getType()->getName(),
+					'type' => $type->getName(),
 					'kind' => $attribute::class,
 				];
 			}
@@ -65,7 +75,8 @@ class Router
 				$parameters[] = [
 					'name' => $attribute->getName()
 						?? $param->getName(),
-					'type' => $param->getType()->getName(),
+					'type' => $type->getName(),
+					'required' => !$type->allowsNull(),
 					'kind' => $attribute::class,
 				];
 			}
@@ -76,8 +87,8 @@ class Router
 
 				$parameters[] = [
 					'name' => $param->getName(),
-					'type' => $param->getType()->getName(),
-					'required' => !$param->getType()->allowsNull(),
+					'type' => $type->getName(),
+					'required' => !$type->allowsNull(),
 					'kind' => $attribute::class,
 				];
 			}
@@ -85,6 +96,12 @@ class Router
 		return $parameters;
 	}
 
+	/**
+	 * @param array<string, class-string | string | bool>[] $parameters
+	 * @param array<string, string> $pathVariables
+	 * @param array<string, string> $requestParams
+	 * @return mixed[]
+	 */
 	private function prepareArguments(
 		array $parameters,
 		array $pathVariables,
@@ -110,6 +127,8 @@ class Router
 				case RequestParam::class:
 					if (array_key_exists($param['name'], $requestParams)) {
 						$dto = $requestParams[$param['name']];
+					} elseif ($param['required']) {
+						throw new MappingException();
 					}
 					break;
 				case CurrentUser::class:
@@ -127,10 +146,13 @@ class Router
 		return $args;
 	}
 
+	/**
+	 * @return string[]
+	 */
 	public static function capturePathVariables(
 		string $routePattern,
 		string $requestPath
-	) {
+	): array {
 		$regexPattern = preg_replace(
 			'/\{(\w+)\}/',
 			'(?P<\1>[^/]+)',
@@ -166,7 +188,7 @@ class Router
 	//     }
 	// }
 
-	public function addController(object $controller)
+	public function addController(object $controller): void
 	{
 		$reflectionClass = new ReflectionClass($controller::class);
 

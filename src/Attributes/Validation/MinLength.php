@@ -11,9 +11,9 @@ class MinLength implements ValidationInterface
 	{
 	}
 
-	public function validate($value): ?string
+	public function validate(mixed $value): ?string
 	{
-		if (mb_strlen($value) < $this->minLength) {
+		if (!is_string($value) || mb_strlen($value) < $this->minLength) {
 			return "MIN_LENGTH_ERROR";
 		}
 		return null;

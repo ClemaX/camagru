@@ -4,7 +4,7 @@ namespace App\Attributes\Validation;
 
 use Attribute;
 
-function mb_nextchar($string, &$pointer)
+function mb_nextchar(string $string, int &$pointer): string | false
 {
 	if (!isset($string[$pointer])) {
 		return false;
@@ -20,7 +20,7 @@ function mb_nextchar($string, &$pointer)
 		} else {
 			$bytes = 4;
 		}
-		$str =  substr($string, $pointer, $bytes);
+		$str = substr($string, $pointer, $bytes);
 		$pointer += $bytes;
 		return $str;
 	}
@@ -39,7 +39,7 @@ class ValidPassword extends MinLength
 		parent::__construct($minLength);
 	}
 
-	public function validate($value): ?string
+	public function validate(mixed $value): ?string
 	{
 		$error = parent::validate($value);
 

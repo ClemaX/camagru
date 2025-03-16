@@ -11,7 +11,7 @@ abstract class HttpException extends Exception
 		protected int $statusCode,
 		protected string $title,
 		string $message,
-		$code = 0,
+		int $code = 0,
 		?Throwable $previous = null
 	) {
 		$this->statusCode = $statusCode;
@@ -19,17 +19,17 @@ abstract class HttpException extends Exception
 		parent::__construct($message, $code, $previous);
 	}
 
-	public function getStatusCode()
+	public function getStatusCode(): int
 	{
 		return $this->statusCode;
 	}
 
-	public function getTitle()
+	public function getTitle(): string
 	{
 		return $this->title;
 	}
 
-	public function sendHeaders()
+	public function sendHeaders(): void
 	{
 		http_response_code($this->statusCode);
 	}

@@ -8,6 +8,9 @@ use ReflectionObject;
 
 class Validator
 {
+	/**
+	 * @return array{property: string, error: string, constraints: array<string, mixed>}[]
+	 */
 	public function validate(object $object): array
 	{
 		$errors = [];

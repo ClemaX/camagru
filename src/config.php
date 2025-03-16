@@ -1,6 +1,9 @@
 <?php
 
-function getConfig()
+/**
+ * @return array<string, string>
+ */
+function getConfig(): array
 {
 	$config = require __DIR__ . '/config.default.php';
 

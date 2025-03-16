@@ -87,13 +87,18 @@ class EntityManager
 	private static function getIdColumnProperties(string $modelClass): array
 	{
 		$idProperty = self::getIdProperty($modelClass);
+		$idType = $idProperty->getType();
 
-		if (!$idProperty->getType()->isBuiltin()) {
-			$reflectionClass = new ReflectionClass($idProperty->getType()->getName());
+		if (!$idType instanceof ReflectionNamedType) {
+			throw new InternalException("Invalid Id property type");
+		}
+
+		if ($idType->isBuiltin()) {
+			$idProperties = [$idProperty];
+		} else {
+			$reflectionClass = new ReflectionClass($idType->getName());
 
 			$idProperties = $reflectionClass->getProperties();
-		} else {
-			$idProperties = [$idProperty];
 		}
 
 		return $idProperties;
@@ -131,7 +136,9 @@ class EntityManager
 			}
 		);
 
-		if (array_any($columnProperties, fn ($property) => $property->getType()->isBuiltin())) {
+		if (array_any($columnProperties, fn ($property) =>
+			!$property->getType() instanceof ReflectionNamedType
+			|| $property->getType()->isBuiltin())) {
 			throw new InternalException('Unsupported relation property type');
 		}
 
@@ -166,8 +173,13 @@ class EntityManager
 		}
 	}
 
-	private static function bindParameters(PDOStatement $stmt, array $data)
-	{
+	/**
+	 * @param array<string, bool | int | string | BackedEnum | null> $data
+	 */
+	private static function bindParameters(
+		PDOStatement $stmt,
+		array $data
+	): void {
 		foreach ($data as $key => $value) {
 			if ($value instanceof BackedEnum) {
 				$type = PDO::PARAM_STR;
@@ -180,7 +192,7 @@ class EntityManager
 	}
 
 	/**
-	 * @param array<string, string | array<string, string> | null> $criteria
+	 * @param array<string, string | int | array<string, string> | null> $criteria
 	 */
 	private static function formulateConditions(array $criteria): string
 	{
@@ -213,8 +225,8 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param class-string<EntityT>
-	 * @return array<string, string | array<string, string> | null>
+	 * @param class-string<EntityT> $modelClass
+	 * @return array<string, string | int | array<string, string> | null>
 	 */
 	private static function getIdCriteria(int|object $id, string $modelClass): array
 	{
@@ -222,6 +234,7 @@ class EntityManager
 
 		$idProperty = self::getIdProperty($modelClass);
 		$idType = $idProperty->getType();
+		assert($idType instanceof ReflectionNamedType);
 
 		if ($idType->isBuiltin()) {
 			$idColumn =
@@ -245,18 +258,26 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
+	 * @param EntityT $model
 	 * @param class-string<EntityT> $modelClass
 	 */
-	private function fetchOneToOneRelations(object $model, string $modelClass)
-	{
+	private function fetchOneToOneRelations(
+		object $model,
+		string $modelClass
+	): void {
 		$idProperty = self::getIdProperty($modelClass);
+		$idType = $idProperty->getType();
+		assert($idType instanceof ReflectionNamedType);
+
 		$id = $idProperty->getValue($model);
 
 		$oneToOneProperties = self::getOneToOneRelations($modelClass);
 
 		foreach ($oneToOneProperties as $property) {
 			$propertyType = $property->getType();
+			assert($propertyType instanceof ReflectionNamedType);
 
+			/** @var class-string<object> $propertyClass */
 			$propertyClass = $propertyType->getName();
 
 			$primaryKeyJoinColumns = $property->getAttributes(PrimaryKeyJoinColumn::class);
@@ -265,7 +286,10 @@ class EntityManager
 			}
 
 			$propertyIdProperty = self::getIdProperty($propertyClass);
-			if ($idProperty->getType()->getName() !== $propertyIdProperty->getType()->getName()) {
+			$propertyIdType = $propertyIdProperty->getType();
+			assert($propertyIdType instanceof ReflectionNamedType);
+
+			if ($idType->getName() !== $propertyIdType->getName()) {
 				throw new InternalException('PrimaryKeyJoinColumn related Entity ID properties must have the same type');
 			}
 
@@ -277,27 +301,30 @@ class EntityManager
 
 			$property->setValue($model, $propertyModel);
 		}
-
 	}
 
 	/**
 	 * @template EntityT of object
+	 * @param EntityT $model
+	 * @param array<string, bool | int | string | BackedEnum | null> $data
 	 * @param class-string<EntityT> $modelClass
 	 */
 	private function fetchManyToOneRelations(
 		object $model,
 		array $data,
 		string $modelClass
-	) {
+	): void {
 		$manyToOneProperties = self::getManyToOneRelations($modelClass);
 
 		foreach ($manyToOneProperties as $property) {
 			$propertyType = $property->getType();
+			assert($propertyType instanceof ReflectionNamedType);
 
 			if ($propertyType->isBuiltin()) {
 				throw new InternalException('Unsupported ManyToOne relation property type');
 			}
 
+			/** @var class-string<object> $propertyClass */
 			$propertyClass = $propertyType->getName();
 
 			$joinColumns = $property->getAttributes(JoinColumn::class);
@@ -326,18 +353,20 @@ class EntityManager
 	/**
 	 * @template EntityT of object
 	 * @param class-string<EntityT> $modelClass
+	 * @param array<string, bool | int | string | BackedEnum | null> $data
 	 */
 	private function fetchRelations(
 		object $model,
 		array $data,
 		string $modelClass
-	) {
+	): void {
 		self::fetchOneToOneRelations($model, $modelClass);
 		self::fetchManyToOneRelations($model, $data, $modelClass);
 	}
 
 	/**
 	 * @template EntityT of object
+	 * @param array<string, bool | int | string | BackedEnum | null> $data
 	 * @param class-string<EntityT> $modelClass
 	 * @return EntityT
 	 */
@@ -348,16 +377,20 @@ class EntityManager
 		$model = new $modelClass();
 
 		foreach ($columnProperties as $property) {
+			$type = $property->getType();
+			assert($type instanceof ReflectionNamedType);
+
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
 
 			if (!array_key_exists($column->name, $data)) {
 				throw new InternalException('Entity column not found');
 			}
 
-			$propertyClass = $property->getType()->getName();
+			$propertyClass = $type->getName();
 			$value = $data[$column->name];
 
-			if (enum_exists($propertyClass)) {
+			if (is_a($propertyClass, BackedEnum::class, allow_string: true)) {
+				/** @var class-string<BackedEnum> $enumType */
 				$enumType = $propertyClass;
 				$value = $enumType::from($data[$column->name]);
 			} elseif ($propertyClass === DateTime::class) {
@@ -376,6 +409,7 @@ class EntityManager
 	/**
 	 * @template EntityT of object
 	 * @param class-string<EntityT> $modelClass
+	 * @return array<string, bool | int | string | BackedEnum | null> $data
 	 */
 	private static function dump(object $model, string $modelClass): array
 	{
@@ -386,7 +420,8 @@ class EntityManager
 			$column = $property->getAttributes(Column::class)[0]->newInstance();
 			$value = $property->getValue($model);
 
-			if ($property->getType()->getName() === DateTime::class) {
+			if ($property->getType() instanceof ReflectionNamedType
+			&& $property->getType()->getName() === DateTime::class) {
 				$data[$column->name] = $value->getTimestamp();
 			} else {
 				$data[$column->name] = $value;
@@ -399,6 +434,10 @@ class EntityManager
 			$joinColumns = $property->getAttributes(JoinColumn::class);
 			if (empty($joinColumns)) {
 				throw new InternalException('Unsupported ManyToOne relation type');
+			}
+
+			if (!$property->getType() instanceof ReflectionNamedType) {
+				throw new InternalException('Unsupported ManyToOne property type');
 			}
 
 			$column = $joinColumns[0]->newInstance();
@@ -414,8 +453,8 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string> | null> $criteria
-	 * @param class-string<EntityT>
+	 * @param array<string, string | int | array<string, string> | null> $criteria
+	 * @param class-string<EntityT> $modelClass
 	 * @return ?EntityT
 	 */
 	public function findBy(array $criteria, string $modelClass): ?object
@@ -503,8 +542,8 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string> | null> $criteria
-	 * @param class-string<EntityT>
+	 * @param array<string, string | int | array<string, string> | null> $criteria
+	 * @param class-string<EntityT> $modelClass
 	 * @return EntityT[]
 	 */
 	public function findAllBy(
@@ -556,8 +595,8 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string> | null> $criteria
-	 * @param class-string<EntityT>
+	 * @param array<string, string | int | array<string, string> | null> $criteria
+	 * @param class-string<EntityT> $modelClass
 	 */
 	public function countBy(array $criteria, string $modelClass): int
 	{
@@ -590,7 +629,7 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param class-string<EntityT>
+	 * @param class-string<EntityT> $modelClass
 	 */
 	public function countAll(string $modelClass): int
 	{
@@ -609,8 +648,8 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string> | null> $criteria
-	 * @param class-string<EntityT>
+	 * @param array<string, string | int | array<string, string> | null> $criteria
+	 * @param class-string<EntityT> $modelClass
 	 */
 	public function existsBy(array $criteria, string $modelClass): bool
 	{
@@ -644,7 +683,6 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param EntityT $model
 	 * @param class-string<EntityT> $modelClass
 	 */
 	public function existsById(int|object $id, string $modelClass): bool
@@ -681,9 +719,14 @@ class EntityManager
 				}
 			}
 		} else {
-
 			$idProperty = self::getIdProperty($modelClass);
-			$data = array_merge($data, self::dump($idProperty->getValue($model), $idProperty->getType()->getName()));
+			$idType = $idProperty->getType();
+			assert($idType instanceof ReflectionNamedType);
+
+			$data = array_merge(
+				$data,
+				self::dump($idProperty->getValue($model), $idType->getName())
+			);
 
 			foreach ($idColumnProperties as $idProperty) {
 				$idColumn = $idColumnProperties[0]->getAttributes(Column::class)[0];
@@ -738,9 +781,14 @@ class EntityManager
 		$oneToOneProperties = self::getOneToOneRelations($modelClass);
 
 		foreach ($oneToOneProperties as $property) {
+			$relatedEntityType = $property->getType();
+			assert($relatedEntityType instanceof ReflectionNamedType);
+			$relatedEntity = $property->getValue($model);
+			assert(is_object($relatedEntity));
+
 			$this->save(
-				$property->getValue($model),
-				$property->getType()->getName(),
+				$relatedEntity,
+				$relatedEntityType->getName(),
 				$insertedId,
 			);
 		}
@@ -794,10 +842,12 @@ class EntityManager
 		$oneToOneProperties = self::getOneToOneRelations($modelClass);
 
 		foreach ($oneToOneProperties as $property) {
-			$this->merge(
-				$property->getValue($model),
-				$property->getType()->getName(),
-			);
+			$relatedEntityType = $property->getType();
+			assert($relatedEntityType instanceof ReflectionNamedType);
+			$relatedEntity = $property->getValue($model);
+			assert(is_object($relatedEntity));
+
+			$this->merge($relatedEntity, $relatedEntityType->getName());
 		}
 
 		return $model;
@@ -806,7 +856,7 @@ class EntityManager
 
 	/**
 	 * @template EntityT of object
-	 * @param array<string, string | array<string, string> | null> $criteria
+	 * @param array<string, string | int | array<string, string> | null> $criteria
 	 * @param class-string<EntityT> $modelClass
 	 * @return int Number of rows affected
 	 */

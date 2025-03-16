@@ -25,9 +25,7 @@ class UserService
 		$user->username = $dto->username;
 		$user->profile->description = $dto->description;
 
-		if (!$this->userRepository->update($user)) {
-			throw new InternalException();
-		}
+		$this->userRepository->update($user);
 
 		return $user;
 	}
@@ -36,9 +34,7 @@ class UserService
 	{
 		$user->settings->commentNotification = $dto->commentNotification;
 
-		if (!$this->userRepository->update($user)) {
-			throw new InternalException();
-		}
+		$this->userRepository->update($user);
 
 		return $user;
 	}

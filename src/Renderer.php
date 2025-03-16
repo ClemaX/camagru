@@ -9,6 +9,10 @@ use Exception;
 class Renderer
 {
 	private readonly string $appEnvironment;
+
+	/**
+	 * @param array<string, string> $config
+	 */
 	public function __construct(
 		private readonly UserSessionServiceInterface $sessionService,
 		private readonly string $templateDir,
@@ -18,6 +22,9 @@ class Renderer
 		$this->appEnvironment = $config['APP_ENV'];
 	}
 
+	/**
+	 * @param array<string, mixed> $params
+	 */
 	private static function processParameters(
 		string $content,
 		array $params
@@ -38,6 +45,9 @@ class Renderer
 		);
 	}
 
+	/**
+	 * @param array<string, mixed> $params
+	 */
 	private static function processUrls(
 		string $content,
 		array $params,
@@ -60,6 +70,9 @@ class Renderer
 		);
 	}
 
+	/**
+	 * @param array<string, mixed> $params
+	 */
 	private static function processIfStatements(
 		string $content,
 		array $params
@@ -78,6 +91,9 @@ class Renderer
 		}, $content);
 	}
 
+	/**
+	 * @param array<string, mixed> $params
+	 */
 	private static function processForLoops(
 		string $content,
 		array $params
@@ -173,7 +189,7 @@ class Renderer
 
 		return preg_replace_callback(
 			$pattern,
-			function ($matches) use ($userRoles) {
+			function ($matches) use (&$userRoles) {
 				if ($userRoles === null) {
 					$user = $this->sessionService->getUser();
 					$userRoles = [$user !== null ? $user->role : Role::GUEST];
@@ -211,7 +227,10 @@ class Renderer
 		return $content;
 	}
 
-	public function render(string $templateName, array $params = [])
+	/**
+	 * @param array<string, mixed> $params
+	 */
+	public function render(string $templateName, array $params = []): string
 	{
 		$templateFile = __DIR__
 			. DIRECTORY_SEPARATOR . $this->templateDir

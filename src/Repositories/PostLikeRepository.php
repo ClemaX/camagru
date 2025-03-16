@@ -18,7 +18,7 @@ class PostLikeRepository extends AbstractRepository
 		return PostLike::class;
 	}
 
-	public function countByPostId(int $postId)
+	public function countByPostId(int $postId): int
 	{
 		return $this->countBy(['post_id' => $postId]);
 	}

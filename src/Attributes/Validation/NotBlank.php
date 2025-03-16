@@ -11,9 +11,9 @@ class NotBlank implements ValidationInterface
 	{
 	}
 
-	public function validate($value): ?string
+	public function validate(mixed $value): ?string
 	{
-		if (ctype_space($value)) {
+		if (!is_string($value) || ctype_space($value)) {
 			return "NOT_BLANK_ERROR";
 		}
 		return null;

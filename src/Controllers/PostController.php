@@ -10,7 +10,6 @@ use App\Attributes\RequestParam;
 use App\Attributes\Route;
 use App\Entities\User;
 use App\Exceptions\MappingException;
-use App\Exceptions\UnauthorizedException;
 use App\Exceptions\ValidationException;
 use App\Renderer;
 use App\Services\DTOs\PostCommentDTO;
@@ -31,7 +30,7 @@ class PostController extends AbstractController
 	#[Route('')]
 	public function getAll(
 		#[SensitiveParameter] #[CurrentUser] ?User $user,
-	) {
+	): string {
 		return $this->render('gallery', [
 			'posts' => $this->postService->getAll($user),
 		]);
@@ -40,7 +39,7 @@ class PostController extends AbstractController
 	#[Route('/post')]
 	public function post(
 		#[SensitiveParameter] #[CurrentUser] User $user,
-	) {
+	): string {
 		return $this->render('post', []);
 	}
 
@@ -48,7 +47,7 @@ class PostController extends AbstractController
 	public function postSubmit(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[RequestBody] PostCreationDTO $dto,
-	) {
+	): string {
 		if (!array_key_exists('picture', $_FILES)
 		|| $_FILES['picture']['error']
 		|| empty($_FILES['picture']['tmp_name'])) {
@@ -76,7 +75,7 @@ class PostController extends AbstractController
 	public function like(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
-	) {
+	): string {
 		$this->postService->like($user, (int)$id);
 
 		header('Content-Type: application/json; charset=UTF-8');
@@ -89,7 +88,7 @@ class PostController extends AbstractController
 	public function unlike(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
-	) {
+	): string {
 		$this->postService->unlike($user, (int)$id);
 
 		header('Content-Type: application/json; charset=UTF-8');
@@ -103,7 +102,7 @@ class PostController extends AbstractController
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
 		#[RequestBody] PostCommentDTO $dto,
-	) {
+	): string {
 		$comment = $this->postService->postComment($user, (int)$id, $dto);
 
 		return json_encode($comment);
@@ -113,7 +112,7 @@ class PostController extends AbstractController
 	public function getComments(
 		#[PathVariable] string $id,
 		#[RequestParam] ?int $subjectId,
-	) {
+	): string {
 		$comments = $this->postService->getComments((int)$id, $subjectId);
 
 		return json_encode($comments);

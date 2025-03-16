@@ -5,6 +5,8 @@ namespace App;
 use App\Exceptions\MappingException;
 use App\Exceptions\ValidationException;
 use ReflectionClass;
+use BackedEnum;
+use ReflectionNamedType;
 
 class Mapper
 {
@@ -12,6 +14,9 @@ class Mapper
 	{
 	}
 
+	/**
+	 * @param array<string, bool | int | string | BackedEnum | null> $data
+	 */
 	public function map(string $dtoClass, array $data): object
 	{
 		$reflectionClass = new ReflectionClass($dtoClass);
@@ -20,13 +25,16 @@ class Mapper
 		$dto = new $dtoClass();
 
 		foreach ($properties as $property) {
+			$type = $property->getType();
+			assert($type instanceof ReflectionNamedType);
 			$key = $property->name;
 
-			if ($property->getType()->isBuiltin() && $property->getType()->getName() === 'bool') {
+
+			if ($type->isBuiltin() && $type->getName() === 'bool') {
 				$property->setValue($dto, array_key_exists($key, $data));
 			} elseif (array_key_exists($key, $data)) {
 				$property->setValue($dto, $data[$key]);
-			} elseif ($property->getType()->allowsNull()) {
+			} elseif ($type->allowsNull()) {
 				$property->setValue($dto, null);
 			} else {
 				throw new MappingException();

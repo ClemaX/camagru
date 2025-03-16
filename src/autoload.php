@@ -1,6 +1,6 @@
 <?php
 
-function autoload(string $class, $directory = null)
+function autoload(string $class, ?string $directory = null): void
 {
 	if ($directory === null) {
 		$directory = __DIR__;
