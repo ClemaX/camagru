@@ -63,23 +63,9 @@
 	</nav>
 	<main>{{ $content }}</main>
 
-	<script>
-		(() => {
-			'use strict';
-
-			const logout = async (logoutUrl) => {
-				const response = await fetch(logoutUrl, { method: 'POST' });
-				window.location = response.headers.get('Location');
-			};
-
-			const logoutButton = document.getElementById('logout-button');
-
-			logoutButton.addEventListener('click', () => {
-				logout(logoutButton.getAttribute('data-logout-url'));
-				return false;
-			});
-		})();
-	</script>
+	@role("USER", "ADMIN")
+	<script src="/js/logout.min.js" async></script>
+	@endrole
 
 	@env("development")
 	<script id="__bs_script__">//<![CDATA[
