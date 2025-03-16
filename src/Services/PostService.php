@@ -71,13 +71,10 @@ class PostService
 		}, $this->postRepository->findAll('created_at', 'DESC'));
 	}
 
-	/**
-	 * @param array<string, string | int> $pictureFile
-	 */
 	public function post(
 		#[SensitiveParameter] User $author,
 		PostCreationDTO $dto,
-		array $pictureFile
+		string $pictureFilename
 	): Post {
 		$temporaryDirectory = tempnam(sys_get_temp_dir(), '');
 		if ($temporaryDirectory === false || !unlink($temporaryDirectory)
@@ -87,7 +84,7 @@ class PostService
 
 		try {
 			$this->svgSanitizer->sanitize(
-				$pictureFile['tmp_name'],
+				$pictureFilename,
 				$temporaryDirectory
 			);
 		} catch (Exception $e) {

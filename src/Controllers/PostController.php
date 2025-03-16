@@ -6,10 +6,10 @@ use App\Attributes\Controller;
 use App\Attributes\CurrentUser;
 use App\Attributes\PathVariable;
 use App\Attributes\RequestBody;
+use App\Attributes\RequestFile;
 use App\Attributes\RequestParam;
 use App\Attributes\Route;
 use App\Entities\User;
-use App\Exceptions\MappingException;
 use App\Exceptions\ValidationException;
 use App\Renderer;
 use App\Services\DTOs\PostCommentDTO;
@@ -47,22 +47,17 @@ class PostController extends AbstractController
 	public function postSubmit(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[RequestBody] PostCreationDTO $dto,
+		#[RequestFile('picture')] string $pictureFilename
 	): string {
-		if (!array_key_exists('picture', $_FILES)
-		|| $_FILES['picture']['error']
-		|| empty($_FILES['picture']['tmp_name'])) {
-			throw new MappingException();
-		}
-
-		$picture = $_FILES['picture'];
-
 		header('Content-Type: application/json; charset=UTF-8');
 
 		try {
-			$post = $this->postService->post($user, $dto, $picture);
+			$post = $this->postService->post($user, $dto, $pictureFilename);
 		} catch (ValidationException $e) {
 			http_response_code($e->getStatusCode());
 			return json_encode($e->getErrors());
+		} finally {
+			unlink($pictureFilename);
 		}
 
 		http_response_code(201);
