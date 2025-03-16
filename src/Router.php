@@ -7,6 +7,7 @@ use App\Attributes\CurrentUser;
 use App\Attributes\PathVariable;
 use App\Attributes\Route;
 use App\Attributes\RequestBody;
+use App\Attributes\RequestFile;
 use App\Attributes\RequestParam;
 use App\Exceptions\InvalidCsrfTokenException;
 use App\Exceptions\MappingException;
@@ -81,6 +82,18 @@ class Router
 				];
 			}
 
+			$attrs = $param->getAttributes(RequestFile::class);
+			if (!empty($attrs)) {
+				$attribute = $attrs[0]->newInstance();
+
+				$parameters[] = [
+					'name' => $attribute->getName(),
+					'type' => $type->getName(),
+					'required' => !$type->allowsNull(),
+					'kind' => $attribute::class,
+				];
+			}
+
 			$attrs = $param->getAttributes(CurrentUser::class);
 			if (!empty($attrs)) {
 				$attribute = $attrs[0]->newInstance();
@@ -127,6 +140,17 @@ class Router
 				case RequestParam::class:
 					if (array_key_exists($param['name'], $requestParams)) {
 						$dto = $requestParams[$param['name']];
+					} elseif ($param['required']) {
+						throw new MappingException();
+					}
+					break;
+				case RequestFile::class:
+					if (array_key_exists($param['name'], $_FILES)) {
+						if ($_FILES[$param['name']]['error']
+						|| empty($_FILES[$param['name']]['tmp_name'])) {
+							throw new MappingException();
+						}
+						$dto = $_FILES[$param['name']]['tmp_name'];
 					} elseif ($param['required']) {
 						throw new MappingException();
 					}
