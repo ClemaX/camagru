@@ -15,6 +15,9 @@ define('SVG_HEIGHT', 1080);
 define('SVG_VIEWBOX', "0 0 1080 1080");
 define('SVG_PRESERVEASPECTRATIO', "xMidYMid");
 
+/**
+ * @var array<string, array{required: bool, unique?: bool, numeric?: bool, pattern?: string, namespace?: string, prefix?: string}> $SVG_IMAGE_ATTRIBUTES
+ */
 define('SVG_IMAGE_ATTRIBUTES', [
 	'id' => [
 		'required' => true,
@@ -51,17 +54,25 @@ define('SVG_IMAGE_ATTRIBUTES', [
 
 class SvgSanitizer
 {
-
+	/**
+	 * @param string[] $allowedImageBaseUrls
+	 */
 	public function __construct(private readonly array $allowedImageBaseUrls)
 	{
 	}
 
+	/**
+	 * @param array<string, string> $attributes
+	 * @param array<string, string[]> $imageUniqueAttributes
+	 * @param array{required: bool, unique?: bool, numeric?: bool, pattern?: string, namespace?: string, prefix?: string} $constraints
+	 * @return array{property: string, error: string, constraints: array<string, mixed>}[]
+	 */
 	public static function validateImageAttribute(
 		array $attributes,
 		array &$imageUniqueAttributes,
 		string $key,
 		array $constraints,
-	) {
+	): array {
 		$attributeValue = $attributes[$key];
 
 		$errors = [];
@@ -105,6 +116,9 @@ class SvgSanitizer
 		return $errors;
 	}
 
+	/**
+	 * @param string[] $writtenFilenames
+	 */
 	public function sanitizeImageSource(
 		string $layerId,
 		string $source,
@@ -152,8 +166,10 @@ class SvgSanitizer
 		return $source;
 	}
 
-	public function sanitize(string $inputFilename, string $outputDirectory)
-	{
+	public function sanitize(
+		string $inputFilename,
+		string $outputDirectory
+	): void {
 		$outputFilename = $outputDirectory . '/index.svg';
 
 		$xmlParser = xml_parser_create_ns();
@@ -222,8 +238,8 @@ class SvgSanitizer
 						$inSvg = true;
 
 						xmlwriter_start_element_ns($xmlWriter, null, 'svg', XML_NS_SVG);
-						xmlwriter_write_attribute($xmlWriter, 'width', SVG_WIDTH);
-						xmlwriter_write_attribute($xmlWriter, 'height', SVG_HEIGHT);
+						xmlwriter_write_attribute($xmlWriter, 'width', (string)SVG_WIDTH);
+						xmlwriter_write_attribute($xmlWriter, 'height', (string)SVG_HEIGHT);
 						xmlwriter_write_attribute($xmlWriter, 'viewBox', SVG_VIEWBOX);
 						xmlwriter_write_attribute($xmlWriter, 'preserveAspectRatio', SVG_PRESERVEASPECTRATIO);
 						xmlwriter_write_attribute($xmlWriter, 'xmlns:' . XML_NS_XLINK_PREFIX, XML_NS_XLINK);
@@ -308,10 +324,6 @@ class SvgSanitizer
 									);
 								}
 							}
-
-							if (!empty($errors)) {
-								break;
-							}
 						}
 
 						$inImage = true;
@@ -326,8 +338,6 @@ class SvgSanitizer
 									'allowedElements' => ['SVG', 'IMAGE'],
 								],
 							]]);
-
-						break;
 				}
 			},
 			function ($parser, $name) use (
@@ -371,6 +381,9 @@ class SvgSanitizer
 			throw new ValidationException([[
 				'property' => 'picture',
 				'error' => 'Invalid XML',
+				'constraints' => [
+					'format' => 'xml',
+				]
 			]]);
 		}
 	}
