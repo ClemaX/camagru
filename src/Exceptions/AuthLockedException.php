@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Exceptions;
+
 class AuthLockedException extends AuthException
 {
 	public function __construct(

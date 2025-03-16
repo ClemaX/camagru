@@ -31,12 +31,8 @@ class UserController extends AbstractController
 	}
 
 	#[Route('/self')]
-	public function self(#[SensitiveParameter] #[CurrentUser] ?User $user): string
+	public function self(#[SensitiveParameter] #[CurrentUser] User $user): string
 	{
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		return $this->render('profile', [
 			'username' => $user->username,
 			'profile' => $user->profile,
@@ -48,13 +44,9 @@ class UserController extends AbstractController
 
 	#[Route('/self', 'PATCH')]
 	public function selfUpdate(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[RequestBody] ProfileUpdateDTO $dto
 	): string {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		try {
 			$user = $this->userService->updateProfile($user, $dto);
 		} catch (ConflictException $e) {
@@ -78,14 +70,10 @@ class UserController extends AbstractController
 
 	#[Route('/self/settings')]
 	public function selfSettings(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[RequestParam] ?string $formEmail,
 		#[RequestParam] ?string $conflict
 	): string {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		if ($formEmail === null) {
 			$formEmail = $user->emailAddress;
 		}
@@ -100,13 +88,9 @@ class UserController extends AbstractController
 
 	#[Route('/self/settings', 'PATCH')]
 	public function selfSettingsUpdate(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[RequestBody] SettingsUpdateDTO $dto
 	): string {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		$user = $this->userService->updateSettings($user, $dto);
 
 		return $this->render('settings', [
@@ -119,13 +103,9 @@ class UserController extends AbstractController
 
 	#[Route('/self/new-email', 'PUT')]
 	public function requestEmailChangeSubmit(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[SensitiveParameter] #[RequestBody] EmailChangeDTO $dto
 	) {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		try {
 			$this->authService->requestEmailChange($user, $dto);
 		} catch (ConflictException $e) {
@@ -147,13 +127,9 @@ class UserController extends AbstractController
 
 	#[Route('/self/password', 'PUT')]
 	public function changePasswordSubmit(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[SensitiveParameter] #[RequestBody] PasswordChangeDTO $dto
 	) {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		$this->authService->changePassword($user, $dto);
 
 		header('Location: ./settings');

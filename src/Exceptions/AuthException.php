@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Exceptions;
+
 use App\Exceptions\HttpException;
 
 class AuthException extends HttpException

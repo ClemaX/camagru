@@ -6,15 +6,14 @@ use App\Attributes\Controller;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Attributes\Route;
+use App\Exceptions\AuthException;
 use App\Exceptions\ConflictException;
 use App\Renderer;
 use App\Services\AuthService;
-use App\Services\DTOs\EmailChangeDTO;
 use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\PasswordResetDTO;
 use App\Services\DTOs\PasswordResetRequestDTO;
 use App\Services\DTOs\SignupDTO;
-use AuthException;
 use SensitiveParameter;
 
 #[Controller('/auth')]

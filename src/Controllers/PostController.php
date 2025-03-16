@@ -39,24 +39,16 @@ class PostController extends AbstractController
 
 	#[Route('/post')]
 	public function post(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 	) {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		return $this->render('post', []);
 	}
 
 	#[Route('/post', 'POST')]
 	public function postSubmit(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[RequestBody] PostCreationDTO $dto,
 	) {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		if (!array_key_exists('picture', $_FILES)
 		|| $_FILES['picture']['error']
 		|| empty($_FILES['picture']['tmp_name'])) {
@@ -82,13 +74,9 @@ class PostController extends AbstractController
 
 	#[Route('/post/{id}/like', 'PUT')]
 	public function like(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
 	) {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		$this->postService->like($user, (int)$id);
 
 		header('Content-Type: application/json; charset=UTF-8');
@@ -99,13 +87,9 @@ class PostController extends AbstractController
 
 	#[Route('/post/{id}/like', 'DELETE')]
 	public function unlike(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
 	) {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		$this->postService->unlike($user, (int)$id);
 
 		header('Content-Type: application/json; charset=UTF-8');
@@ -116,14 +100,10 @@ class PostController extends AbstractController
 
 	#[Route('/post/{id}/comments', 'POST')]
 	public function postComment(
-		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
 		#[RequestBody] PostCommentDTO $dto,
 	) {
-		if ($user === null) {
-			throw new UnauthorizedException();
-		}
-
 		$comment = $this->postService->postComment($user, (int)$id, $dto);
 
 		return json_encode($comment);

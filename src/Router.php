@@ -10,6 +10,7 @@ use App\Attributes\RequestBody;
 use App\Attributes\RequestParam;
 use App\Exceptions\InvalidCsrfTokenException;
 use App\Exceptions\NotFoundException;
+use App\Exceptions\UnauthorizedException;
 use App\Services\UserSessionServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -76,6 +77,7 @@ class Router
 				$parameters[] = [
 					'name' => $param->getName(),
 					'type' => $param->getType()->getName(),
+					'required' => !$param->getType()->allowsNull(),
 					'kind' => $attribute::class,
 				];
 			}
@@ -92,24 +94,31 @@ class Router
 		foreach ($parameters as $param) {
 			$dto = null;
 
-			// FIXME: Replace strcmp with ===
-
-			if (strcmp($param['kind'], PathVariable::class) === 0) {
-				$dto = $pathVariables[$param['name']];
-			} elseif (strcmp($param['kind'], RequestBody::class) === 0) {
-				if (!array_key_exists('_token', $_POST)
-				|| !$this->sessionService->verifyCsrfToken($_POST['_token'])) {
-					throw new InvalidCsrfTokenException();
-				}
-				$dto = $this->mapper->map($param['type'], $_POST);
-			} elseif (strcmp($param['kind'], RequestParam::class) === 0) {
-				if (array_key_exists($param['name'], $requestParams)) {
-					$dto = $requestParams[$param['name']];
-				}
-			} elseif (strcmp($param['kind'], CurrentUser::class) === 0) {
-				if (array_key_exists('user_id', $_SESSION)) {
-					$dto = $this->sessionService->getUser();
-				}
+			switch ($param['kind']) {
+				case PathVariable::class:
+					$dto = $pathVariables[$param['name']];
+					break;
+				case RequestBody::class:
+					if (!array_key_exists('_token', $_POST)
+					|| !$this->sessionService->verifyCsrfToken(
+						$_POST['_token']
+					)) {
+						throw new InvalidCsrfTokenException();
+					}
+					$dto = $this->mapper->map($param['type'], $_POST);
+					break;
+				case RequestParam::class:
+					if (array_key_exists($param['name'], $requestParams)) {
+						$dto = $requestParams[$param['name']];
+					}
+					break;
+				case CurrentUser::class:
+					if (array_key_exists('user_id', $_SESSION)) {
+						$dto = $this->sessionService->getUser();
+					} elseif ($param['required']) {
+						throw new UnauthorizedException('Please Login to access this page.');
+					}
+					break;
 			}
 
 			$args[] = $dto;
@@ -122,7 +131,11 @@ class Router
 		string $routePattern,
 		string $requestPath
 	) {
-		$regexPattern = preg_replace('/\{(\w+)\}/', '(?P<\1>[^/]+)', $routePattern);
+		$regexPattern = preg_replace(
+			'/\{(\w+)\}/',
+			'(?P<\1>[^/]+)',
+			$routePattern
+		);
 		$regexPattern = '#^' . $regexPattern . '$#';
 
 		if (!preg_match($regexPattern, $requestPath, $matches)) {

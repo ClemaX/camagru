@@ -2,8 +2,6 @@
 
 namespace App\Exceptions;
 
-use AuthException;
-
 class UnauthorizedException extends AuthException
 {
 	public function __construct(
