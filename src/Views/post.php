@@ -82,7 +82,7 @@
 						id="title" name="title" required
 						minlength="3" maxlength="64" pattern="^\S(.*\S)?$">
 					<div class="invalid-feedback">
-						Title must be 3-64 characters long and contain at least one non-whitespace character.
+						Title must be 3-64 characters long and must start with a non-whitespace character.
 					</div>
 				</div>
 
