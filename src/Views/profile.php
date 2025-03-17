@@ -10,10 +10,12 @@
 		<div class="card-body">
 			<p class="card-text">
 				@if($profile->description === '')
+				<div class="alert alert-info mt-3">
 					Your profile description is currently empty.
 					You can update your profile information by pressing the edit button.
+				</div>
 				@else
-					{{ $profile->description }}
+				{{ $profile->description }}
 				@endif
 			</p>
 			</div>
