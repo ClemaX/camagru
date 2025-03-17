@@ -129,12 +129,6 @@ class Router
 					$dto = $pathVariables[$param['name']];
 					break;
 				case RequestBody::class:
-					if (!array_key_exists('_token', $_POST)
-					|| !$this->sessionService->verifyCsrfToken(
-						$_POST['_token']
-					)) {
-						throw new InvalidCsrfTokenException();
-					}
 					$dto = $this->mapper->map($param['type'], $_POST);
 					break;
 				case RequestParam::class:
@@ -256,10 +250,10 @@ class Router
 	// }
 
 	public function dispatch(
-		#[SensitiveParameter] string $requestUri,
-		string $requestMethod
+		#[SensitiveParameter] string $uri,
+		string $method
 	): string {
-		$urlParts = parse_url($requestUri);
+		$urlParts = parse_url($uri);
 
 		$requestPath = $urlParts['path'];
 
@@ -269,12 +263,24 @@ class Router
 			$requestParams = [];
 		}
 
-		if ($requestMethod === 'POST' && array_key_exists('_method', $_POST)) {
-			$requestMethod = $_POST['_method'];
+		if ($method === 'POST' && array_key_exists('_method', $_POST)) {
+			$method = $_POST['_method'];
+		}
+
+		if ($method === 'POST' || $method === 'PUT' || $method === 'PATCH') {
+			if (array_key_exists('HTTP_CONTENT_TYPE', $_SERVER)
+			&& $_SERVER['HTTP_CONTENT_TYPE'] === 'application/json') {
+				$_POST = json_decode(file_get_contents('php://input'), associative: true);
+			}
+
+			if (!array_key_exists('_token', $_POST)
+			|| !$this->sessionService->verifyCsrfToken($_POST['_token'])) {
+				throw new InvalidCsrfTokenException();
+			}
 		}
 
 		foreach ($this->routes as $route) {
-			if ($route['method'] === $requestMethod) {
+			if ($route['method'] === $method) {
 				$pathVariables = self::capturePathVariables(
 					$route['path'],
 					$requestPath

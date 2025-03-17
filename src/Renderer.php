@@ -136,8 +136,7 @@ class Renderer
 						$loopDefinition,
 						'$%s = %s to %s'
 					);
-					// echo '<br><br><br><br><br><br><br><br><br><br>';
-					// var_dump($params);
+
 					extract($params, EXTR_SKIP);
 
 					$start = eval("return $start;");
@@ -241,6 +240,8 @@ class Renderer
 		}
 
 		$content = file_get_contents($templateFile);
+
+		$params['csrfToken'] = $this->sessionService->getCsrfToken();
 
 		$content = $this->processEnv($content);
 		$content = $this->processRoles($content);

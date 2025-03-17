@@ -1,15 +1,21 @@
 (() => {
-	'use strict';
+	"use strict";
 
-	const logout = async (logoutUrl) => {
-		const response = await fetch(logoutUrl, { method: 'POST' });
-		window.location = response.headers.get('Location');
+	/**
+	 * @param {MouseEvent} e
+	 */
+	const handleLogout = (e) => {
+		e.preventDefault();
+
+		/** @type {HTMLFormElement} */
+		const logoutForm = document.getElementById('logout-form');
+
+		logoutForm.submit();
 	};
 
-	const logoutButton = document.getElementById('logout-button');
+	const triggers = document.querySelectorAll('[data-app-action="logout"]');
 
-	logoutButton.addEventListener('click', () => {
-		logout(logoutButton.getAttribute('data-logout-url'));
-		return false;
-	});
+	for (const trigger of triggers) {
+		trigger.addEventListener("click", handleLogout);
+	}
 })();

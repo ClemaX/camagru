@@ -85,9 +85,19 @@
 			const label = document.querySelector(`label[for="${trigger.id}"]`);
 			const postId = trigger.getAttribute("data-app-post-id");
 			const wasLiked = trigger.getAttribute("data-app-post-liked") === "true";
+			const csrfToken = document.head
+				.querySelector('meta[name="csrf-token"]')
+				.getAttribute("content");
+
+				console.debug(csrfToken);
 
 			const response = await fetch(`/post/${postId}/like`, {
 				method: wasLiked ? "DELETE" : "PUT",
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ _token: csrfToken }),
 			});
 			const likeCount = await response.json();
 			const isLiked = !wasLiked;
