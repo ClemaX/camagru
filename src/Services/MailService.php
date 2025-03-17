@@ -20,7 +20,10 @@ class MailService
 		array $params = [],
 		string $contentType = 'text/html'
 	): void {
-		$message = $this->renderer->render($templateName, $params);
+		$content = $this->renderer->render($templateName, $params);
+		$message = $this->renderer->render('layout', [
+			'content' => $content,
+		]);
 
 		$headers = "MIME-Version: 1.0\r\n";
 		$headers .= "Content-Type: " . $contentType . "; charset=UTF-8\r\n";
