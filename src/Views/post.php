@@ -68,7 +68,7 @@
 			</div>
 
 			<div class="modal-body">
-				<form id="postEditForm" class="needs-validation d-flex flex-column gap-3" novalidate method="post">
+				<form id="postEditForm" class="needs-validation d-flex flex-column gap-3" novalidate method="post" enctype="multipart/form-data">
 					@csrf
 					<div class="form-group">
 						<label for="title">Title</label>

@@ -135,9 +135,11 @@ $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 $contentType = isset($_SERVER['HTTP_CONTENT_TYPE'])
 	? $_SERVER['HTTP_CONTENT_TYPE'] : null;
+$accept = isset($_SERVER['HTTP_ACCEPT'])
+	? $_SERVER['HTTP_ACCEPT'] : null;
 $body = $_POST;
 
-$response = $router->dispatch($uri, $method, $contentType, $body);
+$response = $router->dispatch($uri, $method, $accept, $contentType, $body);
 
 $pdo = null;
 

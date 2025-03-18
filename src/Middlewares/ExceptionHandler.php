@@ -19,17 +19,25 @@ class ExceptionHandler implements MiddlewareInterface
 		try {
 			$response = $next($request);
 		} catch (HttpException $e) {
-			$content = $this->renderer->render('error', [
-				'title' => $e->getTitle(),
-				'message' => $e->getMessage(),
-				'code' => $e->getCode(),
-			]);
+			if ($request->accept === 'application/json') {
+				$response = Response::json(
+					$e,
+					$e->getStatusCode(),
+					contentType: 'application/problem+json; charset=utf-8'
+				);
+			} else {
+				$content = $this->renderer->render('error', [
+					'title' => $e->getTitle(),
+					'message' => $e->getMessage(),
+					'code' => $e->getCode(),
+				]);
 
-			$content = $this->renderer->render('layout', [
-				"content" => $content,
-			]);
+				$content = $this->renderer->render('layout', [
+					"content" => $content,
+				]);
 
-			$response = new Response($content, $e->getStatusCode());
+				$response = new Response($content, $e->getStatusCode());
+			}
 		}
 
 		return $response;

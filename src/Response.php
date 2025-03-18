@@ -7,7 +7,7 @@ class Response
 	public function __construct(
 		public readonly ?string $body = null,
 		public readonly int $statusCode = 200,
-		public readonly string $contentType = 'text/html',
+		public readonly string $contentType = 'text/html; charset=utf-8',
 		public readonly ?string $location = null,
 	) {
 	}
@@ -41,11 +41,12 @@ class Response
 		mixed $body,
 		int $statusCode = 200,
 		?string $location = null,
+		?string $contentType = 'application/json; charset=utf-8',
 	): Response {
 		return new Response(
 			body: json_encode($body),
 			statusCode: $statusCode,
-			contentType: 'application/json; charset=UTF-8',
+			contentType: $contentType,
 			location: $location,
 		);
 	}

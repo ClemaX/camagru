@@ -272,10 +272,11 @@ class Router
 	public function dispatch(
 		#[SensitiveParameter] string $uri,
 		string $method,
+		?string $accept,
 		?string $contentType,
 		#[SensitiveParameter] ?array $body,
 	): Response {
-		$request = new Request($uri, $method, $contentType, $body);
+		$request = new Request($uri, $method, $accept, $contentType, $body);
 
 		$pipeline = array_reduce(
 			array_reverse($this->middlewares),
@@ -314,7 +315,7 @@ class Router
 					}
 				}
 
-				throw new NotFoundException();
+				throw new NotFoundException('This is not the web page you are looking for.');
 			}
 		);
 

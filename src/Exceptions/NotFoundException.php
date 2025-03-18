@@ -4,12 +4,12 @@ namespace App\Exceptions;
 
 class NotFoundException extends HttpException
 {
-	public function __construct()
+	public function __construct(string $message = "Entity not found")
 	{
 		parent::__construct(
 			404,
-			"Page Not Found",
-			"This is not the web page you are looking for.",
+			"Not Found",
+			$message,
 			4040
 		);
 	}

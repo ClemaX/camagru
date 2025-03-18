@@ -15,6 +15,7 @@ class Request
 	public function __construct(
 		string $uri,
 		public string $method,
+		public ?string $accept,
 		public ?string $contentType,
 		public ?array $body,
 	) {
