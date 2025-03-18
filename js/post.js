@@ -73,7 +73,6 @@
 		});
 
 		if (response.ok) {
-			console.debug(response.headers);
 			window.location = response.headers.get('Location');
 		}
 	});

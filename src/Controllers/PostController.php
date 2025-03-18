@@ -52,8 +52,6 @@ class PostController extends AbstractController
 		#[RequestBody] PostCreationDTO $dto,
 		#[RequestFile('picture')] string $pictureFilename
 	): Response {
-		header('Content-Type: application/json; charset=UTF-8');
-
 		try {
 			$post = $this->postService->post($user, $dto, $pictureFilename);
 		} catch (ValidationException $e) {
