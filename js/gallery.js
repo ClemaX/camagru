@@ -89,34 +89,38 @@
 				.querySelector('meta[name="csrf-token"]')
 				.getAttribute("content");
 
-				console.debug(csrfToken);
-
 			const response = await fetch(`/post/${postId}/like`, {
 				method: wasLiked ? "DELETE" : "PUT",
 				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
+					Accept: "application/json",
+					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({ _token: csrfToken }),
 			});
-			const likeCount = await response.json();
-			const isLiked = !wasLiked;
 
-			trigger.setAttribute("data-app-post-liked", isLiked);
-			trigger.checked = isLiked;
+			if (response.ok) {
+				const { likeCount } = await response.json();
+				const isLiked = !wasLiked;
 
-			const likeIcon = label.getElementsByTagName("i")[0];
-			const likeCountSpan = label.getElementsByTagName("span")[0];
+				trigger.setAttribute("data-app-post-liked", isLiked);
+				trigger.checked = isLiked;
 
-			if (isLiked) {
-				likeIcon.classList.replace("bi-heart", "bi-heart-fill");
-			} else {
-				likeIcon.classList.replace("bi-heart-fill", "bi-heart");
+				const likeIcon = label.getElementsByTagName("i")[0];
+				const likeCountSpan = label.getElementsByTagName("span")[0];
+
+				if (isLiked) {
+					likeIcon.classList.replace("bi-heart", "bi-heart-fill");
+				} else {
+					likeIcon.classList.replace("bi-heart-fill", "bi-heart");
+				}
+
+				likeCountSpan.textContent = `${likeCount} Like${
+					likeCount !== 1 ? "s" : ""
+				}`;
 			}
-
-			likeCountSpan.textContent = `${likeCount} Like${
-				likeCount !== 1 ? "s" : ""
-			}`;
+			else {
+				trigger.checked = wasLiked;
+			}
 
 			trigger.disabled = false;
 		};

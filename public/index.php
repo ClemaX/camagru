@@ -12,6 +12,10 @@ use App\Controllers\AuthController;
 use App\Controllers\UserController;
 use App\EntityManager;
 use App\Exceptions\HttpException;
+use App\Middlewares\CsrfTokenVerificator;
+use App\Middlewares\ExceptionHandler;
+use App\Middlewares\FormMethodDecoder;
+use App\Middlewares\JsonDecoder;
 use App\Renderer;
 use App\Repositories\PostCommentRepository;
 use App\Repositories\PostLikeRepository;
@@ -60,16 +64,13 @@ $sessionService = new DatabaseSessionService(
 
 $sessionService->start();
 
-// Router
-$router = new Router(
-	$sessionService,
-);
+$basePath = dirname($_SERVER['SCRIPT_NAME']);
 
 // Renderer
 $renderer = new Renderer(
 	$sessionService,
 	'Views',
-	$router->basePath,
+	$basePath,
 	$config,
 );
 $mailRenderer = new Renderer(
@@ -77,6 +78,21 @@ $mailRenderer = new Renderer(
 	'Views' . DIRECTORY_SEPARATOR . 'Mails',
 	$config['EXTERNAL_URL'],
 	$config,
+);
+
+// Middlewares
+$middlewares = [
+	new ExceptionHandler($renderer),
+	new FormMethodDecoder($sessionService),
+	new JsonDecoder($sessionService),
+	new CsrfTokenVerificator($sessionService),
+];
+
+// Router
+$router = new Router(
+	$sessionService,
+	$middlewares,
+	$basePath,
 );
 
 // Services
@@ -115,23 +131,14 @@ $router->addController(new UserController(
 ));
 
 // Request dispatch
-try {
-	echo $router->dispatch(
-		$_SERVER['REQUEST_URI'],
-		$_SERVER['REQUEST_METHOD'],
-	);
-} catch (HttpException $e) {
-	$content = $renderer->render('error', [
-		'title' => $e->getTitle(),
-		'message' => $e->getMessage(),
-		'code' => $e->getCode(),
-	]);
+$uri = $_SERVER['REQUEST_URI'];
+$method = $_SERVER['REQUEST_METHOD'];
+$contentType = isset($_SERVER['HTTP_CONTENT_TYPE'])
+	? $_SERVER['HTTP_CONTENT_TYPE'] : null;
+$body = $_POST;
 
-	$e->sendHeaders();
-
-	echo $renderer->render('layout', [
-		"content" => $content,
-	]);
-}
+$response = $router->dispatch($uri, $method, $contentType, $body);
 
 $pdo = null;
+
+$response->send();

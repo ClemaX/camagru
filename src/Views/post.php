@@ -3,8 +3,7 @@
 		<div id="sticker-sheet" class="h-100 overflow-auto p-4 fade">
 			<ul
 				class="sticker-list d-flex flex-md-column gap-3"
-				style="min-width: min-content"
-			>
+				style="min-width: min-content">
 				<li class="card">
 					<img src="/img/icon.svg" draggable="true" alt="Test" />
 				</li>
@@ -23,17 +22,15 @@
 				<canvas
 					id="canvas"
 					width="1080"
-					height="1080"
-				></canvas>
+					height="1080"></canvas>
 			</div>
 			<div class="card-body d-flex flex-wrap justify-content-between gap-3">
 				<button
 					id="delete-button"
-					class="btn"
+					class="btn btn-outline-danger"
 					title="Delete"
 					aria-label="Delete"
-					disabled="true"
-				>
+					disabled="true">
 					<i class="bi bi-trash-fill"></i>
 				</button>
 				<button
@@ -41,17 +38,15 @@
 					class="btn btn-primary"
 					title="Snap"
 					aria-label="Snap"
-					disabled="true"
-				>
+					disabled="true">
 					<i class="bi bi-camera-fill"></i>
 				</button>
 				<button
 					id="download-button"
-					class="btn"
+					class="btn btn-outline-primary"
 					title="Download"
 					aria-label="Download"
-					disabled="true"
-				>
+					disabled="true">
 					<i class="bi bi-download"></i>
 				</button>
 			</div>
@@ -76,24 +71,24 @@
 				<form id="postEditForm" class="needs-validation d-flex flex-column gap-3" novalidate method="post">
 					@csrf
 					<div class="form-group">
-					<label for="title">Title</label>
-					<input type="text"
-						class="form-control"
-						id="title" name="title" required
-						minlength="3" maxlength="64" pattern="^\S(.*\S)?$">
-					<div class="invalid-feedback">
-						Title must be 3-64 characters long and must start with a non-whitespace character.
+						<label for="title">Title</label>
+						<input type="text"
+							class="form-control"
+							id="title" name="title" required
+							minlength="3" maxlength="64" pattern="^\S(.*\S)?$">
+						<div class="invalid-feedback">
+							Title must be 3-64 characters long and must start with a non-whitespace character.
+						</div>
 					</div>
-				</div>
 
-				<div class="form-group">
-					<label for="description">Description</label>
-					<textarea class="form-control no-resize" id="description"
-						name="description" rows="3" maxlength="512"></textarea>
-					<div class="invalid-feedback">
-						Description must be at most 512 characters long.
+					<div class="form-group">
+						<label for="description">Description</label>
+						<textarea class="form-control no-resize" id="description"
+							name="description" rows="3" maxlength="512"></textarea>
+						<div class="invalid-feedback">
+							Description must be at most 512 characters long.
+						</div>
 					</div>
-				</div>
 					<button type="submit" class="btn btn-primary">Post</button>
 				</form>
 			</div>

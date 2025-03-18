@@ -9,12 +9,15 @@ use App\Attributes\RequestBody;
 use App\Attributes\RequestFile;
 use App\Attributes\RequestParam;
 use App\Attributes\Route;
+use App\Entities\PostComment;
 use App\Entities\User;
 use App\Exceptions\ValidationException;
 use App\Renderer;
+use App\Response;
 use App\Services\DTOs\PostCommentDTO;
 use App\Services\DTOs\PostCreationDTO;
 use App\Services\PostService;
+use Dom\Comment;
 use SensitiveParameter;
 
 #[Controller('/')]
@@ -48,48 +51,48 @@ class PostController extends AbstractController
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[RequestBody] PostCreationDTO $dto,
 		#[RequestFile('picture')] string $pictureFilename
-	): string {
+	): Response {
 		header('Content-Type: application/json; charset=UTF-8');
 
 		try {
 			$post = $this->postService->post($user, $dto, $pictureFilename);
 		} catch (ValidationException $e) {
-			http_response_code($e->getStatusCode());
-			return json_encode($e->getErrors());
+			return Response::json($e->getErrors(), $e->getStatusCode());
 		} finally {
 			unlink($pictureFilename);
 		}
 
-		http_response_code(201);
-		header('Location: ./');
-
-		return json_encode($post);
+		return Response::json($post, 201, './');
 	}
 
+	/**
+	 * @return array<mixed>
+	 */
 	#[Route('/post/{id}/like', 'PUT')]
 	public function like(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
-	): string {
+	): array {
 		$this->postService->like($user, (int)$id);
 
-		header('Content-Type: application/json; charset=UTF-8');
-		http_response_code(200);
-
-		return json_encode($this->postService->countLikes((int)$id));
+		return [
+			'likeCount' => $this->postService->countLikes((int)$id)
+		];
 	}
 
+	/**
+	 * @return array<mixed>
+	 */
 	#[Route('/post/{id}/like', 'DELETE')]
 	public function unlike(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
-	): string {
+	): array {
 		$this->postService->unlike($user, (int)$id);
 
-		header('Content-Type: application/json; charset=UTF-8');
-		http_response_code(200);
-
-		return json_encode($this->postService->countLikes((int)$id));
+		return [
+			'likeCount' => $this->postService->countLikes((int)$id)
+		];
 	}
 
 	#[Route('/post/{id}/comments', 'POST')]
@@ -97,19 +100,18 @@ class PostController extends AbstractController
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[PathVariable] string $id,
 		#[RequestBody] PostCommentDTO $dto,
-	): string {
-		$comment = $this->postService->postComment($user, (int)$id, $dto);
-
-		return json_encode($comment);
+	): PostComment {
+		return $this->postService->postComment($user, (int)$id, $dto);
 	}
 
+	/**
+	 * @return PostComment[]
+	 */
 	#[Route('/post/{id}/comments')]
 	public function getComments(
 		#[PathVariable] string $id,
 		#[RequestParam] ?int $subjectId,
-	): string {
-		$comments = $this->postService->getComments((int)$id, $subjectId);
-
-		return json_encode($comments);
+	): array {
+		return $this->postService->getComments((int)$id, $subjectId);
 	}
 }

@@ -10,6 +10,7 @@ use App\Attributes\Route;
 use App\Entities\User;
 use App\Exceptions\ConflictException;
 use App\Renderer;
+use App\Response;
 use App\Services\AuthService;
 use App\Services\DTOs\EmailChangeDTO;
 use App\Services\DTOs\PasswordChangeDTO;
@@ -104,7 +105,7 @@ class UserController extends AbstractController
 	public function requestEmailChangeSubmit(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[SensitiveParameter] #[RequestBody] EmailChangeDTO $dto
-	): string {
+	): Response | string {
 		try {
 			$this->authService->requestEmailChange($user, $dto);
 		} catch (ConflictException $e) {
@@ -116,9 +117,7 @@ class UserController extends AbstractController
 			$conflictUrl = './settings'
 				. '?' . http_build_query($conflictQueryParams);
 
-			header('Location: ' . $conflictUrl);
-
-			return '';
+			return Response::redirect($conflictUrl);
 		}
 
 		return $this->render('verify-new-email');
@@ -128,11 +127,9 @@ class UserController extends AbstractController
 	public function changePasswordSubmit(
 		#[SensitiveParameter] #[CurrentUser] User $user,
 		#[SensitiveParameter] #[RequestBody] PasswordChangeDTO $dto
-	): string {
+	): Response {
 		$this->authService->changePassword($user, $dto);
 
-		header('Location: ./settings');
-
-		return '';
+		return Response::redirect('./settings');
 	}
 }

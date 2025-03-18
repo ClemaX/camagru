@@ -9,6 +9,7 @@ use App\Attributes\Route;
 use App\Exceptions\AuthException;
 use App\Exceptions\ConflictException;
 use App\Renderer;
+use App\Response;
 use App\Services\AuthService;
 use App\Services\DTOs\LoginDTO;
 use App\Services\DTOs\PasswordResetDTO;
@@ -39,7 +40,7 @@ class AuthController extends AbstractController
 	#[Route('/signup', 'POST')]
 	public function signupSubmit(
 		#[SensitiveParameter] #[RequestBody] SignupDTO $dto
-	): string {
+	): Response | string {
 		try {
 			$this->authService->signup($dto);
 		} catch (ConflictException $e) {
@@ -50,9 +51,7 @@ class AuthController extends AbstractController
 			]);
 		}
 
-		header('Location: /auth/verify-email');
-
-		return '';
+		return Response::redirect('/auth/verify-email');
 	}
 
 	#[Route('/verify-email')]
@@ -109,7 +108,7 @@ class AuthController extends AbstractController
 	#[Route('/choose-password', 'POST')]
 	public function choosePasswordSubmit(
 		#[RequestBody] PasswordResetDTO $dto
-	): string {
+	): Response | string {
 		$isReset = $this->authService->resetPassword($dto);
 
 		if (!$isReset) {
@@ -120,9 +119,7 @@ class AuthController extends AbstractController
 			]);
 		}
 
-		header('Location: /');
-
-		return '';
+		return Response::redirect('/');
 	}
 
 	#[Route('/change-email')]
@@ -149,7 +146,7 @@ class AuthController extends AbstractController
 	#[Route('/login', 'POST')]
 	public function loginSubmit(
 		#[SensitiveParameter] #[RequestBody] LoginDTO $dto
-	): string {
+	): Response | string {
 		try {
 			$this->authService->login($dto);
 		} catch (AuthException $e) {
@@ -159,18 +156,14 @@ class AuthController extends AbstractController
 			]);
 		}
 
-		header('Location: /');
-
-		return '';
+		return Response::redirect('/');
 	}
 
 	#[Route('/logout', 'POST')]
-	public function logout(): string
+	public function logout(): Response
 	{
 		$this->authService->logout();
 
-		header('Location: /');
-
-		return '';
+		return Response::redirect('/');
 	}
 }

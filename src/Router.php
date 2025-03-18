@@ -9,11 +9,13 @@ use App\Attributes\Route;
 use App\Attributes\RequestBody;
 use App\Attributes\RequestFile;
 use App\Attributes\RequestParam;
-use App\Exceptions\InvalidCsrfTokenException;
+use App\Exceptions\InternalException;
 use App\Exceptions\MappingException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\UnauthorizedException;
+use App\Middlewares\MiddlewareInterface;
 use App\Services\UserSessionServiceInterface;
+use Closure;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -25,10 +27,14 @@ class Router
 	private array $routes = [];
 	public readonly string $basePath;
 
+	/**
+	 * @param MiddlewareInterface[] $middlewares
+	 */
 	public function __construct(
 		private UserSessionServiceInterface $sessionService,
-		private Mapper $mapper = new Mapper(),
+		private readonly array $middlewares,
 		?string $basePath = null,
+		private Mapper $mapper = new Mapper(),
 	) {
 		$this->basePath = $basePath !== null
 			? $basePath
@@ -249,57 +255,69 @@ class Router
 	//     }
 	// }
 
+	protected function carry(): Closure
+	{
+		return function ($stack, $pipe) {
+			return function ($request) use ($stack, $pipe) {
+				return $pipe->handle($request, function ($request) use ($stack) {
+					return $stack($request);
+				});
+			};
+		};
+	}
+
+	/**
+	 * @param ?array<string, string> $body
+	 */
 	public function dispatch(
 		#[SensitiveParameter] string $uri,
-		string $method
-	): string {
-		$urlParts = parse_url($uri);
+		string $method,
+		?string $contentType,
+		#[SensitiveParameter] ?array $body,
+	): Response {
+		$request = new Request($uri, $method, $contentType, $body);
 
-		$requestPath = $urlParts['path'];
+		$pipeline = array_reduce(
+			array_reverse($this->middlewares),
+			$this->carry(),
+			function ($request) {
+				foreach ($this->routes as $route) {
+					if ($route['method'] === $request->method) {
+						$pathVariables = self::capturePathVariables(
+							$route['path'],
+							$request->path,
+						);
 
-		if (array_key_exists('query', $urlParts)) {
-			parse_str($urlParts['query'], $requestParams);
-		} else {
-			$requestParams = [];
-		}
+						if (!empty($pathVariables)) {
+							$controller = $route['controller'];
 
-		if ($method === 'POST' && array_key_exists('_method', $_POST)) {
-			$method = $_POST['_method'];
-		}
+							$args = $this->prepareArguments(
+								$route['parameters'],
+								$pathVariables,
+								$request->params,
+							);
 
-		if ($method === 'POST' || $method === 'PUT' || $method === 'PATCH') {
-			if (array_key_exists('HTTP_CONTENT_TYPE', $_SERVER)
-			&& $_SERVER['HTTP_CONTENT_TYPE'] === 'application/json') {
-				$_POST = json_decode(file_get_contents('php://input'), associative: true);
-			}
+							$result = $controller->{$route['action']}(...$args);
 
-			if (!array_key_exists('_token', $_POST)
-			|| !$this->sessionService->verifyCsrfToken($_POST['_token'])) {
-				throw new InvalidCsrfTokenException();
-			}
-		}
+							if ($result instanceof Response) {
+								$response = $result;
+							} elseif (is_string($result)) {
+								$response = new Response($result);
+							} elseif (is_array($result) || is_object($result)) {
+								$response = Response::json($result);
+							} else {
+								throw new InternalException('Unsupported controller result type');
+							}
 
-		foreach ($this->routes as $route) {
-			if ($route['method'] === $method) {
-				$pathVariables = self::capturePathVariables(
-					$route['path'],
-					$requestPath
-				);
-
-				if (!empty($pathVariables)) {
-					$controller = $route['controller'];
-
-					$args = $this->prepareArguments(
-						$route['parameters'],
-						$pathVariables,
-						$requestParams
-					);
-
-					return $controller->{$route['action']}(...$args);
+							return $response;
+						}
+					}
 				}
-			}
-		}
 
-		throw new NotFoundException();
+				throw new NotFoundException();
+			}
+		);
+
+		return $pipeline($request);
 	}
 }
