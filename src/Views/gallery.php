@@ -7,7 +7,7 @@
 					{{ $post->author->username }}
 				</h2>
 				<h6 class="card-title">
-					{{ date_format($post->createdAt, 'd/m/Y H:i:s') }}
+					{{ $post->createdAt->format('d/m/Y, h:m A') }}
 				</h6>
 			</div>
 		</div>
