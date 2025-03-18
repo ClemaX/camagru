@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg version="1.0" width="512pt" height="512pt" viewBox="0 0 512 512" preserveAspectRatio="none"
-   xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+<svg width="512pt" height="512pt" viewBox="0 0 512 512" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="gray" stroke="red" stroke-width="2">
     </rect>
 </svg>

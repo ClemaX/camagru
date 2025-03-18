@@ -923,7 +923,7 @@ class CanvasEditor {
 		image.setAttribute("width", layer.dimensions.x);
 		image.setAttribute("height", layer.dimensions.y);
 		image.setAttribute("preserveAspectRatio", "none");
-		image.setAttributeNS(xlinkNs, "xlink:href", layer.image.src);
+		image.setAttribute("href", layer.image.src);
 
 		return image;
 	}
@@ -942,7 +942,6 @@ class CanvasEditor {
 			`0 0 ${this.canvas.width} ${this.canvas.height}`
 		);
 		svg.setAttribute("preserveAspectRatio", "xMidYMid");
-		svg.setAttributeNS(xmlnsNs, "xmlns:xlink", xlinkNs);
 
 		if (this.background) {
 			svg.appendChild(this._exportLayer(this.background));

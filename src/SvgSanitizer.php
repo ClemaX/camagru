@@ -7,8 +7,6 @@ use App\Exceptions\ValidationException;
 use Exception;
 
 define('XML_NS_SVG', 'http://www.w3.org/2000/svg');
-define('XML_NS_XLINK', 'http://www.w3.org/1999/xlink');
-define('XML_NS_XLINK_PREFIX', 'xlink');
 
 define('SVG_WIDTH', 1080);
 define('SVG_HEIGHT', 1080);
@@ -46,8 +44,6 @@ define('SVG_IMAGE_ATTRIBUTES', [
 	],
 	'href' => [
 		'required' => true,
-		'namespace' => XML_NS_XLINK,
-		'prefix' => XML_NS_XLINK_PREFIX,
 	],
 ]);
 
@@ -130,8 +126,8 @@ class SvgSanitizer
 
 			if ($image === false) {
 				throw new ValidationException([[
-					'property' => "IMAGE.href",
-					'error' => "IMAGE href attribute value data URL is invalid",
+					'property' => 'IMAGE.href',
+					'error' => 'IMAGE href attribute value data URL is invalid',
 					'constraints' => [
 						'type' => 'image/png',
 					],
@@ -154,8 +150,8 @@ class SvgSanitizer
 					str_starts_with($source, $allowedUrl)
 			)) {
 				throw new ValidationException([[
-					'property' => "IMAGE.href",
-					'error' => "IMAGE href attribute value URL is invalid",
+					'property' => 'IMAGE.href',
+					'error' => 'IMAGE href attribute value URL is invalid',
 					'constraints' => [
 						'startsWith' => $this->allowedImageBaseUrls,
 					],
@@ -176,13 +172,13 @@ class SvgSanitizer
 
 		$svgData = file_get_contents($inputFilename);
 		if ($svgData === false) {
-			throw new InternalException("Failed to open input file");
+			throw new InternalException('Failed to open input file');
 		}
 
 		$xmlWriter = xmlwriter_open_uri($outputFilename);
 
 		if ($xmlWriter === false) {
-			throw new InternalException("Failed to create xml writer");
+			throw new InternalException('Failed to create xml writer');
 		}
 
 		xmlwriter_start_document($xmlWriter, '1.0', 'UTF-8');
@@ -242,7 +238,6 @@ class SvgSanitizer
 						xmlwriter_write_attribute($xmlWriter, 'height', (string)SVG_HEIGHT);
 						xmlwriter_write_attribute($xmlWriter, 'viewBox', SVG_VIEWBOX);
 						xmlwriter_write_attribute($xmlWriter, 'preserveAspectRatio', SVG_PRESERVEASPECTRATIO);
-						xmlwriter_write_attribute($xmlWriter, 'xmlns:' . XML_NS_XLINK_PREFIX, XML_NS_XLINK);
 
 						break;
 
@@ -272,9 +267,7 @@ class SvgSanitizer
 						xmlwriter_start_element($xmlWriter, 'image');
 
 						foreach (SVG_IMAGE_ATTRIBUTES as $attributeName => $constraints) {
-							$attributeKey = array_key_exists('namespace', $constraints)
-							? strtoupper($constraints['namespace']) . ':' . strtoupper($attributeName)
-							: strtoupper($attributeName);
+							$attributeKey = strtoupper($attributeName);
 
 							if (!array_key_exists($attributeKey, $attributes)) {
 								if ($constraints['required']) {
@@ -308,21 +301,11 @@ class SvgSanitizer
 									);
 								}
 
-								if (array_key_exists('namespace', $constraints)) {
-									xmlwriter_write_attribute_ns(
-										$xmlWriter,
-										$constraints['prefix'],
-										$attributeName,
-										null,
-										$attributeValue
-									);
-								} else {
-									xmlwriter_write_attribute(
-										$xmlWriter,
-										$attributeName,
-										$attributeValue
-									);
-								}
+								xmlwriter_write_attribute(
+									$xmlWriter,
+									$attributeName,
+									$attributeValue
+								);
 							}
 						}
 
