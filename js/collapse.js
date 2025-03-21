@@ -122,7 +122,7 @@ const getOrCreateCollapse = (target) => {
 	 */
 	const handleTriggerClick = async (e) => {
 		/** @type {HTMLElement} */
-		const trigger = e.target;
+		const trigger = e.currentTarget;
 		const collapseId = trigger.getAttribute("data-bs-target");
 		const collapse = getOrCreateCollapse(document.querySelector(collapseId));
 

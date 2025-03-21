@@ -78,7 +78,7 @@
 		 */
 		const handleLike = async (e) => {
 			/** @type {HTMLInputElement} */
-			const trigger = e.target;
+			const trigger = e.currentTarget;
 
 			trigger.disabled = true;
 
@@ -130,7 +130,7 @@
 		 */
 		const handleLoadComments = async (e) => {
 			/** @type {HTMLInputElement} */
-			const trigger = e.target;
+			const trigger = e.currentTarget;
 			const wasLoaded =
 				trigger.getAttribute("data-app-post-comments-loaded") === "true";
 
