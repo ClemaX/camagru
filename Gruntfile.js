@@ -1,5 +1,13 @@
 module.exports = function (grunt) {
 	grunt.initConfig({
+		copy: {
+			fonts: {
+				expand: true,
+				cwd: "node_modules/bootstrap-icons/font/fonts/",
+				src: "*",
+				dest: "public/css/fonts/",
+			},
+		},
 		sass: {
 			dist: {
 				options: {
@@ -20,6 +28,9 @@ module.exports = function (grunt) {
 			options: {
 				compress: true,
 				mangle: true,
+				sourceMap: {
+					includeSources: true,
+				},
 			},
 			dist: {
 				files: [
@@ -28,7 +39,7 @@ module.exports = function (grunt) {
 						cwd: "js",
 						src: ["**/*.js"],
 						dest: "public/js",
-						ext: ".min.js",
+						ext: ".js",
 					},
 				],
 			},
@@ -63,7 +74,6 @@ module.exports = function (grunt) {
 				],
 			},
 			dist: {
-
         files: [
           {
             expand: true,
@@ -75,20 +85,12 @@ module.exports = function (grunt) {
         ],
 			},
 		},
-		copy: {
-			fonts: {
-				expand: true,
-				cwd: "node_modules/bootstrap-icons/font/fonts/",
-				src: "*",
-				dest: "public/css/fonts/",
-			},
-		},
 		browserSync: {
 			default_options: {
 				bsFiles: {
 					src: [
-						"public/css/**/*.min.css",
-						"public/js/**/*.min.js",
+						"public/css/**/*.css",
+						"public/js/**/*.js",
 						"public/img/**/*",
 						"public/index.php",
 						"src/**/*.php",
@@ -131,11 +133,11 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
 	grunt.registerTask("default", [
+		"copy",
 		"sass",
 		"uglify",
 		"purgecss",
 		"svgmin",
-		"copy",
 		"browserSync",
 		"watch",
 	]);
