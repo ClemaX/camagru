@@ -1,84 +1,93 @@
-(() => {
-	"use strict";
-
-	const handleDismiss = async (e) => {
+/**
+ * @param {MouseEvent} e
+ */
+const handleDismiss = async (e) => {
+	if (
+		e.target.getAttribute("data-bs-toggle") === "dropdown" ||
+		e.target.parentNode.getAttribute("data-bs-toggle") === "dropdown"
+	) {
 		e.stopPropagation();
-		e.currentTarget.removeEventListener('click', handleDismiss, true);
+	}
+	e.currentTarget.removeEventListener("click", handleDismiss, true);
 
-		const visibleDropDownMenus =
-			document.getElementsByClassName("dropdown-menu show");
+	const visibleDropDownMenus =
+		document.getElementsByClassName("dropdown-menu show");
 
-		for (const dropDownMenu of visibleDropDownMenus) {
+	for (const dropDownMenu of visibleDropDownMenus) {
+		dropDownMenu.classList.remove("show");
+		dropDownMenu.style.removeProperty("position");
+		dropDownMenu.style.removeProperty("inset");
+		dropDownMenu.style.removeProperty("margin");
+		dropDownMenu.style.removeProperty("transform");
+	}
+};
+
+/**
+ *
+ * @param {MouseEvent} e
+ */
+const handleTriggerClick = async (e) => {
+	/** @type {HTMLElement} */
+	const trigger = e.currentTarget;
+	const triggerBounds = trigger.getBoundingClientRect();
+	const dropDownContainer = trigger.parentElement;
+	const dropDownMenus =
+		dropDownContainer.getElementsByClassName("dropdown-menu");
+	var anyIsShown = false;
+
+	for (const dropDownMenu of dropDownMenus) {
+		const isShown = dropDownMenu.classList.contains("show");
+
+		if (isShown) {
 			dropDownMenu.classList.remove("show");
 			dropDownMenu.style.removeProperty("position");
 			dropDownMenu.style.removeProperty("inset");
 			dropDownMenu.style.removeProperty("margin");
 			dropDownMenu.style.removeProperty("transform");
-		}
-	};
+		} else {
+			anyIsShown = true;
 
-	/**
-	 *
-	 * @param {MouseEvent} e
-	 */
-	const handleTriggerClick = async (e) => {
-		/** @type {HTMLElement} */
-		const trigger = e.currentTarget;
-		const triggerBounds = trigger.getBoundingClientRect();
-		const dropDownContainer = trigger.parentElement;
-		const dropDownMenus =
-			dropDownContainer.getElementsByClassName("dropdown-menu");
-		var anyIsShown = false;
+			const translate = {
+				x: 0,
+				y: triggerBounds.height,
+			};
 
-		for (const dropDownMenu of dropDownMenus) {
-			const isShown = dropDownMenu.classList.contains("show");
+			dropDownMenu.style.position = "absolute";
+			dropDownMenu.style.inset = "0px auto auto 0px";
+			dropDownMenu.style.margin = "margin: 0px";
 
-			if (isShown) {
-				dropDownMenu.classList.remove("show");
-				dropDownMenu.style.removeProperty("position");
-				dropDownMenu.style.removeProperty("inset");
-				dropDownMenu.style.removeProperty("margin");
-				dropDownMenu.style.removeProperty("transform");
-			} else {
-				anyIsShown = true;
+			dropDownMenu.classList.add("show");
 
-				const translate = {
-					x: 0,
-					y: triggerBounds.height,
-				};
+			if (dropDownMenu.classList.contains("dropdown-menu-end")) {
+				/** @type {DOMRect} */
+				const dropDownBounds = dropDownMenu.getBoundingClientRect();
 
-				dropDownMenu.style.position = "absolute";
-				dropDownMenu.style.inset = "0px auto auto 0px";
-				dropDownMenu.style.margin = "margin: 0px";
-
-				dropDownMenu.classList.add("show");
-
-				if (dropDownMenu.classList.contains("dropdown-menu-end")) {
-					/** @type {DOMRect} */
-					const dropDownBounds = dropDownMenu.getBoundingClientRect();
-
-					translate.x = triggerBounds.width - dropDownBounds.width;
-				}
-
-				dropDownMenu.style.transform = `translate(${translate.x}px, ${translate.y}px)`;
+				translate.x = triggerBounds.width - dropDownBounds.width;
 			}
-		}
 
-		if (anyIsShown) {
-			document.addEventListener('click', handleDismiss, true);
+			dropDownMenu.style.transform = `translate(${translate.x}px, ${translate.y}px)`;
 		}
-		else {
-			document.removeEventListener('click', handleDismiss, true);
-		}
-	};
+	}
 
-	document.addEventListener("DOMContentLoaded", () => {
-		const dropdownTriggers = document.querySelectorAll(
-			'[data-bs-toggle="dropdown"]'
-		);
+	if (anyIsShown) {
+		document.addEventListener("click", handleDismiss, true);
+	} else {
+		document.removeEventListener("click", handleDismiss, true);
+	}
+};
 
-		dropdownTriggers.forEach((trigger) => {
-			trigger.addEventListener("click", handleTriggerClick);
-		});
+const init = () => {
+	const dropdownTriggers = document.querySelectorAll(
+		'[data-bs-toggle="dropdown"]'
+	);
+
+	dropdownTriggers.forEach((trigger) => {
+		trigger.addEventListener("click", handleTriggerClick);
 	});
-})();
+};
+
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", init);
+} else {
+	init();
+}

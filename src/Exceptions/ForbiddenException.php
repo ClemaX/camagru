@@ -9,7 +9,7 @@ class ForbiddenException extends HttpException
 		parent::__construct(
 			403,
 			"Forbidden",
-			"You are not allowed to view this content.",
+			"You are not allowed to modify this resource.",
 			4030
 		);
 	}

@@ -1,4 +1,4 @@
-class Collapse {
+export class Collapse {
 	constructor(element) {
 		this.element = element;
 		this.isTransitioning = false;
@@ -20,9 +20,6 @@ class Collapse {
 		setTimeout(callback, delayMs);
 	}
 
-	/**
-	 * @returns {Promise<boolean>}
-	 */
 	show() {
 		if (this.isShown() || this.isTransitioning) {
 			return true;
@@ -54,9 +51,6 @@ class Collapse {
 		return true;
 	}
 
-	/**
-	 * @returns {Promise<boolean>}
-	 */
 	hide() {
 		if (!this.isShown() || this.isTransitioning) {
 			return false;
@@ -88,9 +82,6 @@ class Collapse {
 		return false;
 	}
 
-	/**
-	 * @returns {Promise<boolean>}
-	 */
 	toggle() {
 		return !this.isShown() ? this.show() : this.hide();
 	}
@@ -100,48 +91,52 @@ class Collapse {
 	}
 }
 
-const _collapses = {};
+/** @type {Object.<string, Collapse>} */
+const collapses = {};
 
 /**
  * @param {HTMLElement} target
  * @returns {Collapse}
  */
-const getOrCreateCollapse = (target) => {
-	if (!(target.id in _collapses)) {
-		_collapses[target.id] = new Collapse(target);
+export const getOrCreateCollapse = (target) => {
+	if (!(target.id in collapses)) {
+		collapses[target.id] = new Collapse(target);
 	}
 
-	return _collapses[target.id];
+	return collapses[target.id];
 };
 
-(() => {
-	"use strict";
-	/**
-	 *
-	 * @param {MouseEvent} e
-	 */
-	const handleTriggerClick = async (e) => {
-		/** @type {HTMLElement} */
-		const trigger = e.currentTarget;
-		const collapseId = trigger.getAttribute("data-bs-target");
-		const collapse = getOrCreateCollapse(document.querySelector(collapseId));
+/**
+ * @param {MouseEvent} e
+ */
+const handleTriggerClick = async (e) => {
+	/** @type {HTMLElement} */
+	const trigger = e.currentTarget;
+	const collapseId = trigger.getAttribute("data-bs-target");
+	const collapse = getOrCreateCollapse(document.querySelector(collapseId));
 
-		const isShown = await collapse.toggle();
+	const isShown = collapse.toggle();
 
-		if (isShown) {
-			trigger.classList.remove("collapsed");
-		} else {
-			trigger.classList.add("collapsed");
-		}
-	};
+	if (isShown) {
+		trigger.classList.remove("collapsed");
+	} else {
+		trigger.classList.add("collapsed");
+	}
+};
 
-	document.addEventListener("DOMContentLoaded", () => {
-		const collapseTriggers = document.querySelectorAll(
-			'[data-bs-toggle="collapse"]'
-		);
+const init = () => {
+	const collapseTriggers = document.querySelectorAll(
+		'[data-bs-toggle="collapse"]'
+	);
 
-		collapseTriggers.forEach((trigger) => {
-			trigger.addEventListener("click", handleTriggerClick);
-		});
+	collapseTriggers.forEach((trigger) => {
+		trigger.addEventListener("click", handleTriggerClick);
 	});
-})();
+}
+
+if (document.readyState === 'loading') {
+	document.addEventListener("DOMContentLoaded", init);
+}
+else {
+	init();
+}

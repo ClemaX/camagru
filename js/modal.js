@@ -1,4 +1,6 @@
-class Modal {
+import { Backdrop } from "./backdrop.js";
+
+export class Modal {
 	constructor(element, options = {}) {
 		this.element = element;
 		this.options = {
@@ -8,22 +10,23 @@ class Modal {
 			...options,
 		};
 		this.isShown = false;
-		this.backdrop = null;
+		/** @type {Backdrop} */
+		this.backdrop = new Backdrop();
 		this.setupEventListeners();
 	}
 
 	show() {
 		if (this.isShown) return;
 
-		this.isShown = true;
 		this.element.style.display = "block";
 		setTimeout(() => {
 			this.element.classList.add("show");
+			this.isShown = true;
 		}, 10); // Small delay to ensure the display change has taken effect
 		document.body.classList.add("modal-open");
 
 		if (this.options.backdrop) {
-			this.showBackdrop();
+			this.backdrop.show();
 		}
 
 		if (this.options.focus) {
@@ -46,45 +49,11 @@ class Modal {
 
 		this.element.classList.remove("show");
 
-		if (this.backdrop) {
-			this.hideBackdrop();
-		}
+		this.backdrop.hide();
 	}
 
 	toggle() {
-		!this.isShown ? this.show() : this.hide();
-	}
-
-	showBackdrop() {
-		this.backdrop = document.createElement("div");
-		this.backdrop.className = "modal-backdrop fade";
-		document.body.appendChild(this.backdrop);
-
-		// Force reflow to ensure the class change takes effect
-		this.backdrop.offsetHeight;
-
-		this.backdrop.classList.add("show");
-
-		if (this.options.backdrop === true) {
-			const onMouseDown = () => {
-				this.hide();
-				this.backdrop.addEventListener("mousedown", onMouseDown);
-			};
-
-			this.backdrop.addEventListener("mousedown", onMouseDown);
-		}
-	}
-
-	hideBackdrop() {
-		if (!this.backdrop) return;
-
-		this.backdrop.addEventListener("transitionend", (event) => {
-			if (!this.backdrop) return;
-			this.backdrop.remove();
-			this.backdrop = null;
-		});
-
-		this.backdrop.classList.remove("show");
+		return !this.isShown ? this.show() : this.hide();
 	}
 
 	setupEventListeners() {
@@ -100,9 +69,7 @@ class Modal {
 		if (this.options.backdrop) {
 			const onMouseDown = (event) => {
 				if (event.target === this.element) {
-					if (this.isShown) {
-						this.hide();
-					}
+					this.hide();
 				}
 			};
 			this.element.addEventListener("mousedown", onMouseDown);
@@ -110,7 +77,7 @@ class Modal {
 	}
 }
 
-const _modals = {};
+const modals = {};
 
 /**
  * Get or create a modal instance.
@@ -118,46 +85,75 @@ const _modals = {};
  * @param {HTMLElement} target
  * @returns {Modal}
  */
-const getOrCreateModal = (target) => {
-	if (!(target.id in _modals)) {
-		_modals[target.id] = new Modal(target);
+export const getOrCreateModal = (target) => {
+	if (!(target.id in modals)) {
+		modals[target.id] = new Modal(target);
 	}
 
-	return _modals[target.id];
+	return modals[target.id];
+};
+
+/**
+ * @param {Element} trigger
+ * @returns {Modal}
+ */
+const getTargetOrClosest = (trigger) => {
+	const selector = trigger.getAttribute("data-bs-target");
+	const target = selector
+		? document.querySelector(selector)
+		: trigger.closest(".modal");
+
+	if (!target) return null;
+
+	return getOrCreateModal(target);
+};
+
+/**
+ * @param {MouseEvent} e
+ */
+const handleToggle = (e) => {
+	/** @type {HTMLButtonElement} */
+	const trigger = e.currentTarget;
+
+	const modal = getTargetOrClosest(trigger);
+	if (!modal) return;
+
+	modal.toggle();
+};
+
+/**
+ * @param {MouseEvent} e
+ */
+const handleDismiss = (e) => {
+	/** @type {HTMLButtonElement} */
+	const trigger = e.currentTarget;
+
+	const modal = getTargetOrClosest(trigger);
+	if (!modal) return;
+
+	modal.hide();
+};
+
+const init = () => {
+	const modalToggleTriggers = document.querySelectorAll(
+		'[data-bs-toggle="modal"]'
+	);
+
+	for (const trigger of modalToggleTriggers) {
+		trigger.addEventListener("click", handleToggle);
+	}
+
+	const modalDimsissTriggers = document.querySelectorAll(
+		'[data-bs-dismiss="modal"]'
+	);
+
+	for (const trigger of modalDimsissTriggers) {
+		trigger.addEventListener("click", handleDismiss);
+	}
+};
+
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", init);
+} else {
+	init();
 }
-
-(() => {
-	'use strict';
-
-	const getTargetOrClosest = (trigger) => {
-		const selector = trigger.getAttribute('data-bs-target');
-		const target = selector
-			? document.querySelector(selector) : trigger.closest('.modal');
-
-		if (!target) return null;
-
-		return getOrCreateModal(target);
-	}
-
-	document.addEventListener('DOMContentLoaded', () => {
-		const modalToggleTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
-
-		modalToggleTriggers.forEach((trigger) => {
-			const modal = getTargetOrClosest(trigger);
-
-			if (!modal) return;
-
-			trigger.addEventListener('click', () => modal.toggle());
-		});
-
-		const modalDimsissTriggers = document.querySelectorAll('[data-bs-dismiss="modal"]');
-
-		modalDimsissTriggers.forEach((trigger) => {
-			const modal = getTargetOrClosest(trigger);
-
-			if (!modal) return;
-
-			trigger.addEventListener('click', () => modal.hide());
-		});
-	});
-})();

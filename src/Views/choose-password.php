@@ -24,4 +24,4 @@
 	<button type="submit" class="btn btn-primary">Change Password</button>
 </form>
 
-<script src="/js/form.min.js"></script>
+<script type="module" src="/js/form.js" async></script>

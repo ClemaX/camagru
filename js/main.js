@@ -1,13 +1,10 @@
-(() => {
-	'use strict';
-	const setTheme = (prefersDarkScheme) =>  {
-		const prefferedTheme = prefersDarkScheme.matches ? 'dark' : 'light';
-		document.documentElement.setAttribute('data-bs-theme', prefferedTheme);
-	}
+const setTheme = (prefersDarkScheme) =>  {
+	const prefferedTheme = prefersDarkScheme.matches ? 'dark' : 'light';
+	document.documentElement.setAttribute('data-bs-theme', prefferedTheme);
+}
 
-	const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
-	setTheme(prefersDarkScheme);
+setTheme(prefersDarkScheme);
 
-	prefersDarkScheme.addEventListener('change', setTheme);
-})();
+prefersDarkScheme.addEventListener('change', setTheme);

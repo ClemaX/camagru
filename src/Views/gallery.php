@@ -1,7 +1,7 @@
 <div id="gallery" class="gallery-container">
 	@foreach($posts as $post)
-	<article class="card mb-4" aria-hidden="true">
-		<div class="card-header">
+	<article id="post-{{ $post->id }}" class="card mb-4" aria-hidden="true">
+		<div class="card-header d-flex align-items-center justify-content-between">
 			<div class="d-flex flex-column">
 				<h2 class="card-title">
 					{{ $post->author->username }}
@@ -9,6 +9,35 @@
 				<h6 class="card-title">
 					{{ $post->createdAt->format('d/m/Y, h:m A') }}
 				</h6>
+			</div>
+			<div class="dropdown">
+				<button class="btn" title="Manage…" data-bs-toggle="dropdown" aria-expanded="false">
+					<i class="bi bi-three-dots-vertical"></i>
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end">
+					<li>
+						<a class="dropdown-item" href="#">Share</a>
+					</li>
+					@if($post->isOwn)
+					<li>
+						<hr class="dropdown-divider">
+					</li>
+					<li>
+						<a class="dropdown-item" href="#">Edit</a>
+					</li>
+					<li>
+						<a class="dropdown-item" href="#postAction=delete&postId={{ $post->id }}" data-bs-toggle="modal"
+							data-bs-target="#postDeleteModal">Delete</a>
+					</li>
+					@else
+					@role("ADMIN")
+					<li>
+						<a class="dropdown-item" href="#postAction=delete&postId={{ $post->id }}" data-bs-toggle="modal"
+							data-bs-target="#postDeleteModal">Delete</a>
+					</li>
+					@endrole
+					@endif
+				</ul>
 			</div>
 		</div>
 		<div class="ratio ratio-1x1">
@@ -125,5 +154,28 @@
 	@endif
 </div>
 
-<script src="/js/gallery.min.js" defer></script>
-<script src="/js/form.min.js" defer></script>
+<div class="modal fade" id="postDeleteModal" tabindex="-1" aria-hidden="true"
+	aria-labelledby="postDeleteModalLabel">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="postDeleteModalLabel">Delete Post</h1>
+				<a type="button" class="btn-close" href="#" data-bs-dismiss="modal"
+					aria-label="Close"></a>
+			</div>
+
+			<div class="modal-body">
+				<p>Are you sure that you want to delete this post?</p>
+			</div>
+
+			<div class="modal-footer">
+				<a class="btn btn-secondary" data-bs-dismiss="modal" href="#">Cancel</a>
+				<button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-app-post-action="delete">Yes</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="module" src="/js/dropdown.js" async></script>
+<script type="module" src="/js/form.js" async></script>
+<script type="module" src="/js/gallery.js" async></script>

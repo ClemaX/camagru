@@ -38,4 +38,4 @@
 	</div>
 </div>
 
-<script src="/js/form.min.js" defer></script>
+<script type="module" src="/js/form.js" async></script>

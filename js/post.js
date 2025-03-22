@@ -1,22 +1,46 @@
-(() => {
-	"use strict";
+import { CanvasEditor } from "./canvas-editor.js";
+import { getOrCreateModal } from "./modal.js";
 
-	const stickerSheet = document.getElementById("sticker-sheet");
-
+const init = () => {
 	/** @type {HTMLVideoElement} */
 	const video = document.getElementById("video");
+
 	/** @type {HTMLCanvasElement} */
 	const canvas = document.getElementById("canvas");
 
-	const actionButton = document.getElementById("action-button");
-	const downloadButton = document.getElementById("download-button");
+	const stickerSheet = document.getElementById("sticker-sheet");
+	const stickers = stickerSheet.getElementsByTagName("img");
+
+	const postEditForm = document.getElementById("postEditForm");
 	const deleteButton = document.getElementById("delete-button");
+	const downloadButton = document.getElementById("download-button");
+
+	const actionButton = document.getElementById("action-button");
 	const postEditModal = getOrCreateModal(
 		document.getElementById("postEditModal")
 	);
-	const postEditForm = document.getElementById("postEditForm");
 
-	const dragStartHandler = (e) => {
+	const editor = new CanvasEditor(canvas);
+
+	/**
+	 * @param {MediaStream} stream
+	 */
+	const handleMediaStream = async (stream) => {
+		video.srcObject = stream;
+		await video.play();
+		video.classList.remove("placeholder");
+		actionButton.disabled = false;
+	};
+
+	const handleMediaStreamError = (err) => {
+		// TODO: Show error in toast
+		console.error("Error accessing the webcam:", err);
+	};
+
+	/**
+	 * @param {DragEvent} e
+	 */
+	const handleStickerDragStart = (e) => {
 		const rect = e.target.getBoundingClientRect();
 		const offsetX = e.clientX - rect.left;
 		const offsetY = e.clientY - rect.top;
@@ -34,33 +58,10 @@
 		);
 	};
 
-	const stickers = stickerSheet.getElementsByTagName("img");
-
-	for (const sticker of stickers) {
-		sticker.addEventListener("dragstart", dragStartHandler);
-	}
-
-	const editor = new CanvasEditor(canvas);
-
-	navigator.mediaDevices
-		.getUserMedia({
-			video: {
-				width: { ideal: 4096 },
-				height: { ideal: 2160 },
-			},
-			audio: false,
-		})
-		.then(async (stream) => {
-			video.srcObject = stream;
-			await video.play();
-			video.classList.remove("placeholder");
-			actionButton.disabled = false;
-		})
-		.catch((err) => {
-			console.error("Error accessing the webcam:", err);
-		});
-
-	postEditModal.element.addEventListener("submit", async (e) => {
+	/**
+	 * @param {SubmitEvent} e
+	 */
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 
 		const form = e.target;
@@ -73,22 +74,20 @@
 		});
 
 		if (response.ok) {
-			window.location = response.headers.get('Location');
+			window.location = response.headers.get("Location");
 		}
-	});
+	};
 
-	postEditForm.addEventListener("formdata", (e) => {
+	/**
+	 * @param {FormDataEvent} e
+	 */
+	const handleFormData = (e) => {
 		const formData = e.formData;
 
 		formData.set("picture", editor.export());
-	});
+	};
 
-	actionButton.addEventListener("click", () => {
-		if (editor.background) {
-			postEditModal.show();
-			return;
-		}
-
+	const handleSnapshot = () => {
 		const minDimension = Math.min(video.videoWidth, video.videoHeight);
 
 		const sourceX = (video.videoWidth - minDimension) / 2;
@@ -120,9 +119,9 @@
 
 		deleteButton.disabled = false;
 		downloadButton.disabled = false;
-	});
+	};
 
-	deleteButton.addEventListener("click", () => {
+	const handleDelete = () => {
 		deleteButton.disabled = true;
 
 		actionButton.disabled = true;
@@ -152,9 +151,9 @@
 			.catch((err) => {
 				console.error("Error accessing the webcam:", err);
 			});
-	});
+	};
 
-	downloadButton.addEventListener("click", () => {
+	const handleDownload = () => {
 		const svgBlob = editor.export();
 
 		const link = document.createElement("a");
@@ -165,5 +164,38 @@
 		link.click();
 
 		URL.revokeObjectURL(link.href);
+	};
+
+	navigator.mediaDevices
+		.getUserMedia({
+			video: {
+				width: { ideal: 4096 },
+				height: { ideal: 2160 },
+			},
+			audio: false,
+		})
+		.then(handleMediaStream)
+		.catch(handleMediaStreamError);
+
+	for (const sticker of stickers) {
+		sticker.addEventListener("dragstart", handleStickerDragStart);
+	}
+
+	actionButton.addEventListener("click", () => {
+		if (editor.background) {
+			postEditModal.show();
+		} else {
+			handleSnapshot();
+		}
 	});
-})();
+	postEditModal.element.addEventListener("submit", handleSubmit);
+	postEditForm.addEventListener("formdata", handleFormData);
+	deleteButton.addEventListener("click", handleDelete);
+	downloadButton.addEventListener("click", handleDownload);
+};
+
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", init);
+} else {
+	init();
+}

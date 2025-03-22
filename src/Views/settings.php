@@ -116,16 +116,14 @@
 	</div>
 </div>
 
-<script src="/js/form.min.js" defer></script>
-<script src="/js/modal.min.js"></script>
+<script type="module" src="/js/form.js" async></script>
 
-<script>
-	(() => {
-		'use strict';
-		window.addEventListener('load', () => {
-			@if($conflict === 'email')
-			getOrCreateModal(document.getElementById('emailEditModal')).show();
-			@endif
-		}, false);
-	})();
+<script type="module" async>
+	import { getOrCreateModal } from '/js/modal.js';
+
+	window.addEventListener('load', () => {
+		@if($conflict === 'email')
+		getOrCreateModal(document.getElementById('emailEditModal')).show();
+		@endif
+	}, false);
 </script>

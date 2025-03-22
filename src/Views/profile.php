@@ -72,16 +72,14 @@
 	</div>
 </div>
 
-<script src="/js/form.min.js" defer></script>
-<script src="/js/modal.min.js"></script>
+<script type="module" src="/js/form.js" async></script>
 
-<script>
-	(() => {
-		'use strict';
-		window.addEventListener('load', () => {
-			@if($conflict !== null)
-			getOrCreateModal(document.getElementById('profileEditModal')).show();
-			@endif
-		}, false);
-	})();
+<script type="module" async>
+	import { getOrCreateModal } from '/js/modal.js';
+
+	window.addEventListener('load', () => {
+		@if($conflict !== null)
+		getOrCreateModal(document.getElementById('profileEditModal')).show();
+		@endif
+	}, false);
 </script>

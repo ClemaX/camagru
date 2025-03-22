@@ -97,7 +97,6 @@
 </div>
 
 
-<script src="/js/canvas-editor.min.js" defer></script>
-<script src="/js/form.min.js" defer></script>
-<script src="/js/modal.min.js" defer></script>
-<script src="/js/post.min.js" defer></script>
+<script type="module" src="/js/canvas-editor.js" async></script>
+<script type="module" src="/js/form.js" async></script>
+<script type="module" src="/js/post.js" async></script>

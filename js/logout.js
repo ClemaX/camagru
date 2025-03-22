@@ -1,21 +1,17 @@
-(() => {
-	"use strict";
+/**
+ * @param {MouseEvent} e
+ */
+const handleLogout = (e) => {
+	e.preventDefault();
 
-	/**
-	 * @param {MouseEvent} e
-	 */
-	const handleLogout = (e) => {
-		e.preventDefault();
+	/** @type {HTMLFormElement} */
+	const logoutForm = document.getElementById("logout-form");
 
-		/** @type {HTMLFormElement} */
-		const logoutForm = document.getElementById('logout-form');
+	logoutForm.submit();
+};
 
-		logoutForm.submit();
-	};
+const triggers = document.querySelectorAll('[data-app-action="logout"]');
 
-	const triggers = document.querySelectorAll('[data-app-action="logout"]');
-
-	for (const trigger of triggers) {
-		trigger.addEventListener("click", handleLogout);
-	}
-})();
+for (const trigger of triggers) {
+	trigger.addEventListener("click", handleLogout);
+}

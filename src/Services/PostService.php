@@ -65,10 +65,22 @@ class PostService
 				);
 
 				$post->isLiked = $this->likeRepository->existsById($viewerLikeId);
+				$post->isOwn = $viewer->id === $post->author->id;
 			}
 
 			return $post;
 		}, $this->postRepository->findAll('created_at', 'DESC'));
+	}
+
+	public function getById(int $postId): Post
+	{
+		$post = $this->postRepository->findById($postId);
+
+		if ($post === null) {
+			throw new NotFoundException();
+		}
+
+		return $post;
 	}
 
 	public function post(
@@ -96,6 +108,7 @@ class PostService
 
 		$post = new Post();
 		$post->author = $author;
+		$post->isOwn = true;
 		$post->title = $dto->title;
 		$post->description = $dto->description;
 		$post->createdAt = $now;
@@ -134,6 +147,25 @@ class PostService
 		}
 
 		return $post;
+	}
+
+	public function deletePost(int $postId): void
+	{
+		if ($this->postRepository->delete($postId) !== 1) {
+			throw new NotFoundException();
+		}
+
+		$postDirectory = $this->storageDirectory . '/' . $postId;
+
+		$success = !!($postDirectoryHandle = opendir($postDirectory));
+
+		while ($success && $file = readdir($postDirectoryHandle)) {
+			if (!str_starts_with($file, '.')) {
+				$success = unlink($postDirectory . '/' . $file);
+			}
+		}
+
+		rmdir($postDirectory);
 	}
 
 	// public function update(PostUpdateDTO $dto): User

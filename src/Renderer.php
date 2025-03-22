@@ -124,6 +124,11 @@ class Renderer
 						$iterationParams = $params;
 						$iterationParams[$itemName] = $item;
 						$iterationContent = $loopContent;
+
+						$iterationContent = self::processIfStatements(
+							$iterationContent,
+							$iterationParams
+						);
 						$iterationContent = self::processParameters(
 							$iterationContent,
 							$iterationParams
@@ -146,6 +151,10 @@ class Renderer
 						$iterationParams = $params;
 						$iterationParams[$variable] = $i;
 						$iterationContent = $loopContent;
+						$iterationContent = self::processIfStatements(
+							$iterationContent,
+							$iterationParams
+						);
 						$iterationContent = self::processParameters(
 							$iterationContent,
 							$iterationParams
@@ -247,8 +256,8 @@ class Renderer
 		$content = $this->processRoles($content);
 		$content = $this::processForms($content);
 
-		$content = self::processIfStatements($content, $params);
 		$content = self::processForLoops($content, $params);
+		$content = self::processIfStatements($content, $params);
 
 		$content = self::processUrls($content, $params, $this->baseUrlPath);
 		$content = self::processParameters($content, $params);

@@ -11,6 +11,8 @@ use App\Attributes\RequestParam;
 use App\Attributes\Route;
 use App\Entities\PostComment;
 use App\Entities\User;
+use App\Enumerations\Role;
+use App\Exceptions\ForbiddenException;
 use App\Exceptions\ValidationException;
 use App\Renderer;
 use App\Response;
@@ -61,6 +63,22 @@ class PostController extends AbstractController
 		}
 
 		return Response::json($post, 201, './');
+	}
+
+	#[Route('/post/{id}', 'DELETE')]
+	public function postDelete(
+		#[SensitiveParameter] #[CurrentUser] User $user,
+		#[PathVariable] string $id,
+	): Response {
+		$post = $this->postService->getById((int)$id);
+
+		if ($post->author->id !== $user->id && $user->role !== Role::ADMIN) {
+			throw new ForbiddenException();
+		}
+
+		$this->postService->deletePost($post->id);
+
+		return new Response(statusCode: 204);
 	}
 
 	/**

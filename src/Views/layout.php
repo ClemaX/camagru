@@ -8,8 +8,8 @@
 		<title>Camagru</title>
 		<link href="/css/main.min.css" rel="stylesheet" />
 		<link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
-		<script src="/js/main.min.js" async></script>
-		<script src="/js/collapse.min.js" async></script>
+		<script type="module" src="/js/main.js" async></script>
+		<script type="module" src="/js/collapse.js" async></script>
 	</head>
 	<body class="overflow-hidden">
 		<nav class="navbar navbar-expand-sm fixed-top bg-body-tertiary">
@@ -83,7 +83,7 @@
 		<form id="logout-form" action="{{ url('/auth/logout') }}" method="POST" style="display: none;">
 			@csrf
 		</form>
-		<script src="/js/logout.min.js" async></script>
+		<script type="module" src="/js/logout.js" async></script>
 		@endrole @env("development")
 		<script id="__bs_script__">
 			//<![CDATA[

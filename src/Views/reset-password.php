@@ -24,4 +24,4 @@
 	</form>
 </div>
 
-<script src="/js/form.min.js"></script>
+<script type="module" src="/js/form.js" async></script>

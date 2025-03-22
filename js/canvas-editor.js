@@ -233,11 +233,9 @@ const corners = [
 	{ x: 1, y: 1 },
 ];
 
-const xmlnsNs = "http://www.w3.org/2000/xmlns/";
 const svgNs = "http://www.w3.org/2000/svg";
-const xlinkNs = "http://www.w3.org/1999/xlink";
 
-class CanvasEditor {
+export class CanvasEditor {
 	/**
 	 * @param {HTMLCanvasElement} canvas
 	 */
