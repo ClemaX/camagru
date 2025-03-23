@@ -47,7 +47,7 @@
 		</div>
 		<div class="card-body">
 			<h5 class="card-title">{{ $post->title }}</h5>
-			<p class="card-text">{{ $post->description }}</p>
+			<p class="card-text text-pre-line">{{ $post->description }}</p>
 			<div class="d-flex gap-3">
 				<div>
 					<input type="checkbox" class="btn-check" id="btn-check-{{ $post->id }}" autocomplete="off"

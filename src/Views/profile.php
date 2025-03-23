@@ -8,17 +8,15 @@
 			</button>
 		</div>
 		<div class="card-body">
-			<p class="card-text">
-				@if($profile->description === '')
-				<div class="alert alert-info mt-3">
-					Your profile description is currently empty.
-					You can update your profile information by pressing the edit button.
-				</div>
-				@else
-				{{ $profile->description }}
-				@endif
-			</p>
+			@if($profile->description === '')
+			<div class="alert alert-info mt-3">
+				Your profile description is currently empty.
+				You can update your profile information by pressing the edit button.
 			</div>
+			@else
+			<p class="card-text text-pre-line">{{ $profile->description }}</p>
+			@endif
+		</div>
 	</div>
 	@role("ADMIN")
 	<div class="alert alert-info mt-3" role="alert">

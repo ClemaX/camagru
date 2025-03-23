@@ -25,6 +25,10 @@ main {
 	resize: none;
 }
 
+.text-pre-line {
+	white-space: pre-line;
+}
+
 .gallery-container {
 	@include make-container();
 	max-width: 75vmin;
