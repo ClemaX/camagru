@@ -16,7 +16,7 @@
 				</button>
 				<ul class="dropdown-menu dropdown-menu-end">
 					<li>
-						<a class="dropdown-item" href="#">Share</a>
+						<button class="dropdown-item" data-app-post-action="share" data-app-post-id="{{ $post->id }}">Share</button>
 					</li>
 					@if($post->isOwn)
 					<li>
@@ -174,6 +174,19 @@
 			</div>
 		</div>
 	</div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="postShareToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Share</strong>
+      <small>Just now</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Copied Post URL to clipboard.
+    </div>
+  </div>
 </div>
 
 <script type="module" src="/js/dropdown.js" async></script>

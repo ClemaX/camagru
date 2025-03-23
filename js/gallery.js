@@ -1,4 +1,5 @@
 import { getOrCreateModal } from "./modal.js";
+import { getOrCreateToast } from "./toast.js";
 
 /**
  * @typedef CommentDTO
@@ -202,6 +203,24 @@ const handleDelete = async (e) => {
 	}
 };
 
+/**
+ * @param {MouseEvent} e
+ */
+const handleShare = async (e) => {
+	/** @type {HTMLElement} */
+	const trigger = e.currentTarget;
+
+	const postId = trigger.getAttribute("data-app-post-id");
+
+	const postUrl = new URL(postId, window.location.origin);
+
+	navigator.clipboard.writeText(postUrl);
+
+	const postShareToast = getOrCreateToast(document.getElementById("postShareToast"));
+
+	postShareToast.show();
+};
+
 const init = () => {
 	const gallery = document.getElementById("gallery");
 
@@ -240,6 +259,15 @@ const init = () => {
 	for (const trigger of deleteTriggers) {
 		trigger.addEventListener("click", handleDelete);
 	}
+
+	const shareTriggers = document.querySelectorAll(
+		'button[data-app-post-action="share"]'
+	);
+
+	for (const trigger of shareTriggers) {
+		trigger.addEventListener("click", handleShare);
+	}
+
 	const hashParams = new URLSearchParams(window.location.hash.slice(1));
 	const postAction = hashParams.get("postAction");
 	// const postId = hashParams.get("postId");

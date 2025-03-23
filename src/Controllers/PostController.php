@@ -19,7 +19,6 @@ use App\Response;
 use App\Services\DTOs\PostCommentDTO;
 use App\Services\DTOs\PostCreationDTO;
 use App\Services\PostService;
-use Dom\Comment;
 use SensitiveParameter;
 
 #[Controller('/')]
@@ -65,6 +64,18 @@ class PostController extends AbstractController
 		return Response::json($post, 201, './');
 	}
 
+	#[Route('/{id}')]
+	public function getOne(
+		#[SensitiveParameter] #[CurrentUser] ?User $user,
+		#[PathVariable] string $id,
+	): string {
+		return $this->render('gallery', [
+			'posts' => [
+				$this->postService->getById((int)$id, $user),
+			],
+		]);
+	}
+
 	#[Route('/post/{id}', 'DELETE')]
 	public function postDelete(
 		#[SensitiveParameter] #[CurrentUser] User $user,
@@ -82,7 +93,7 @@ class PostController extends AbstractController
 	}
 
 	/**
-	 * @return array<mixed>
+	 * @return mixed[]
 	 */
 	#[Route('/post/{id}/like', 'PUT')]
 	public function like(
@@ -97,7 +108,7 @@ class PostController extends AbstractController
 	}
 
 	/**
-	 * @return array<mixed>
+	 * @return mixed[]
 	 */
 	#[Route('/post/{id}/like', 'DELETE')]
 	public function unlike(

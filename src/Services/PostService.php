@@ -48,31 +48,37 @@ class PostService
 		$this->storageDirectory = $config['STORAGE_DIRECTORY'] . '/' . $this->bucketId;
 	}
 
-	/** @return Post[] */
-	public function getAll(?User $viewer): array
+	private function enrichPost(Post $post, ?User $viewer): Post
 	{
-		return array_map(function ($post) use ($viewer) {
-			$post->pictureUrl = $this->externalStorageUrl . '/'
-				. $this->bucketId . '/'
-				. $post->id . '/';
-			$post->likeCount = $this->countLikes($post->id);
-			$post->commentCount = $this->countComments($post->id);
+		$post->pictureUrl = $this->externalStorageUrl . '/'
+			. $this->bucketId . '/'
+			. $post->id . '/';
+		$post->likeCount = $this->countLikes($post->id);
+		$post->commentCount = $this->countComments($post->id);
 
-			if ($viewer !== null) {
-				$viewerLikeId = new PostLikeId(
-					authorId: $viewer->id,
-					postId: $post->id
-				);
+		if ($viewer !== null) {
+			$viewerLikeId = new PostLikeId(
+				authorId: $viewer->id,
+				postId: $post->id
+			);
 
-				$post->isLiked = $this->likeRepository->existsById($viewerLikeId);
-				$post->isOwn = $viewer->id === $post->author->id;
-			}
+			$post->isLiked = $this->likeRepository->existsById($viewerLikeId);
+			$post->isOwn = $viewer->id === $post->author->id;
+		}
 
-			return $post;
-		}, $this->postRepository->findAll('created_at', 'DESC'));
+		return $post;
 	}
 
-	public function getById(int $postId): Post
+	/** @return Post[] */
+	public function getAll(?User $viewer = null): array
+	{
+		return array_map(
+			fn ($post) => $this->enrichPost($post, $viewer),
+			$this->postRepository->findAll('created_at', 'DESC')
+		);
+	}
+
+	public function getById(int $postId, ?User $viewer = null): Post
 	{
 		$post = $this->postRepository->findById($postId);
 
@@ -80,7 +86,7 @@ class PostService
 			throw new NotFoundException();
 		}
 
-		return $post;
+		return $this->enrichPost($post, $viewer);
 	}
 
 	public function post(
