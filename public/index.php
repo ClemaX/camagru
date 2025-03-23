@@ -11,7 +11,10 @@ use App\Controllers\PostController;
 use App\Controllers\AuthController;
 use App\Controllers\UserController;
 use App\EntityManager;
-use App\Exceptions\HttpException;
+use App\EventDispatcher;
+use App\EventHandlers\NotifyAuthorOnPostCommented;
+use App\Events\PostCommentedEvent;
+use App\ListenerProvider;
 use App\Middlewares\CsrfTokenVerificator;
 use App\Middlewares\ExceptionHandler;
 use App\Middlewares\FormMethodDecoder;
@@ -46,6 +49,10 @@ try {
 } catch (PDOException $e) {
 	die('Connection failed: ' . $e->getMessage());
 }
+
+// Event Dispatcher
+$listenerProvider = new ListenerProvider();
+$eventDispatcher = new EventDispatcher($listenerProvider);
 
 // Entity Manager
 $entityManager = new EntityManager($pdo);
@@ -112,7 +119,16 @@ $postService = new PostService(
 	$postRepository,
 	$postLikeRepository,
 	$postCommentRepository,
+	$eventDispatcher,
 	$config,
+);
+
+// Event Handlers
+$notifyAuthorOnPostCommented = new NotifyAuthorOnPostCommented($mailService);
+
+$listenerProvider->addListener(
+	PostCommentedEvent::class,
+	fn (PostCommentedEvent $e) => $notifyAuthorOnPostCommented->handle($e)
 );
 
 // Controllers

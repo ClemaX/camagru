@@ -7,6 +7,8 @@ use App\Entities\PostComment;
 use App\Entities\PostLike;
 use App\Entities\PostLikeId;
 use App\Entities\User;
+use App\EventDispatcher;
+use App\Events\PostCommentedEvent;
 use App\Exceptions\ConflictException;
 use App\Exceptions\InternalException;
 use App\Exceptions\NotFoundException;
@@ -34,6 +36,7 @@ class PostService
 		private readonly PostRepository $postRepository,
 		private readonly PostLikeRepository $likeRepository,
 		private readonly PostCommentRepository $commentRepository,
+		private readonly EventDispatcher $eventDispatcher,
 		array $config,
 	) {
 		$this->svgSanitizer = new SvgSanitizer([
@@ -221,18 +224,24 @@ class PostService
 		int $postId,
 		PostCommentDTO $dto,
 	): PostComment {
+		$post = $this->getById($postId);
+
 		$now = new DateTime();
 
 		$comment = new PostComment();
 
 		$comment->author = $author;
-		$comment->postId = $postId;
+		$comment->postId = $post->id;
 		$comment->subjectId = $dto->subjectId;
 		$comment->body = $dto->body;
 		$comment->createdAt = $now;
 		$comment->updatedAt = $now;
 
-		return $this->commentRepository->save($comment);
+		$comment = $this->commentRepository->save($comment);
+
+		$this->eventDispatcher->dispatch(new PostCommentedEvent($post, $comment));
+
+		return $comment;
 	}
 
 	public function countComments(int $postId): int
